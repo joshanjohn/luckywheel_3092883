@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928336816033",
+    "project_id": "pickaside-43c0c",
+    "storage_bucket": "pickaside-43c0c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928336816033:android:e85c5a65b94e29fce00de0",
+        "android_client_info": {
+          "package_name": "com.griffith.goldshake"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNprUjdWqF-SjM6-gX2qU5C1hTDUoi0dE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
