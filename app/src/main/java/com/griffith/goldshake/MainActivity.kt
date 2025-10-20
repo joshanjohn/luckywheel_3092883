@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.griffith.goldshake.screens.auth.RegisterScreen
 import com.griffith.goldshake.screens.playground.PlayGround
 import com.griffith.goldshake.ui.theme.GoldShakeTheme
 
@@ -36,5 +37,6 @@ fun AppRoute(){
     NavHost(navController = navController, startDestination = "play") {
 
         composable ("play"){ PlayGround(navController) }
+        composable ( "register") { RegisterScreen(navController) }
     }
 }
