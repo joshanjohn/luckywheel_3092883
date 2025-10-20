@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -44,6 +45,7 @@ data class SpinWheelItem(
     val value: Int
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayGround(navController: NavHostController) {
     val context = LocalContext.current
@@ -74,7 +76,8 @@ fun PlayGround(navController: NavHostController) {
         val degreesPerSlice = 360f / wheelItems.size
         val normalizedAngle = (angle + 90f) % 360
         val correctedAngle = (360f - normalizedAngle) % 360
-        val winnerIndex = (correctedAngle / degreesPerSlice).toInt().coerceIn(0, wheelItems.size - 1)
+        val winnerIndex =
+            (correctedAngle / degreesPerSlice).toInt().coerceIn(0, wheelItems.size - 1)
         return wheelItems[winnerIndex]
     }
 
@@ -85,8 +88,12 @@ fun PlayGround(navController: NavHostController) {
         when (resultItem.type) {
             SpinActionType.GAIN_GOLD -> playerGold += resultItem.value
             SpinActionType.LOSE_GOLD -> {
-                playerGold = if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(0)
+                playerGold =
+                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(
+                        0
+                    )
             }
+
             SpinActionType.MULTIPLY_GOLD -> playerGold *= resultItem.value
         }
         showResultDialog = true
@@ -110,6 +117,7 @@ fun PlayGround(navController: NavHostController) {
                     rotationSpeed += magnitude * 0.5f // Add more spin based on shake strength
                 }
             }
+
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
@@ -132,40 +140,78 @@ fun PlayGround(navController: NavHostController) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF1C273A))
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(Modifier.height(30.dp))
-            Text("Spin The Wheel!", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            Spacer(Modifier.height(16.dp))
-            Text("GOLD: $playerGold", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFFFD700))
-        }
 
-        Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
-            SpinWheelCanvas(items = wheelItems, rotationDegrees = currentRotationDegrees)
-        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Spin The Wheel!",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
-        AnimatedText(text=if (isSpinning) "Spinning..." else "Shake your phone to spin!")
-
-    }
-
-    if (showResultDialog) {
-        lastSpinResult?.let { result ->
-            ResultCard(
-                resultText = "You landed on:\n${result.label}",
-                onDismiss = {
-                    showResultDialog = false
-                    sensorEnabled = true // Re-enable sensor
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1C273A),         // Background color
+                )
             )
+        },
+        containerColor = Color(0xFF151921)
+    ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                //   .background(Color(0xFF1C273A))
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                Text(
+                    "GOLD: $playerGold",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFFFD700)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                SpinWheelCanvas(items = wheelItems, rotationDegrees = currentRotationDegrees)
+            }
+
+            AnimatedText(text = if (isSpinning) "Spinning..." else "Shake your phone to spin!")
+        }
+
+        if (showResultDialog) {
+            lastSpinResult?.let { result ->
+                ResultCard(
+                    resultText = "You landed on:\n${result.label}",
+                    onDismiss = {
+                        showResultDialog = false
+                        sensorEnabled = true // Re-enable sensor
+                    }
+                )
+            }
         }
     }
+
+
 }
 
 // --- UI Components ---
@@ -212,7 +258,12 @@ private fun SpinWheelCanvas(items: List<SpinWheelItem>, rotationDegrees: Float) 
                     textPaint.getTextBounds(item.label, 0, item.label.length, textBounds)
                     val textHeight = textBounds.height()
 
-                    canvas.nativeCanvas.drawText(item.label, textX, textY + textHeight / 2, textPaint)
+                    canvas.nativeCanvas.drawText(
+                        item.label,
+                        textX,
+                        textY + textHeight / 2,
+                        textPaint
+                    )
                 }
             }
         }
