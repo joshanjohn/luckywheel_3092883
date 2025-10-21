@@ -44,10 +44,14 @@ android {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-basement:18.2.0")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("com.google.firebase:firebase-bom:33.3.0")
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
+    implementation("com.google.firebase:firebase-database-ktx:20.3.1")
     implementation("com.google.firebase:firebase-analytics")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
     implementation(libs.androidx.core.ktx)
