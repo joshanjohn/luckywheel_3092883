@@ -1,6 +1,5 @@
 package com.griffith.goldshake.screens.auth
 
-import android.widget.Space
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,25 +7,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -43,9 +37,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.griffith.goldshake.screens.auth.components.CustomTextField
 import com.griffith.goldshake.R
 import com.griffith.goldshake.services.FireBaseService
@@ -74,7 +65,7 @@ fun RegisterScreen(
             } else {
                 Toast.makeText(
                     navController.context,
-                    message ?: "Failed",
+                    message ?: "Failed to register",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -180,8 +171,20 @@ fun RegisterScreen(
                         onRegister()
                     }
                 ) {
-                    Text("Register")
+                    Text("Register", style = MaterialTheme.typography.titleMedium)
                 }
+
+                TextButton(
+                    onClick = {
+                        navController.navigate("login") {
+                            popUpTo("register") { inclusive = true }
+                        }
+                    }
+                ) {
+                    Text("Already have an account? Login", color = Color.White)
+                }
+
+
 
             }
         }
