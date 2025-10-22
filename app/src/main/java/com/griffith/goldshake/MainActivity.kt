@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppRoute(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "play") {
+    NavHost(navController = navController, startDestination = "register") {
 
         composable ("play"){ PlayGround(navController) }
         composable ( "register") { RegisterScreen(navController) }
