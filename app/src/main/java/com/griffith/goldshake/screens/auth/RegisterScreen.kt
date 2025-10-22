@@ -96,7 +96,7 @@ fun RegisterScreen(
 
 
         Image(
-            painter = painterResource(id = R.drawable.bgg),
+            painter = painterResource(id = R.drawable.bg),
             contentDescription = "Background Overlay",
             contentScale = ContentScale.Crop,
             modifier = Modifier
