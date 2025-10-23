@@ -47,7 +47,7 @@ fun PlayGround(
             SpinWheelItem("LOSE ALL", Color(0xFF607D8B), SpinActionType.LOSE_GOLD, Int.MAX_VALUE),
             SpinWheelItem("+250", Color(0xFF9C27B0), SpinActionType.GAIN_GOLD, 250),
             SpinWheelItem("-1000", Color(0xFF795548), SpinActionType.LOSE_GOLD, 1000),
-            SpinWheelItem("3x GOLD", Color(0xFFFF5722), SpinActionType.MULTIPLY_GOLD, 3)
+            SpinWheelItem("3x GOLD", Color(0xFFFF5722), SpinActionType.MULTIPLY_GOLD, 3),
         )
     }
 
@@ -83,7 +83,6 @@ fun PlayGround(
     var showResultDialog by remember { mutableStateOf(false) }
     var lastSpinResult by remember { mutableStateOf<SpinWheelItem?>(null) }
     val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
-
     var sensorEnabled by remember { mutableStateOf(false) }
 
     fun getResultFromAngle(angle: Float): SpinWheelItem {
@@ -158,10 +157,11 @@ fun PlayGround(
     // --- UI ---
     Scaffold(
         topBar = {
-            PlayGroundAppBar()
+            PlayGroundAppBar(navController)
         },
-        //containerColor = Color(0xFF151921)
-        containerColor = Color.Transparent
+
+        containerColor = Color(0xFF151921)
+        //containerColor = Color.Transparent
     ) { innerPadding ->
 
         Column(
@@ -190,7 +190,7 @@ fun PlayGround(
                 SpinWheel(items = wheelItems, rotationDegrees = currentRotationDegrees)
             }
 
-            AnimatedText(text = if (isSpinning) "Spinning..." else "Shake your phone to spin!")
+            AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
             var isButtonPressed by remember { mutableStateOf(false) }
 
@@ -228,7 +228,7 @@ fun PlayGround(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (isButtonPressed) "Sensing..." else "Hold to Spin",
+                            text = if (isButtonPressed) "Spining..." else "Hold to Spin",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,

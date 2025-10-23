@@ -22,7 +22,7 @@ import kotlin.math.sin
 fun SpinWheel(items: List<SpinWheelItem>, rotationDegrees: Float) {
     val textPaint = remember {
         Paint().apply {
-            color = android.graphics.Color.WHITE
+            color = android.graphics.Color.WHITE // label colors
             textSize = 45f
             textAlign = Paint.Align.CENTER
             isAntiAlias = true

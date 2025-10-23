@@ -1,25 +1,55 @@
 package com.griffith.goldshake.routes
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.griffith.goldshake.screens.auth.LoginScreen
 import com.griffith.goldshake.screens.auth.RegisterScreen
 import com.griffith.goldshake.screens.playground.PlayGround
-
+import com.griffith.goldshake.services.DataStoreService
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppRoute() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login") {
+    val context = navController.context
+    val dataStoreService = remember { DataStoreService(context) }
+    val coroutineScope = rememberCoroutineScope()
 
-        // play ground screen
-        composable("play/{playerId}") {
-            val playerId = it.arguments?.getString("playerId")
+    // Remember start destination, default to login
+    var startDestination by remember { mutableStateOf("login") }
+
+    // On first launch, check DataStore for existing player
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val player = dataStoreService.getPlayer()
+            if (player.playerId.isNotEmpty()) {
+                // Player already saved → go to playground
+                startDestination = "play/${player.playerId}"
+                navController.navigate(startDestination) {
+                    popUpTo(0) // clear backstack
+                }
+            }
+        }
+    }
+
+    // Navigation graph
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable("play/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
             PlayGround(navController, playerId)
         }
-        composable("register") { RegisterScreen(navController) } // register screen
-        composable("login") { LoginScreen(navController) }  // login screen
+
+        composable("register") {
+            RegisterScreen(navController)
+        }
+
+        composable("login") {
+            LoginScreen(navController)
+        }
     }
 }
