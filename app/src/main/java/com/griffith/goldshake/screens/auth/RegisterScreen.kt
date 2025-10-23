@@ -18,6 +18,8 @@ import com.griffith.goldshake.screens.auth.components.AuthBgWallpaper
 import com.griffith.goldshake.screens.auth.components.CustomTextField
 import com.griffith.goldshake.services.DataStoreService
 import com.griffith.goldshake.services.FireBaseService
+import com.griffith.goldshake.services.validateEmail
+import com.griffith.goldshake.services.validatePassword
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +38,24 @@ fun RegisterScreen(
     val coroutineScope = rememberCoroutineScope()
 
     fun onRegister() {
+        name = name.trim()
+        email = email.trim()
+        password = password.trim()
+
+        // validate email
+        val emailError = validateEmail(email)
+        if (emailError != null) {
+            Toast.makeText(context, emailError, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+       // validate password
+        val passwordError = validatePassword(password)
+        if (passwordError != null) {
+            Toast.makeText(context, passwordError, Toast.LENGTH_SHORT).show()
+            return
+        }
+
         firebaseService.registerUserWithPlayer(name, email, password) { success, message ->
             if (success) {
                 val userId = firebaseService.getCurrentUserId()

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.goldshake.data.Player
 import com.griffith.goldshake.data.SpinWheelItem
+import com.griffith.goldshake.screens.playground.components.PlayGroundAppBar
 import com.griffith.goldshake.screens.playground.components.AnimatedText
 import com.griffith.goldshake.screens.playground.components.ResultCard
 import com.griffith.goldshake.screens.playground.components.SpinWheel
@@ -102,8 +103,11 @@ fun PlayGround(
             SpinActionType.GAIN_GOLD -> playerGold += resultItem.value
             SpinActionType.LOSE_GOLD -> {
                 playerGold =
-                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(0)
+                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(
+                        0
+                    )
             }
+
             SpinActionType.MULTIPLY_GOLD -> playerGold *= resultItem.value
         }
 
@@ -154,25 +158,10 @@ fun PlayGround(
     // --- UI ---
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Spin The Wheel!",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1C273A))
-            )
+            PlayGroundAppBar()
         },
-        containerColor = Color(0xFF151921)
+        //containerColor = Color(0xFF151921)
+        containerColor = Color.Transparent
     ) { innerPadding ->
 
         Column(
@@ -218,7 +207,9 @@ fun PlayGround(
                     modifier = Modifier.size(90.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else Color(0xFF1C273A)
+                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else Color(
+                            0xFF1C273A
+                        )
                     ),
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -260,4 +251,5 @@ fun PlayGround(
             }
         }
     }
+
 }
