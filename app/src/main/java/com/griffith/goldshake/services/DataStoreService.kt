@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class DataStoreService(context: Context) {
+private val Context.playerPrefDataStore by preferencesDataStore(name = "player_pref")
 
-    // Create the DataStore once, internally
-    private val Context.playerPrefDataStore by preferencesDataStore(name = "player_pref")
-    private val dataStore by lazy { context.playerPrefDataStore }
+class DataStoreService(private val context: Context) {
+
+    private val dataStore = context.playerPrefDataStore
 
     private companion object {
         val PLAYER_ID = stringPreferencesKey("player_id")
@@ -23,18 +23,17 @@ class DataStoreService(context: Context) {
         val GOLD = intPreferencesKey("gold")
     }
 
-    /** Save (or replace) single player */
+    //Save (or replace) single player
     suspend fun savePlayer(player: Player) {
-        ensureDataStoreExists()
         dataStore.edit { prefs ->
-            prefs.clear() // ensure only one player is stored
+            prefs.clear()
             prefs[PLAYER_ID] = player.playerId
             prefs[PLAYER_NAME] = player.playerName
             prefs[GOLD] = player.gold
         }
     }
 
-    /** Get player as Flow (auto-updates UI) */
+    // Get player as Flow
     val playerFlow: Flow<Player> = dataStore.data.map { prefs ->
         Player(
             playerId = prefs[PLAYER_ID] ?: "",
@@ -43,9 +42,8 @@ class DataStoreService(context: Context) {
         )
     }
 
-    /** Read current player once (non-flow) */
+    // Read player once
     suspend fun getPlayer(): Player {
-        ensureDataStoreExists()
         val prefs = dataStore.data.first()
         return Player(
             playerId = prefs[PLAYER_ID] ?: "",
@@ -54,27 +52,19 @@ class DataStoreService(context: Context) {
         )
     }
 
-    /** Update only gold value for existing player */
+    // Update only gold value
     suspend fun updateGold(newGold: Int) {
-        ensureDataStoreExists()
         dataStore.edit { prefs ->
-            val currentName = prefs[PLAYER_NAME] ?: ""
             val currentId = prefs[PLAYER_ID] ?: ""
+            val currentName = prefs[PLAYER_NAME] ?: ""
             if (currentId.isNotEmpty() && currentName.isNotEmpty()) {
                 prefs[GOLD] = newGold
             }
         }
     }
 
-    /** Remove the player info entirely */
+    // Clear player info
     suspend fun clear() {
-        ensureDataStoreExists()
         dataStore.edit { prefs -> prefs.clear() }
-    }
-
-    /** Ensure the datastore exists before any operation */
-    private suspend fun ensureDataStoreExists() {
-        // Reading once forces creation
-        dataStore.data.first()
     }
 }
