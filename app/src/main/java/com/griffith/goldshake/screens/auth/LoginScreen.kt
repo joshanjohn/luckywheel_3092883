@@ -44,7 +44,7 @@ fun LoginScreen(navController: NavHostController) {
         }
 
         // validate password
-        val passwordError = validatePassword(password)
+        val passwordError = validatePassword(password, disable_string_validations = true)
         if (passwordError != null) {
             Toast.makeText(context, passwordError, Toast.LENGTH_SHORT).show()
             return
