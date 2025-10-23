@@ -3,12 +3,12 @@ package com.griffith.goldshake.services
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.griffith.goldshake.data.Player
+import kotlinx.coroutines.tasks.await
 
 class FireBaseService {
     private val auth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance().reference
+    val database = FirebaseDatabase.getInstance().reference
 
-    // 1️⃣ Register user and create player info
     fun registerUserWithPlayer(
         playerName: String,
         email: String,
@@ -18,9 +18,10 @@ class FireBaseService {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val player = Player(playerName = playerName)
-                    val playerId = player.playerId
-                    database.child("players").child(playerId).setValue(player)
+                    val regUserId = getCurrentUserId() ?: ""
+                    val player = Player(playerId = regUserId, playerName = playerName, gold = 0)
+
+                    database.child("players").child(player.playerId).setValue(player)
                         .addOnCompleteListener { dbTask ->
                             if (dbTask.isSuccessful) {
                                 onResult(true, null)
@@ -34,7 +35,6 @@ class FireBaseService {
             }
     }
 
-    // 2️⃣ Get player info by playerId
     fun getPlayerInfo(playerId: String, onResult: (Player?) -> Unit) {
         database.child("players").child(playerId)
             .get()
@@ -47,7 +47,23 @@ class FireBaseService {
             }
     }
 
-    // 3️⃣ Update gold count by playerId
+    fun getPlayerInfoById(playerId: String, onResult: (Player?) -> Unit) {
+        if (playerId.isBlank()) {
+            onResult(null)
+            return
+        }
+
+        database.child("players").child(playerId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val player = snapshot.getValue(Player::class.java)
+                onResult(player)
+            }
+            .addOnFailureListener {
+                onResult(null)
+            }
+    }
+
     fun updatePlayerGold(playerId: String, newGold: Int, onResult: (Boolean) -> Unit) {
         database.child("players").child(playerId).child("gold").setValue(newGold)
             .addOnCompleteListener { task ->
@@ -55,20 +71,20 @@ class FireBaseService {
             }
     }
 
-    // 4️⃣ Get player gold by playerId
-    fun getPlayerGold(playerId: String, onResult: (Int?) -> Unit) {
-        database.child("players").child(playerId).child("gold")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val gold = snapshot.getValue(Int::class.java)
-                onResult(gold)
-            }
-            .addOnFailureListener {
-                onResult(null)
-            }
+    suspend fun getPlayerGold(playerId: String): Int? {
+        return try {
+            val snapshot = database.child("players")
+                .child(playerId)
+                .child("gold")
+                .get()
+                .await()  // Waits for Firebase Task to complete
+            snapshot.getValue(Int::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 
-    // 5️⃣ Update full player info
+
     fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {
         database.child("players").child(playerId).setValue(updatedPlayer)
             .addOnCompleteListener { task ->

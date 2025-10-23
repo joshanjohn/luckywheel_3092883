@@ -12,9 +12,13 @@ import com.griffith.goldshake.screens.playground.PlayGround
 @Composable
 fun AppRoute() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "register") {
+    NavHost(navController = navController, startDestination = "login") {
 
-        composable("play") { PlayGround(navController) }  // play ground screen
+        // play ground screen
+        composable("play/{playerId}") {
+            val playerId = it.arguments?.getString("playerId")
+            PlayGround(navController, playerId)
+        }
         composable("register") { RegisterScreen(navController) } // register screen
         composable("login") { LoginScreen(navController) }  // login screen
     }

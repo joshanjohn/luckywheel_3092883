@@ -65,6 +65,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.google.android.gms:play-services-basement:18.2.0")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
