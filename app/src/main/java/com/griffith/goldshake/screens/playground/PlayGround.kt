@@ -1,54 +1,41 @@
 package com.griffith.goldshake.screens.playground
 
-
 import android.content.Context
-import android.graphics.Paint
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.griffith.goldshake.data.Player
+import com.griffith.goldshake.data.SpinWheelItem
 import com.griffith.goldshake.screens.playground.components.AnimatedText
 import com.griffith.goldshake.screens.playground.components.ResultCard
+import com.griffith.goldshake.screens.playground.components.SpinWheel
+import com.griffith.goldshake.services.FireBaseService
 import kotlinx.coroutines.delay
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.random.Random
-
-// --- Game Data Structures ---
-
-enum class SpinActionType { GAIN_GOLD, LOSE_GOLD, MULTIPLY_GOLD }
-
-data class SpinWheelItem(
-    val label: String,
-    val color: Color,
-    val type: SpinActionType,
-    val value: Int
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlayGround(navController: NavHostController) {
-    val context = LocalContext.current
+fun PlayGround(
+    navController: NavHostController,
+    playerId: String?
+) {
+    val context = navController.context
+    val fireBaseService = remember { FireBaseService() }
 
     val wheelItems = remember {
         listOf(
@@ -63,14 +50,40 @@ fun PlayGround(navController: NavHostController) {
         )
     }
 
-    var playerGold by remember { mutableIntStateOf(500) }
+    var playerGold by remember { mutableIntStateOf(0) }
+    var playerName by remember { mutableStateOf("") }
+
+    // --- Real-time Firebase Updates ---
+    DisposableEffect(playerId) {
+        if (playerId.isNullOrBlank()) {
+            onDispose { }
+        } else {
+            val playerRef = fireBaseService.database.child("players").child(playerId)
+            val listener = object : com.google.firebase.database.ValueEventListener {
+                override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                    val player = snapshot.getValue(Player::class.java)
+                    player?.let {
+                        playerGold = it.gold
+                        playerName = it.playerName
+                    }
+                }
+
+                override fun onCancelled(error: com.google.firebase.database.DatabaseError) {}
+            }
+            playerRef.addValueEventListener(listener)
+            onDispose {
+                playerRef.removeEventListener(listener)
+            }
+        }
+    }
+
     var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
     var rotationSpeed by remember { mutableFloatStateOf(0f) }
     var showResultDialog by remember { mutableStateOf(false) }
     var lastSpinResult by remember { mutableStateOf<SpinWheelItem?>(null) }
     val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
 
-    var sensorEnabled by remember { mutableStateOf(true) }
+    var sensorEnabled by remember { mutableStateOf(false) }
 
     fun getResultFromAngle(angle: Float): SpinWheelItem {
         val degreesPerSlice = 360f / wheelItems.size
@@ -89,17 +102,19 @@ fun PlayGround(navController: NavHostController) {
             SpinActionType.GAIN_GOLD -> playerGold += resultItem.value
             SpinActionType.LOSE_GOLD -> {
                 playerGold =
-                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(
-                        0
-                    )
+                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(0)
             }
-
             SpinActionType.MULTIPLY_GOLD -> playerGold *= resultItem.value
         }
+
+        // Update Firebase with new gold
+        playerId?.let { fireBaseService.updatePlayerGold(it, playerGold) {} }
+
         showResultDialog = true
         sensorEnabled = false
     }
 
+    // --- Sensor Handling ---
     DisposableEffect(sensorEnabled) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -107,15 +122,11 @@ fun PlayGround(navController: NavHostController) {
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (!sensorEnabled || event == null) return
-
                 val x = event.values[0]
                 val y = event.values[1]
                 val z = event.values[2]
-                val magnitude = sqrt(x * x + y * y + z * z) - 9.8f // Remove gravity
-
-                if (magnitude > 2f) {
-                    rotationSpeed += magnitude * 0.5f // Add more spin based on shake strength
-                }
+                val magnitude = sqrt(x * x + y * y + z * z) - 9.8f
+                if (magnitude > 2f) rotationSpeed += magnitude * 0.5f
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -125,12 +136,12 @@ fun PlayGround(navController: NavHostController) {
         onDispose { sensorManager.unregisterListener(listener) }
     }
 
+    // --- Rotation Logic ---
     LaunchedEffect(Unit) {
         while (true) {
             if (rotationSpeed > 0f) {
                 currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360
-                rotationSpeed *= 0.99f // Smooth friction
-
+                rotationSpeed *= 0.99f
                 if (rotationSpeed < 0.1f) {
                     rotationSpeed = 0f
                     processResult()
@@ -140,7 +151,7 @@ fun PlayGround(navController: NavHostController) {
         }
     }
 
-
+    // --- UI ---
     Scaffold(
         topBar = {
             TopAppBar(
@@ -157,11 +168,8 @@ fun PlayGround(navController: NavHostController) {
                             textAlign = TextAlign.Center
                         )
                     }
-
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1C273A),         // Background color
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1C273A))
             )
         },
         containerColor = Color(0xFF151921)
@@ -171,15 +179,13 @@ fun PlayGround(navController: NavHostController) {
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                //   .background(Color(0xFF1C273A))
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
                 Text(
-                    "GOLD: $playerGold",
+                    "$playerName's GOLD: $playerGold",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFFFFD700)
@@ -192,10 +198,54 @@ fun PlayGround(navController: NavHostController) {
                     .aspectRatio(1f),
                 contentAlignment = Alignment.Center
             ) {
-                SpinWheelCanvas(items = wheelItems, rotationDegrees = currentRotationDegrees)
+                SpinWheel(items = wheelItems, rotationDegrees = currentRotationDegrees)
             }
 
             AnimatedText(text = if (isSpinning) "Spinning..." else "Shake your phone to spin!")
+
+            var isButtonPressed by remember { mutableStateOf(false) }
+
+            LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = { },
+                    modifier = Modifier.size(90.dp),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else Color(0xFF1C273A)
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onPress = {
+                                        isButtonPressed = true
+                                        tryAwaitRelease()
+                                        isButtonPressed = false
+                                    }
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (isButtonPressed) "Sensing..." else "Hold to Spin",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
 
         if (showResultDialog) {
@@ -204,80 +254,10 @@ fun PlayGround(navController: NavHostController) {
                     resultText = "You landed on:\n${result.label}",
                     onDismiss = {
                         showResultDialog = false
-                        sensorEnabled = true // Re-enable sensor
+                        sensorEnabled = false
                     }
                 )
             }
         }
     }
-
-
 }
-
-// --- UI Components ---
-
-@Composable
-private fun SpinWheelCanvas(items: List<SpinWheelItem>, rotationDegrees: Float) {
-    val textPaint = remember {
-        Paint().apply {
-            color = android.graphics.Color.WHITE
-            textSize = 45f
-            textAlign = Paint.Align.CENTER
-            isAntiAlias = true
-        }
-    }
-
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val centerX = size.width / 2
-        val centerY = size.height / 2
-        val radius = (size.minDimension / 2) * 0.95f
-        val degreesPerSlice = 360f / items.size
-
-        rotate(rotationDegrees, pivot = center) {
-            items.forEachIndexed { index, item ->
-                val startAngle = index * degreesPerSlice
-
-                drawArc(
-                    color = item.color,
-                    startAngle = startAngle,
-                    sweepAngle = degreesPerSlice,
-                    useCenter = true,
-                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
-                    topLeft = Offset(centerX - radius, centerY - radius)
-                )
-
-                drawIntoCanvas { canvas ->
-                    val textAngleDegrees = startAngle + degreesPerSlice / 2f
-                    val textAngleRadians = Math.toRadians(textAngleDegrees.toDouble())
-                    val textDistance = radius * 0.65f
-
-                    val textX = centerX + (textDistance * cos(textAngleRadians)).toFloat()
-                    val textY = centerY + (textDistance * sin(textAngleRadians)).toFloat()
-
-                    val textBounds = android.graphics.Rect()
-                    textPaint.getTextBounds(item.label, 0, item.label.length, textBounds)
-                    val textHeight = textBounds.height()
-
-                    canvas.nativeCanvas.drawText(
-                        item.label,
-                        textX,
-                        textY + textHeight / 2,
-                        textPaint
-                    )
-                }
-            }
-        }
-
-        val pointerPath = Path().apply {
-            val pointerWidth = 60f
-            val pointerHeight = 50f
-            moveTo(centerX - pointerWidth / 2, 0f)
-            lineTo(centerX, pointerHeight)
-            lineTo(centerX + pointerWidth / 2, 0f)
-            close()
-        }
-        drawPath(pointerPath, color = Color(0xFFEFEBEB))
-    }
-}
-
-
