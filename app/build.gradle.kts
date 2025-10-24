@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.griffith.goldshake"
+    namespace = "com.griffith.luckywheel"
     compileSdk {
         version = release(36)
     }
@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.griffith.goldshake"
+        applicationId = "com.griffith.luckywheel"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

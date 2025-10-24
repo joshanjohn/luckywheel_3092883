@@ -9,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.griffith.goldshake" />
-                  <option name="mobileSdkAppId" value="1:928336816033:android:e85c5a65b94e29fce00de0" />
-                  <option name="projectId" value="pickaside-43c0c" />
-                  <option name="projectNumber" value="928336816033" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
