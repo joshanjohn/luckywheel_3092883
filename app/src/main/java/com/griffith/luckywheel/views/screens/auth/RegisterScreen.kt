@@ -28,7 +28,7 @@ import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail
 import com.griffith.luckywheel.services.validatePassword
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
-import com.griffith.luckywheel.ui.theme.goldColor
+import com.griffith.luckywheel.ui.theme.GoldColor
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +120,7 @@ fun RegisterScreen(
                         }
                         withStyle(
                             style = SpanStyle(
-                                color = goldColor,
+                                color = GoldColor,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {

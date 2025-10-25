@@ -15,15 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.darkerGreenColor
-import com.griffith.luckywheel.ui.theme.lightGreenColor
+import com.griffith.luckywheel.ui.theme.DarkerGreenColor
+import com.griffith.luckywheel.ui.theme.LightGreenColor
 
 @Composable
 fun SettingsChoiceButton(
     label: String,
     onClick: () -> Unit,
-    lightColor: Color = lightGreenColor,
-    darkerColor: Color = darkerGreenColor,
+    lightColor: Color = LightGreenColor,
+    darkerColor: Color = DarkerGreenColor,
 ) {
     Button(
         onClick = onClick,
