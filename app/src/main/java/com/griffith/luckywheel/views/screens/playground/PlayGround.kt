@@ -226,13 +226,10 @@ fun PlayGround(
                 SpinWheel(items = wheelItems, rotationDegrees = currentRotationDegrees)
             }
 
-
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
-
 
             // --- Push to Spin Wheel  Button ---
             var isButtonPressed by remember { mutableStateOf(false) }
-
 
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 

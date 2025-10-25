@@ -25,9 +25,11 @@ import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.views.screens.leaderboard.components.RankingHeader
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.data.PlayerRankModel
 import com.griffith.luckywheel.ui.theme.BronzeColor
 import com.griffith.luckywheel.ui.theme.GoldColor
 import com.griffith.luckywheel.ui.theme.SilverColor
+import com.griffith.luckywheel.views.screens.leaderboard.components.LeaderboardListView
 import java.util.Locale
 
 
@@ -93,29 +95,12 @@ fun LeaderBoardScreen(
             RankingHeader()
             Spacer(modifier = Modifier.height(16.dp))
 
-            LeaderboardList(entries = leaderboardList)
+            LeaderboardListView(entries = leaderboardList)
         }
     }
 }
 
-// --- Data Model ---
-data class PlayerRankModel(
-    val id: Int,
-    val name: String,
-    val score: Int,
-    val rank: Int,
-    val avatarRes: ImageVector = Icons.Default.Person
-)
 
-// --- Composables ---
-@Composable
-fun LeaderboardList(entries: List<PlayerRankModel>) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(entries, key = { it.id }) { entry ->
-            LeaderboardItem(entry = entry)
-        }
-    }
-}
 
 @Composable
 fun LeaderboardItem(entry: PlayerRankModel) {

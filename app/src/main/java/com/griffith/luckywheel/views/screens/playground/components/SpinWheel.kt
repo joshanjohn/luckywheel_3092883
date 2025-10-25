@@ -122,7 +122,7 @@ fun SpinWheel(
         )
 
         drawCircle(
-            color = Color(0xFF1A1A1A),
+            color = Color(0xFF02610C),
             radius = radius * 0.3f,
             center = center
         )
@@ -138,7 +138,7 @@ fun SpinWheel(
                     textAlign = TextAlign.Center
                 ).toSpanStyle()
             ) {
-                append("GOLD\nSHAKE")
+                append("Lucky\nWHEEL")
             }
         }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.R
+import java.util.Locale
 
 @Composable
 fun GoldCountComponent( playerName: String, playerGold: Int){
@@ -23,10 +24,11 @@ fun GoldCountComponent( playerName: String, playerGold: Int){
     ){
         Image(painterResource(R.drawable.gold_coin_icon), contentDescription = "gold count icon")
         Spacer(Modifier.width(5.dp))
-        Text("$playerName : $playerGold", style= TextStyle(
+        Text("$playerName : ${String.format(Locale.getDefault(), "%,d", playerGold)}", style= TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFFFFD700)
         ))
     }
 }
+
