@@ -7,8 +7,6 @@ fun validatePassword(password: String, disable_string_validations: Boolean = fal
         if (!password.any { it.isUpperCase() }) return "Password must contain at least one uppercase letter"
         if (!password.any { it.isLowerCase() }) return "Password must contain at least one lowercase letter"
         if (!password.any { it.isDigit() }) return "Password must contain at least one digit"
-        if (!password.any { "!@#\$%^&*()-_=+[]{}|;:'\",.<>?/`~".contains(it) })
-            return "Password must contain at least one special character"
     }
     return null // valid
 }
