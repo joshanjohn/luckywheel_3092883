@@ -71,18 +71,38 @@ class FireBaseService {
             }
     }
 
-    suspend fun getPlayerGold(playerId: String): Int? {
-        return try {
-            val snapshot = database.child("players")
-                .child(playerId)
-                .child("gold")
-                .get()
-                .await()  // Waits for Firebase Task to complete
-            snapshot.getValue(Int::class.java)
-        } catch (e: Exception) {
-            null
-        }
+    fun getPlayerRanking(
+        onPlayersUpdated: (List<Player>) -> Unit,
+        onError: (Exception) -> Unit = {}
+    ) {
+        // Reference to 'players' in Firebase
+        val playersRef = database.child("players")
+
+        // Add a real-time listener
+        playersRef.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
+            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                val playerList = mutableListOf<Player>()
+
+                for (playerSnap in snapshot.children) {
+                    val player = playerSnap.getValue(Player::class.java)
+                    if (player != null) {
+                        playerList.add(player)
+                    }
+                }
+
+                // Sort players by gold in descending order
+                val sortedList = playerList.sortedByDescending { it.gold }
+
+                // Return the updated sorted list in real-time
+                onPlayersUpdated(sortedList)
+            }
+
+            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                onError(Exception(error.message))
+            }
+        })
     }
+
 
 
     fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {

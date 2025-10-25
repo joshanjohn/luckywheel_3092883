@@ -9,14 +9,18 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +36,8 @@ import com.griffith.luckywheel.screens.playground.model.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.screens.AppBar
+import com.griffith.luckywheel.ui.theme.backgroundColor
+import com.griffith.luckywheel.views.screens.playground.components.GoldCountComponent
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
@@ -159,12 +164,22 @@ fun PlayGround(
 
     // --- UI ---
     Scaffold(
+//        containerColor = backgroundColor,
         topBar = {
             AppBar(navController)
         },
-
-        containerColor = Color(0xFF212121)
-        //containerColor = Color.Transparent
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF033E14),
+                        Color(0xFF01150B),
+                        Color(0xFF01150B)
+                    )
+                )
+            ),
+        containerColor = Color.Transparent
     ) { innerPadding ->
 
         Column(
@@ -175,20 +190,32 @@ fun PlayGround(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(horizontalAlignment = Alignment.Start) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Top
+            ) {
+
                 Row (
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ){
-                    Image(painterResource(R.drawable.gold_coin_icon), contentDescription = "gold count icon")
-                    Spacer(Modifier.width(5.dp))
-                    Text("$playerName : $playerGold", style= TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFFFD700)
-                    ))
+                    GoldCountComponent( playerName, playerGold)
+
+
+                    Button (
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        contentPadding = PaddingValues(6.dp),
+                        onClick = {navController.navigate("leaderboard")}
+                    ){
+                        Image(painterResource(R.drawable.leaderboard_icon), contentDescription = "leaderboard icon")
+                    }
                 }
 
+
             }
+
+            // --- Spining Wheel ---
 
             Box(
                 modifier = Modifier
@@ -201,6 +228,7 @@ fun PlayGround(
 
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
+            // --- Push to Spin Wheel  Button ---
             var isButtonPressed by remember { mutableStateOf(false) }
 
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }

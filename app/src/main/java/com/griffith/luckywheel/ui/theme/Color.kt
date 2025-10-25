@@ -3,16 +3,21 @@ package com.griffith.luckywheel.ui.theme
 import androidx.compose.ui.graphics.Color
 
 
-val goldColor = Color(0xFFFFA500)
-val darkGreenColor = Color(0xFF0BA136)
-val darkerGreenColor = Color(0xFF0B2814)
-val lightGreenColor = Color(0xFF20B652)
+val GoldColor = Color(0xFFFFA500)
+val SilverColor = Color(0xFFC0C0C0)
+val BronzeColor = Color(0xFFCD7F32)
+
+
+val DarkGreenColor = Color(0xFF0BA136)
+val DarkerGreenColor = Color(0xFF0B2814)
+val LightGreenColor = Color(0xFF20B652)
 
 
 val darkerRedColor = Color(0xFF450303)
 val lightRedColor = Color(0xFFD50505)
 
 
+val backgroundColor = Color(0xFF1A1A1A)
 
 
 val primaryLight = Color(0xFF006876)

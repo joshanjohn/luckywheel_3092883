@@ -12,17 +12,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.screens.settings.components.SettingsChoiceButton
-import com.griffith.luckywheel.ui.theme.darkerGreenColor
+import com.griffith.luckywheel.ui.theme.DarkerGreenColor
 import com.griffith.luckywheel.ui.theme.darkerRedColor
-import com.griffith.luckywheel.ui.theme.lightGreenColor
+import com.griffith.luckywheel.ui.theme.LightGreenColor
 import com.griffith.luckywheel.ui.theme.lightRedColor
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.ui.theme.backgroundColor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,7 +35,7 @@ fun SettingsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-        containerColor = Color(0xFF212121),
+        containerColor = backgroundColor,
         topBar = { AppBar(navController) },
         bottomBar = {
 
@@ -81,8 +81,8 @@ fun SettingsScreen(
             SettingsChoiceButton(
                 onClick = {},
                 label = "Settings",
-                lightColor = lightGreenColor,
-                darkerColor = darkerGreenColor
+                lightColor = LightGreenColor,
+                darkerColor = DarkerGreenColor
             )
         }
     }
