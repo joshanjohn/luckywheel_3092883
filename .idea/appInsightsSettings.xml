@@ -9,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.griffith.luckywheel" />
+                  <option name="mobileSdkAppId" value="1:928336816033:android:38f427a74b4aab15e00de0" />
+                  <option name="projectId" value="pickaside-43c0c" />
+                  <option name="projectNumber" value="928336816033" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

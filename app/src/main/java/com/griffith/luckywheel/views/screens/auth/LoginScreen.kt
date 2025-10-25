@@ -28,6 +28,7 @@ import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail
 import com.griffith.luckywheel.services.validatePassword
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
+import com.griffith.luckywheel.ui.theme.goldColor
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +116,7 @@ fun LoginScreen(navController: NavHostController) {
                         }
                         withStyle(
                             style = SpanStyle(
-                                color = Color(0xFFFFD700),
+                                color = goldColor,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {

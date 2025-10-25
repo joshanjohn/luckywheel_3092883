@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.Player
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.playground.components.PlayGroundAppBar
 import com.griffith.luckywheel.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.screens.playground.components.ResultCard
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
@@ -32,6 +31,8 @@ import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.screens.playground.model.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.screens.AppBar
+import com.griffith.luckywheel.screens.AppBar
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
@@ -92,20 +93,7 @@ fun PlayGround(
     val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
     var sensorEnabled by remember { mutableStateOf(false) }
 
-//    fun getResultFromAngle(angle: Float): SpinWheelItem {
-//        val normalizedAngle = (angle + 90f) % 360f
-//        val correctedAngle = (360f - normalizedAngle) % 360f
-//
-//        var cumulativeAngle = 0f
-//        for (item in wheelItems) {
-//            val sliceAngle = item.percent * 360f
-//            if (correctedAngle >= cumulativeAngle && correctedAngle < cumulativeAngle + sliceAngle) {
-//                return item
-//            }
-//            cumulativeAngle += sliceAngle
-//        }
-//        return wheelItems.last()
-//    }
+
 
     fun processResult() {
         val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
@@ -172,7 +160,7 @@ fun PlayGround(
     // --- UI ---
     Scaffold(
         topBar = {
-            PlayGroundAppBar(navController)
+            AppBar(navController)
         },
 
         containerColor = Color(0xFF212121)
