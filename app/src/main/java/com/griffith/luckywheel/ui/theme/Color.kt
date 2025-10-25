@@ -13,6 +13,7 @@ val darkerRedColor = Color(0xFF450303)
 val lightRedColor = Color(0xFFD50505)
 
 
+val backgroundColor = Color(0xFF1A1A1A)
 
 
 val primaryLight = Color(0xFF006876)

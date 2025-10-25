@@ -2,7 +2,9 @@ package com.griffith.luckywheel.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -27,7 +29,8 @@ import com.griffith.luckywheel.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
-    navController: NavHostController
+    navController: NavHostController,
+    title: String = "Lucky Wheel"
 ) {
     val canGoBack = navController.previousBackStackEntry != null
     val currentScreen = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -38,7 +41,7 @@ fun AppBar(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    "Lucky Wheel",
+                    title,
                     fontSize = 24.sp,
                     fontFamily = BubbleFontFamily,
                     color = Color(0xFFFFD700),
@@ -58,9 +61,9 @@ fun AppBar(
                 }
             } else {
                 // Empty placeholder to satisfy type
-                Box (
+                Box(
                     modifier = Modifier.width(30.dp),
-                ){}
+                ) {}
             }
         },
         actions = {
@@ -78,7 +81,10 @@ fun AppBar(
             }
 
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
+        // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+        )
     )
 }
 
