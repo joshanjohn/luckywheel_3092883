@@ -79,11 +79,11 @@ fun RegisterScreen(
                                 // Debug print
                                 val prefs: Player = dataStoreService.getPlayer()
                                 println("Player DataStore: $prefs")
-                            }
 
-                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                            navController.navigate("play") {
-                                popUpTo("register") { inclusive = true }
+                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                                navController.navigate("play/${prefs.playerId}") {
+                                    popUpTo("register") { inclusive = true }
+                                }
                             }
                         }
                     }
