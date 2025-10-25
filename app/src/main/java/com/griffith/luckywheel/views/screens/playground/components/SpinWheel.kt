@@ -120,6 +120,7 @@ fun SpinWheel(
             radius = radius * 0.12f,
             center = center
         )
+
         drawCircle(
             color = Color(0xFF1A1A1A),
             radius = radius * 0.3f,

@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.griffith.luckywheel.screens.auth.LoginScreen
 import com.griffith.luckywheel.screens.auth.RegisterScreen
 import com.griffith.luckywheel.screens.playground.PlayGround
+import com.griffith.luckywheel.screens.settings.SettingsScreen
 import com.griffith.luckywheel.services.DataStoreService
 import kotlinx.coroutines.launch
 
@@ -50,6 +51,11 @@ fun AppRoute() {
 
         composable("login") {
             LoginScreen(navController)
+        }
+
+
+        composable("settings") {
+            SettingsScreen(navController)
         }
     }
 }
