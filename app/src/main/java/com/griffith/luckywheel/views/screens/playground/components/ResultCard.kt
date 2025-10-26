@@ -1,14 +1,13 @@
-package com.griffith.luckywheel.screens.playground.components
+package com.griffith.luckywheel.views.screens.playground.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,32 +18,83 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import com.griffith.luckywheel.data.SpinWheelItem
+import com.griffith.luckywheel.screens.playground.model.SpinActionType
+import com.griffith.luckywheel.ui.theme.DarkGreenColor
+import com.griffith.luckywheel.ui.theme.DarkerGreenColor
+import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.darkerRedColor
+import com.griffith.luckywheel.ui.theme.lightRedColor
 
 @Composable
-fun ResultCard(resultText: String, onDismiss: () -> Unit) {
+fun ResultCard(
+    wheelResult: SpinWheelItem,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
-        Card(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .size(450.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = if (wheelResult.type == SpinActionType.LOSE_GOLD)
+                            listOf(darkerRedColor, lightRedColor,darkerRedColor)
+                        else listOf(DarkerGreenColor, DarkGreenColor, DarkerGreenColor)
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ),
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .size(450.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = resultText,
-                    fontSize = 22.sp,
+                    text = if (wheelResult.type == SpinActionType.LOSE_GOLD)
+                        "😢 Try Again 😢"
+                    else "🎉 Congratulations 🎉",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                    color = if (wheelResult.type == SpinActionType.LOSE_GOLD)
+                        lightRedColor
+                    else LightGreenColor,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = onDismiss) {
-                    Text("Awesome!")
+
+                Text(
+                    text = "You got\n${wheelResult.label}",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (wheelResult.type == SpinActionType.LOSE_GOLD)
+                            Color(0xFFD32F2F)
+                        else Color(0xFF388E3C)
+                    ),
+                    modifier = Modifier
+                        .width(110.dp)
+                        .height(48.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "OK",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                 }
             }
         }

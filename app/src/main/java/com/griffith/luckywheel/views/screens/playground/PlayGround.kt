@@ -16,7 +16,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -29,15 +28,15 @@ import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.Player
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.screens.playground.components.AnimatedText
-import com.griffith.luckywheel.screens.playground.components.ResultCard
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.screens.playground.model.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.ui.theme.backgroundColor
+import com.griffith.luckywheel.ui.theme.DarkerGreenColor
 import com.griffith.luckywheel.views.screens.playground.components.GoldCountComponent
+import com.griffith.luckywheel.views.screens.playground.components.ResultCard
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
@@ -204,15 +203,13 @@ fun PlayGround(
 
                     Button (
                         shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                        contentPadding = PaddingValues(6.dp),
                         onClick = {navController.navigate("leaderboard")}
                     ){
                         Image(painterResource(R.drawable.leaderboard_icon), contentDescription = "leaderboard icon")
                     }
                 }
-
-
             }
 
             // --- Spining Wheel ---
@@ -244,9 +241,11 @@ fun PlayGround(
                     modifier = Modifier.size(90.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else Color(
-                            0xFF1C273A
-                        )
+                        containerColor =
+                            if (isButtonPressed)
+                                Color(0xFF4CAF50)
+                            else
+                                DarkerGreenColor
                     ),
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -279,7 +278,7 @@ fun PlayGround(
         if (showResultDialog) {
             lastSpinResult?.let { result ->
                 ResultCard(
-                    resultText = "You landed on:\n${result.label}",
+                    wheelResult = result,
                     onDismiss = {
                         showResultDialog = false
                         sensorEnabled = false
