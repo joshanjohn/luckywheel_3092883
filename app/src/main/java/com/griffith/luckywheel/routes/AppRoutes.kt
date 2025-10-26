@@ -9,7 +9,7 @@ import com.griffith.luckywheel.screens.auth.RegisterScreen
 import com.griffith.luckywheel.screens.playground.PlayGround
 import com.griffith.luckywheel.screens.settings.SettingsScreen
 import com.griffith.luckywheel.services.DataStoreService
-import com.griffith.luckywheel.views.screens.leaderboard.LeaderBoardScreen
+import com.griffith.luckywheel.screens.leaderboard.LeaderBoardScreen
 import kotlinx.coroutines.launch
 
 @Composable

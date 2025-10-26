@@ -17,13 +17,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import com.griffith.luckywheel.ui.theme.GoldColor
+import com.griffith.luckywheel.ui.theme.LightGreenColor
 import com.griffith.luckywheel.ui.theme.MeriendaFontFamily
 
 @Composable
 fun AnimatedText(
     text: String,
-    fontFamily: FontFamily? = null,
-    baseColor: Color = Color(0xFF23B62A) // Gold color
+    baseColor: Color = GoldColor
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "glow_animation")
 
@@ -41,7 +42,7 @@ fun AnimatedText(
     // Optional color shimmer between gold tones
     val glowColor by infiniteTransition.animateColor(
         initialValue = baseColor,
-        targetValue = Color(0xFFFFF5A5),
+        targetValue = LightGreenColor,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse

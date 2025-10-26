@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.views.screens.playground.components
+package com.griffith.luckywheel.screens.playground.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row

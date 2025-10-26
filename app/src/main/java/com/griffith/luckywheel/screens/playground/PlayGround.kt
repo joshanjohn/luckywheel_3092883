@@ -35,8 +35,9 @@ import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.ui.theme.DarkerGreenColor
-import com.griffith.luckywheel.views.screens.playground.components.GoldCountComponent
-import com.griffith.luckywheel.views.screens.playground.components.ResultCard
+import com.griffith.luckywheel.screens.playground.components.GoldCountComponent
+import com.griffith.luckywheel.screens.playground.components.ResultCard
+import com.griffith.luckywheel.screens.playground.logic.updatePlayerGold
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
@@ -103,17 +104,7 @@ fun PlayGround(
         val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
         lastSpinResult = resultItem
 
-        when (resultItem.type) {
-            SpinActionType.GAIN_GOLD -> playerGold += resultItem.value
-            SpinActionType.LOSE_GOLD -> {
-                playerGold =
-                    if (resultItem.value == Int.MAX_VALUE) 0 else (playerGold - resultItem.value).coerceAtLeast(
-                        0
-                    )
-            }
-
-            SpinActionType.MULTIPLY_GOLD -> playerGold *= resultItem.value
-        }
+        playerGold = updatePlayerGold(playerGold, resultItem)
 
         // Update Firebase with new gold
         playerId?.let { fireBaseService.updatePlayerGold(it, playerGold) {} }
