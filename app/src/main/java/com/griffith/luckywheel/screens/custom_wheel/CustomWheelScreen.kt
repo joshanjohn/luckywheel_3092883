@@ -10,6 +10,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +48,10 @@ fun CustomWheelScreen(
             )
         )
     }
+
+    // Track which item is being edited
+    var editingIndex by remember { mutableStateOf<Int?>(null) }
+    var editingText by remember { mutableStateOf("") }
 
     // --- Calculate percentage (fraction of full circle) ---
     val totalItems = wheelItems.size
@@ -121,7 +127,7 @@ fun CustomWheelScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF033E14), Color(0xFF01150B))
+                    colors = listOf(Color(0xFF033E14), Color(0xFF01150B), Color(0xFF01150B))
                 )
             ),
         containerColor = Color.Transparent
@@ -227,7 +233,6 @@ fun CustomWheelScreen(
                 ) {
                     Text("Edit Wheel Items", color = Color.White, fontWeight = FontWeight.Bold)
 
-                    // Display each item
                     wheelItems.forEachIndexed { index, item ->
                         Row(
                             Modifier
@@ -236,11 +241,48 @@ fun CustomWheelScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(item.label, color = Color.White)
-                            TextButton(onClick = {
-                                wheelItems = wheelItems.toMutableList().also { it.removeAt(index) }
-                            }) {
-                                Text("Remove", color = Color.Red)
+                            if (editingIndex == index) {
+                                TextField(
+                                    value = editingText,
+                                    onValueChange = { editingText = it },
+                                    modifier = Modifier.weight(1f),
+                                    singleLine = true,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedTextColor = Color.White,
+                                        focusedContainerColor = Color.DarkGray,
+                                        unfocusedContainerColor = Color.DarkGray,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                    ),
+
+                                )
+                                TextButton(onClick = {
+                                    wheelItems = wheelItems.toMutableList().also {
+                                        it[index] = it[index].copy(label = editingText)
+                                    }
+                                    editingIndex = null
+                                }) {
+                                    Text("Save", color = Color.Green)
+                                }
+                            } else {
+                                Text(item.label, color = Color.White)
+                                Row {
+                                    IconButton(onClick = {
+                                        editingIndex = index
+                                        editingText = item.label
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit Item",
+                                            tint = Color.Yellow
+                                        )
+                                    }
+                                    TextButton(onClick = {
+                                        wheelItems = wheelItems.toMutableList().also { it.removeAt(index) }
+                                    }) {
+                                        Text("Remove", color = Color.Red)
+                                    }
+                                }
                             }
                         }
                     }
