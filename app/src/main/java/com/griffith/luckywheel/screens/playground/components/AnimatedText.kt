@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.screens.gold_wheel.components
+package com.griffith.luckywheel.screens.playground.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.LinearEasing
@@ -13,18 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.GoldColor
 import com.griffith.luckywheel.ui.theme.LightGreenColor
 import com.griffith.luckywheel.ui.theme.MeriendaFontFamily
 
 @Composable
 fun AnimatedText(
     text: String,
-    baseColor: Color = GoldColor
+    baseColor: Color = Color.White
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "glow_animation")
 

@@ -10,8 +10,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,10 +20,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.screens.AppBar
+import com.griffith.luckywheel.screens.custom_wheel.components.EditBottomSheet
+import com.griffith.luckywheel.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.screens.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
@@ -44,23 +43,19 @@ fun CustomWheelScreen(
         mutableStateOf(
             listOf(
                 SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.GAIN_GOLD, 0, 0.0f),
-                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.GAIN_GOLD, 0, 0.0f),
+                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.GAIN_GOLD, 0, 0.0f)
             )
         )
     }
 
-    // Track which item is being edited
-    var editingIndex by remember { mutableStateOf<Int?>(null) }
-    var editingText by remember { mutableStateOf("") }
-
-    // --- Calculate percentage (fraction of full circle) ---
+    // --- Wheel Angles ---
     val totalItems = wheelItems.size
     val wheelItemsWithAngles = remember(totalItems, wheelItems) {
         val fractionPerItem = 1f / totalItems
-        wheelItems.map { it.copy(percent = fractionPerItem) } // "percent" is 0–1 range
+        wheelItems.map { it.copy(percent = fractionPerItem) }
     }
 
-    // --- Spin Logic States ---
+    // --- Spin Logic ---
     var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
     var rotationSpeed by remember { mutableFloatStateOf(0f) }
     var sensorEnabled by remember { mutableStateOf(false) }
@@ -108,21 +103,11 @@ fun CustomWheelScreen(
     }
 
     // --- Bottom Sheet State ---
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
 
     // --- UI ---
     Scaffold(
         topBar = { AppBar(navController) },
-        floatingActionButton = {
-            Button(
-                onClick = { showBottomSheet = true },
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-            ) {
-                Text("Edit Items")
-            }
-        },
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -142,6 +127,14 @@ fun CustomWheelScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
+            Button(
+                onClick = { showBottomSheet = true },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49A84D))
+            ) {
+                Text("Edit Wheel", color = Color.White)
+            }
+
             // --- Wheel Display ---
             Box(
                 modifier = Modifier
@@ -153,12 +146,8 @@ fun CustomWheelScreen(
             }
 
             // --- Instruction Text ---
-            Text(
+            AnimatedText(
                 text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake your phone!",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
             )
 
             // --- Spin Button ---
@@ -219,96 +208,12 @@ fun CustomWheelScreen(
             }
         }
 
-        // --- Bottom Sheet: Edit Wheel Items ---
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = sheetState,
-                containerColor = Color(0xFF022C14)
-            ) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text("Edit Wheel Items", color = Color.White, fontWeight = FontWeight.Bold)
-
-                    wheelItems.forEachIndexed { index, item ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (editingIndex == index) {
-                                TextField(
-                                    value = editingText,
-                                    onValueChange = { editingText = it },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true,
-                                    colors = TextFieldDefaults.colors(
-                                        focusedTextColor = Color.White,
-                                        focusedContainerColor = Color.DarkGray,
-                                        unfocusedContainerColor = Color.DarkGray,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                    ),
-
-                                )
-                                TextButton(onClick = {
-                                    wheelItems = wheelItems.toMutableList().also {
-                                        it[index] = it[index].copy(label = editingText)
-                                    }
-                                    editingIndex = null
-                                }) {
-                                    Text("Save", color = Color.Green)
-                                }
-                            } else {
-                                Text(item.label, color = Color.White)
-                                Row {
-                                    IconButton(onClick = {
-                                        editingIndex = index
-                                        editingText = item.label
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit Item",
-                                            tint = Color.Yellow
-                                        )
-                                    }
-                                    TextButton(onClick = {
-                                        wheelItems = wheelItems.toMutableList().also { it.removeAt(index) }
-                                    }) {
-                                        Text("Remove", color = Color.Red)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Add New Item Button
-                    Button(
-                        onClick = {
-                            wheelItems = wheelItems + SpinWheelItem(
-                                label = "New Item ${wheelItems.size + 1}",
-                                color = Color(
-                                    listOf(
-                                        0xFF4CAF50, 0xFFFFC107, 0xFF2196F3, 0xFFFF5722, 0xFF9C27B0
-                                    ).random()
-                                ),
-                                type = SpinActionType.GAIN_GOLD,
-                                value = 0,
-                                percent = 0f
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Add Item")
-                    }
-                }
-            }
-        }
+        // --- Reusable Bottom Sheet Composable ---
+        EditBottomSheet(
+            showBottomSheet = showBottomSheet,
+            onDismiss = { showBottomSheet = false },
+            wheelItems = wheelItems,
+            onUpdateItems = { updated -> wheelItems = updated }
+        )
     }
 }

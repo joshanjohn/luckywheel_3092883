@@ -50,7 +50,7 @@ import com.griffith.luckywheel.R
 import com.griffith.luckywheel.data.Player
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.screens.gold_wheel.components.AnimatedText
+import com.griffith.luckywheel.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.screens.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.screens.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
