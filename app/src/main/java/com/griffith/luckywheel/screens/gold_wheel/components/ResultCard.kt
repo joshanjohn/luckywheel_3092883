@@ -1,9 +1,8 @@
-package com.griffith.luckywheel.screens.playground.components
+package com.griffith.luckywheel.screens.gold_wheel.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -20,12 +19,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.playground.model.SpinActionType
+import com.griffith.luckywheel.screens.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.ui.theme.DarkGreenColor
 import com.griffith.luckywheel.ui.theme.DarkerGreenColor
 import com.griffith.luckywheel.ui.theme.LightGreenColor

@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.screens.playground.components
+package com.griffith.luckywheel.screens.gold_wheel.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.LinearEasing
