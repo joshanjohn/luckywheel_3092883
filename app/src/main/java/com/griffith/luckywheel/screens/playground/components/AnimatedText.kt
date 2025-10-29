@@ -34,7 +34,6 @@ fun AnimatedText(
             animation = tween(durationMillis = 1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "alpha_anim"
     )
 
     // Optional color shimmer between gold tones
@@ -45,7 +44,6 @@ fun AnimatedText(
             animation = tween(durationMillis = 1200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "color_anim"
     )
 
     Text(

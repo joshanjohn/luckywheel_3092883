@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,8 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.griffith.luckywheel.data.BottomNavItem
-import com.griffith.luckywheel.screens.custom_wheel.CustomWheelScreen
-import com.griffith.luckywheel.screens.gold_wheel.GoldWheelScreen
+import com.griffith.luckywheel.screens.playground.custom_wheel.CustomWheelScreen
+import com.griffith.luckywheel.screens.playground.gold_wheel.GoldWheelScreen
 import com.griffith.luckywheel.screens.playground.components.BottomNavBar
 
 // ------------------------ MAIN PLAYGROUND WITH BOTTOM NAV ------------------------

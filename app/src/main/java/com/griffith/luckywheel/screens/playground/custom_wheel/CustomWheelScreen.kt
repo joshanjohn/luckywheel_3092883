@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.screens.custom_wheel
+package com.griffith.luckywheel.screens.playground.custom_wheel
 
 import android.content.Context
 import android.hardware.Sensor
@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.screens.custom_wheel.components.EditBottomSheet
+import com.griffith.luckywheel.screens.playground.custom_wheel.components.EditBottomSheet
 import com.griffith.luckywheel.screens.playground.components.AnimatedText
-import com.griffith.luckywheel.screens.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
 import kotlinx.coroutines.delay

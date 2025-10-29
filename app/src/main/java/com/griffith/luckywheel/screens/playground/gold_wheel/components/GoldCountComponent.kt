@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.screens.gold_wheel.components
+package com.griffith.luckywheel.screens.playground.gold_wheel.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row

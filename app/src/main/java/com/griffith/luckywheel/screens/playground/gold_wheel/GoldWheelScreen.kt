@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.screens.gold_wheel
+package com.griffith.luckywheel.screens.playground.gold_wheel
 
 import android.content.Context
 import android.hardware.Sensor
@@ -46,19 +46,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.data.Player
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.screens.playground.components.AnimatedText
-import com.griffith.luckywheel.screens.gold_wheel.components.GoldCountComponent
-import com.griffith.luckywheel.screens.gold_wheel.components.ResultCard
+import com.griffith.luckywheel.screens.playground.gold_wheel.components.GoldCountComponent
+import com.griffith.luckywheel.screens.playground.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.screens.playground.logic.updatePlayerGold
-import com.griffith.luckywheel.screens.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.ui.theme.DarkerGreenColor
 import kotlinx.coroutines.delay
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -96,15 +98,15 @@ fun GoldWheelScreen(
         if (playerId.isNullOrBlank()) onDispose {}
         else {
             val playerRef = fireBaseService.database.child("players").child(playerId)
-            val listener = object : com.google.firebase.database.ValueEventListener {
-                override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
                     val player = snapshot.getValue(Player::class.java)
                     player?.let {
                         playerGold = it.gold
                         playerName = it.playerName
                     }
                 }
-                override fun onCancelled(error: com.google.firebase.database.DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {}
             }
             playerRef.addValueEventListener(listener)
             onDispose { playerRef.removeEventListener(listener) }
@@ -216,7 +218,7 @@ fun GoldWheelScreen(
                     modifier = Modifier.size(90.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else DarkerGreenColor
+                        containerColor = if (isButtonPressed)  Color(0xFF4CAF50) else Color(0xFF006400)
                     ),
                     contentPadding = PaddingValues(0.dp)
                 ) {
