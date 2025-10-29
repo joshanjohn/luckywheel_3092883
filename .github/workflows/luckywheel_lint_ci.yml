@@ -36,3 +36,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: Execute gradle execute command - lintdebug
         run: ./gradlew lintDebug
+
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --no-daemon
