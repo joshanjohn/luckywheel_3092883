@@ -10,6 +10,7 @@ val BronzeColor = Color(0xFFCD7F32)
 
 val DarkGreenColor = Color(0xFF0BA136)
 val DarkerGreenColor = Color(0xFF0B2814)
+val ExtraDarkerGreenColor = Color(0x85071507)
 val LightGreenColor = Color(0xFF20B652)
 
 

@@ -2,7 +2,7 @@ package com.griffith.luckywheel.screens.playground.logic
 
 
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.playground.model.SpinActionType
+import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
 
 fun getResultFromAngle(angle: Float, wheelItems: List<SpinWheelItem>): SpinWheelItem {
     val normalizedAngle = (angle + 90f) % 360f

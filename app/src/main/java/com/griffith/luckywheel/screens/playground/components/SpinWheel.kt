@@ -51,7 +51,7 @@ fun SpinWheel(
         val center = Offset(centerX, centerY)
         val radius = (size.minDimension / 2) * 0.9f
 
-        // --- Outer Glow Border ---
+        // --- Outer Wheel Border 1 ---
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(Color(0xFF055C09), Color(0xFF4CAF50)),
@@ -63,7 +63,7 @@ fun SpinWheel(
             alpha = 0.3f
         )
 
-        // --- Outer Circle Border ---
+        // --- Outer Circle Border 2 ---
         drawCircle(
             color = Color(0xFF23B62A),
             radius = radius + 8f,
@@ -96,7 +96,8 @@ fun SpinWheel(
                     val textY = centerY + (textDistance * sin(textAngleRadians)).toFloat()
 
                     // Display original label + percentage
-                    val displayText = "${item.label} (${(item.percent * 100).toInt()}%)"
+//                    val displayText = "${item.label} (${(item.percent * 100).toInt()}%)" // with percentage
+                    val displayText = "${item.label}"
 
                     val textBounds = Rect()
                     textPaint.getTextBounds(displayText, 0, displayText.length, textBounds)
