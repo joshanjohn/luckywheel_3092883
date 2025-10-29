@@ -4,12 +4,12 @@ import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.griffith.luckywheel.screens.auth.LoginScreen
-import com.griffith.luckywheel.screens.auth.RegisterScreen
-import com.griffith.luckywheel.screens.playground.PlayGround
-import com.griffith.luckywheel.screens.leaderboard.LeaderBoardScreen
-import com.griffith.luckywheel.screens.settings.SettingsScreen
 import com.griffith.luckywheel.services.DataStoreService
+import com.griffith.luckywheel.ui.screens.auth.LoginScreen
+import com.griffith.luckywheel.ui.screens.auth.RegisterScreen
+import com.griffith.luckywheel.ui.screens.leaderboard.LeaderBoardScreen
+import com.griffith.luckywheel.ui.screens.playground.PlayGround
+import com.griffith.luckywheel.ui.screens.settings.SettingsScreen
 import kotlinx.coroutines.launch
 
 @Composable
