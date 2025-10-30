@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.ui.theme.GoldColor
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -16,12 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.screens.leaderboard.components.RankingHeader
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.data.PlayerRankModel
-import com.griffith.luckywheel.screens.leaderboard.components.LeaderboardListView
+import com.griffith.luckywheel.ui.screens.AppBar
+import com.griffith.luckywheel.ui.screens.leaderboard.components.LeaderboardListView
+import com.griffith.luckywheel.ui.screens.leaderboard.components.RankingHeader
 import com.griffith.luckywheel.ui.theme.BronzeColor
 import com.griffith.luckywheel.ui.theme.GoldColor
 import com.griffith.luckywheel.ui.theme.SilverColor

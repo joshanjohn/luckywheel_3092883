@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.data.PlayerRankModel
-import com.griffith.luckywheel.screens.leaderboard.LeaderboardItem
+import com.griffith.luckywheel.ui.screens.leaderboard.LeaderboardItem
 
 
 @Composable

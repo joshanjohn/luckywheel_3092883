@@ -52,15 +52,15 @@ import com.google.firebase.database.ValueEventListener
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.data.Player
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.screens.playground.components.AnimatedText
-import com.griffith.luckywheel.screens.playground.gold_wheel.components.GoldCountComponent
-import com.griffith.luckywheel.screens.playground.gold_wheel.components.ResultCard
-import com.griffith.luckywheel.screens.playground.components.SpinWheel
-import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
-import com.griffith.luckywheel.screens.playground.logic.updatePlayerGold
-import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.ui.screens.AppBar
+import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
+import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
+import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.GoldColor
 import com.griffith.luckywheel.ui.theme.LightGreenColor
 import kotlinx.coroutines.delay
@@ -196,7 +196,7 @@ fun GoldWheelScreen(
                     onClick = { navController.navigate("leaderboard") }
                 ) {
                     Image(
-                        painterResource(R.drawable.leaderboard_icon),
+                        painterResource(R.drawable.trophy),
                         contentDescription = "leaderboard icon"
                     )
                 }
@@ -250,7 +250,7 @@ fun GoldWheelScreen(
 
         if (showResultDialog) {
             lastSpinResult?.let { result ->
-                ResultCard(
+                ResultCard (
                     wheelResult = result,
                     onDismiss = {
                         showResultDialog = false

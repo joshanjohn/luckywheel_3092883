@@ -13,15 +13,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.griffith.luckywheel.screens.settings.components.SettingsChoiceButton
 import com.griffith.luckywheel.ui.theme.DarkerGreenColor
 import com.griffith.luckywheel.ui.theme.darkerRedColor
 import com.griffith.luckywheel.ui.theme.LightGreenColor
 import com.griffith.luckywheel.ui.theme.lightRedColor
 import androidx.navigation.NavHostController
-import com.griffith.luckywheel.screens.AppBar
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.ui.screens.AppBar
+import com.griffith.luckywheel.ui.screens.settings.components.SettingsChoiceButton
 import com.griffith.luckywheel.ui.theme.backgroundColor
 import kotlinx.coroutines.launch
 

@@ -22,12 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.screens.AppBar
-import com.griffith.luckywheel.screens.playground.custom_wheel.components.EditBottomSheet
-import com.griffith.luckywheel.screens.playground.components.AnimatedText
-import com.griffith.luckywheel.screens.playground.gold_wheel.model.SpinActionType
-import com.griffith.luckywheel.screens.playground.components.SpinWheel
-import com.griffith.luckywheel.screens.playground.logic.getResultFromAngle
+import com.griffith.luckywheel.ui.screens.AppBar
+import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
+import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
+import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.EditBottomSheet
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
@@ -42,8 +42,8 @@ fun CustomWheelScreen(
     var wheelItems by remember {
         mutableStateOf(
             listOf(
-                SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.GAIN_GOLD, 0, 0.0f),
-                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.GAIN_GOLD, 0, 0.0f)
+                SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.0f),
+                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.CUSTOM, 0, 0.0f)
             )
         )
     }
@@ -209,7 +209,7 @@ fun CustomWheelScreen(
         }
 
         // --- Reusable Bottom Sheet Composable ---
-        EditBottomSheet(
+        EditBottomSheet (
             showBottomSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false },
             wheelItems = wheelItems,

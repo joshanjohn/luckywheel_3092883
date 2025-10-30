@@ -20,13 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.Player
-import com.griffith.luckywheel.screens.auth.components.AuthBgWallpaper
-import com.griffith.luckywheel.screens.auth.components.AuthSubmitBtn
-import com.griffith.luckywheel.screens.auth.components.CustomTextField
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail
 import com.griffith.luckywheel.services.validatePassword
+import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
+import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
+import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import com.griffith.luckywheel.ui.theme.GoldColor
 import kotlinx.coroutines.launch

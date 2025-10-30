@@ -15,9 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.griffith.luckywheel.data.BottomNavItem
-import com.griffith.luckywheel.screens.playground.custom_wheel.CustomWheelScreen
-import com.griffith.luckywheel.screens.playground.gold_wheel.GoldWheelScreen
-import com.griffith.luckywheel.screens.playground.components.BottomNavBar
+import com.griffith.luckywheel.ui.screens.playground.components.BottomNavBar
+import com.griffith.luckywheel.ui.screens.playground.custom_wheel.CustomWheelScreen
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen
 
 // ------------------------ MAIN PLAYGROUND WITH BOTTOM NAV ------------------------
 
@@ -30,7 +30,8 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
     )
 
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
