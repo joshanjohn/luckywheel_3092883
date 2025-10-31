@@ -29,7 +29,7 @@ import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
 import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
-import com.griffith.luckywheel.ui.theme.GoldColor
+import com.griffith.luckywheel.ui.theme.goldColor
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,7 +117,7 @@ fun LoginScreen(navController: NavHostController) {
                         }
                         withStyle(
                             style = SpanStyle(
-                                color = GoldColor,
+                                color = goldColor,
                                 fontWeight = FontWeight.Bold
                             )
                         ) {

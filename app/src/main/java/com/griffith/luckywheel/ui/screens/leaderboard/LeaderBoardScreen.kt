@@ -23,8 +23,8 @@ import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.leaderboard.components.LeaderboardListView
 import com.griffith.luckywheel.ui.screens.leaderboard.components.RankingHeader
 import com.griffith.luckywheel.ui.theme.BronzeColor
-import com.griffith.luckywheel.ui.theme.GoldColor
-import com.griffith.luckywheel.ui.theme.SilverColor
+import com.griffith.luckywheel.ui.theme.goldColor
+import com.griffith.luckywheel.ui.theme.silverColor
 import java.util.Locale
 
 
@@ -156,8 +156,8 @@ fun LeaderboardItem(entry: PlayerRankModel) {
 @Composable
 fun RankBadge(rank: Int) {
     val (color, imgIcon) = when (rank) {
-        1 -> GoldColor to R.drawable.gold_wreath
-        2 -> SilverColor to R.drawable.silver_wreath
+        1 -> goldColor to R.drawable.gold_wreath
+        2 -> silverColor to R.drawable.silver_wreath
         3 -> BronzeColor to R.drawable.bronze_wreath
         else -> Color.Transparent to R.drawable.player_circle // replace with a generic image for others
     }

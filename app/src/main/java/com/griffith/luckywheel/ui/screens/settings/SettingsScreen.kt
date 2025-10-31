@@ -13,9 +13,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.griffith.luckywheel.ui.theme.DarkerGreenColor
+import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.darkerRedColor
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import com.griffith.luckywheel.ui.theme.lightRedColor
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.services.DataStoreService
@@ -81,8 +81,8 @@ fun SettingsScreen(
             SettingsChoiceButton(
                 onClick = {},
                 label = "Settings",
-                lightColor = LightGreenColor,
-                darkerColor = DarkerGreenColor
+                lightColor = lightGreenColor,
+                darkerColor = darkerGreenColor
             )
         }
     }

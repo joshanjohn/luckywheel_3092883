@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import com.griffith.luckywheel.ui.theme.MeriendaFontFamily
 
 @Composable
@@ -39,7 +39,7 @@ fun AnimatedText(
     // Optional color shimmer between gold tones
     val glowColor by infiniteTransition.animateColor(
         initialValue = baseColor,
-        targetValue = LightGreenColor,
+        targetValue = lightGreenColor,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse

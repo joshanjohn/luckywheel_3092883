@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
-import com.griffith.luckywheel.ui.theme.GoldColor
+import com.griffith.luckywheel.ui.theme.goldColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +83,7 @@ fun EditBottomSheet(
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = "Edit Item",
-                                    tint = GoldColor
+                                    tint = goldColor
                                 )
                             }
                             TextButton(onClick = {

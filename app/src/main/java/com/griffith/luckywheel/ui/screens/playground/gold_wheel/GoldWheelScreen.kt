@@ -61,7 +61,7 @@ import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.Resul
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlinx.coroutines.delay
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -80,13 +80,13 @@ fun GoldWheelScreen(
 
     val wheelItems = remember {
         listOf(
-            SpinWheelItem("+100", LightGreenColor, SpinActionType.GAIN_GOLD, 100, 0.125f),
+            SpinWheelItem("+100", lightGreenColor, SpinActionType.GAIN_GOLD, 100, 0.125f),
             SpinWheelItem("2x GOLD", Color(0xFF062E12), SpinActionType.MULTIPLY_GOLD, 2, 0.125f),
-            SpinWheelItem("-200", LightGreenColor, SpinActionType.LOSE_GOLD, 200, 0.125f),
+            SpinWheelItem("-200", lightGreenColor, SpinActionType.LOSE_GOLD, 200, 0.125f),
             SpinWheelItem("+500", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 500, 0.125f),
-            SpinWheelItem("LOSE ALL", LightGreenColor, SpinActionType.LOSE_GOLD, Int.MAX_VALUE, 0.125f),
+            SpinWheelItem("LOSE ALL", lightGreenColor, SpinActionType.LOSE_GOLD, Int.MAX_VALUE, 0.125f),
             SpinWheelItem("+250", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 250, 0.125f),
-            SpinWheelItem("-1000", LightGreenColor, SpinActionType.LOSE_GOLD, 1000, 0.125f),
+            SpinWheelItem("-1000", lightGreenColor, SpinActionType.LOSE_GOLD, 1000, 0.125f),
             SpinWheelItem("3x GOLD", Color(0xFF062E12), SpinActionType.MULTIPLY_GOLD, 3, 0.125f),
         )
     }

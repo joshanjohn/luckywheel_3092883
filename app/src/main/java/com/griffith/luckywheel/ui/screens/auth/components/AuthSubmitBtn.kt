@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.DarkGreenColor
-import com.griffith.luckywheel.ui.theme.DarkerGreenColor
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.darkGreenColor
+import com.griffith.luckywheel.ui.theme.darkerGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 
 @Composable
 fun AuthSubmitBtn(label: String, onSubmit: () -> Unit) {
@@ -35,15 +35,15 @@ fun AuthSubmitBtn(label: String, onSubmit: () -> Unit) {
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        LightGreenColor,
-                        DarkerGreenColor,
-                        LightGreenColor
+                        lightGreenColor,
+                        darkerGreenColor,
+                        lightGreenColor
                     )
                 ),
                 shape = RoundedCornerShape(50.dp) // keep rounded shape
             ),
         shape = RoundedCornerShape(50.dp),
-        border = BorderStroke(1.5.dp, DarkGreenColor),
+        border = BorderStroke(1.5.dp, darkGreenColor),
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // make transparent so gradient shows
         contentPadding = PaddingValues(vertical = 20.dp)
     ) {

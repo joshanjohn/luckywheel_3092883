@@ -24,9 +24,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import com.griffith.luckywheel.data.SpinWheelItem
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
-import com.griffith.luckywheel.ui.theme.DarkGreenColor
-import com.griffith.luckywheel.ui.theme.DarkerGreenColor
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.darkGreenColor
+import com.griffith.luckywheel.ui.theme.darkerGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import com.griffith.luckywheel.ui.theme.darkerRedColor
 import com.griffith.luckywheel.ui.theme.lightRedColor
 
@@ -43,7 +43,7 @@ fun ResultCard(
                     brush = Brush.verticalGradient(
                         colors = if (wheelResult.type == SpinActionType.LOSE_GOLD)
                             listOf(darkerRedColor, lightRedColor,darkerRedColor)
-                        else listOf(DarkerGreenColor, DarkGreenColor, DarkerGreenColor)
+                        else listOf(darkerGreenColor, darkGreenColor, darkerGreenColor)
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ),
@@ -62,7 +62,7 @@ fun ResultCard(
                     fontWeight = FontWeight.Bold,
                     color = if (wheelResult.type == SpinActionType.LOSE_GOLD)
                         lightRedColor
-                    else LightGreenColor,
+                    else lightGreenColor,
                     textAlign = TextAlign.Center
                 )
 

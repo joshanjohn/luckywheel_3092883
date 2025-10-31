@@ -25,8 +25,8 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.griffith.luckywheel.data.BottomNavItem
-import com.griffith.luckywheel.ui.theme.ExtraDarkerGreenColor
-import com.griffith.luckywheel.ui.theme.LightGreenColor
+import com.griffith.luckywheel.ui.theme.extraDarkerGreenColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlin.collections.forEach
 
 
@@ -60,7 +60,7 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) ExtraDarkerGreenColor else Color.Transparent)
+                            .background(if (selected) extraDarkerGreenColor else Color.Transparent)
                             .clickable {
                                 if (!selected) {
                                     navController.navigate(item.route) {
@@ -81,11 +81,11 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                tint = if (selected) LightGreenColor else Color.White
+                                tint = if (selected) lightGreenColor else Color.White
                             )
                             Text(
                                 text = item.label,
-                                color = if (selected) LightGreenColor else Color.White,
+                                color = if (selected) lightGreenColor else Color.White,
                                 fontSize = 12.sp
                             )
                         }
