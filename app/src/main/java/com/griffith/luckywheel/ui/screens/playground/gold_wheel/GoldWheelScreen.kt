@@ -195,7 +195,7 @@ fun GoldWheelScreen(
                     onClick = { navController.navigate("leaderboard") }
                 ) {
                     Image(
-                        painterResource(R.drawable.trophy),
+                        painterResource(R.drawable.icon_trophy),
                         contentDescription = "leaderboard icon"
                     )
                 }

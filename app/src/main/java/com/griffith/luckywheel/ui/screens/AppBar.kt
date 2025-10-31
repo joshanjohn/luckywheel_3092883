@@ -72,7 +72,7 @@ fun AppBar(
                 ) {
                     Image(
                         modifier = Modifier.size(100.dp),
-                        painter = painterResource(R.drawable.game_icon),
+                        painter = painterResource(R.drawable.icon_game_control),
                         contentDescription = "Settings button",
                     )
                 }
