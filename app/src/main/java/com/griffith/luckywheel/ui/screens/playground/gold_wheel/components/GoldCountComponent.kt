@@ -22,7 +22,7 @@ fun GoldCountComponent( playerName: String, playerGold: Int){
     Row (
         verticalAlignment = Alignment.CenterVertically
     ){
-        Image(painterResource(R.drawable.gold_coin_icon), contentDescription = "gold count icon")
+        Image(painterResource(R.drawable.icon_gold_coin_icon), contentDescription = "gold count icon")
         Spacer(Modifier.width(5.dp))
         Text("$playerName : ${String.format(Locale.getDefault(), "%,d", playerGold)}", style= TextStyle(
             fontSize = 20.sp,

@@ -41,7 +41,7 @@ fun RankingHeader() {
         )
 
         Image(
-            painter = painterResource(R.drawable.rank_icon),
+            painter = painterResource(R.drawable.icon_rank),
             contentDescription = null,
         )
 
@@ -52,7 +52,7 @@ fun RankingHeader() {
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         Image(
-            painter = painterResource(R.drawable.rank_icon),
+            painter = painterResource(R.drawable.icon_rank),
             contentDescription = null,
         )
 

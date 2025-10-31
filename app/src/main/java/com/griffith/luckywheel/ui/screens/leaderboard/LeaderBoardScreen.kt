@@ -136,7 +136,7 @@ fun LeaderboardItem(entry: PlayerRankModel) {
             Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                   painter = painterResource(R.drawable.gold_coin),
+                   painter = painterResource(R.drawable.icon_gold_coin),
                     contentDescription = "Score",
                     modifier = Modifier.size(20.dp)
                 )
@@ -156,10 +156,10 @@ fun LeaderboardItem(entry: PlayerRankModel) {
 @Composable
 fun RankBadge(rank: Int) {
     val (color, imgIcon) = when (rank) {
-        1 -> goldColor to R.drawable.gold_wreath
-        2 -> silverColor to R.drawable.silver_wreath
-        3 -> BronzeColor to R.drawable.bronze_wreath
-        else -> Color.Transparent to R.drawable.player_circle // replace with a generic image for others
+        1 -> goldColor to R.drawable.icon_gold_wreath
+        2 -> silverColor to R.drawable.icon_silver_wreath
+        3 -> BronzeColor to R.drawable.icon_bronze_wreath
+        else -> Color.Transparent to R.drawable.icon_player_circle // replace with a generic image for others
     }
 
     val rankText = "$rank${getRankSuffix(rank)}"
