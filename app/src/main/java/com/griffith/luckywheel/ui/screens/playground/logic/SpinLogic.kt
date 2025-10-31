@@ -24,5 +24,6 @@ fun updatePlayerGold(currentGold: Int, resultItem: SpinWheelItem): Int {
         SpinActionType.GAIN_GOLD -> currentGold + resultItem.value
         SpinActionType.LOSE_GOLD -> if (resultItem.value == Int.MAX_VALUE) 0 else (currentGold - resultItem.value).coerceAtLeast(0)
         SpinActionType.MULTIPLY_GOLD -> currentGold * resultItem.value
+        SpinActionType.CUSTOM -> currentGold
     }
 }
