@@ -61,7 +61,6 @@ import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.Resul
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
-import com.griffith.luckywheel.ui.theme.GoldColor
 import com.griffith.luckywheel.ui.theme.LightGreenColor
 import kotlinx.coroutines.delay
 import kotlin.collections.component1
@@ -83,7 +82,7 @@ fun GoldWheelScreen(
         listOf(
             SpinWheelItem("+100", LightGreenColor, SpinActionType.GAIN_GOLD, 100, 0.125f),
             SpinWheelItem("2x GOLD", Color(0xFF062E12), SpinActionType.MULTIPLY_GOLD, 2, 0.125f),
-            SpinWheelItem("-200", GoldColor, SpinActionType.LOSE_GOLD, 200, 0.125f),
+            SpinWheelItem("-200", LightGreenColor, SpinActionType.LOSE_GOLD, 200, 0.125f),
             SpinWheelItem("+500", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 500, 0.125f),
             SpinWheelItem("LOSE ALL", LightGreenColor, SpinActionType.LOSE_GOLD, Int.MAX_VALUE, 0.125f),
             SpinWheelItem("+250", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 250, 0.125f),
@@ -211,7 +210,8 @@ fun GoldWheelScreen(
 
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
-            var isButtonPressed by remember { mutableStateOf(false) }
+            var isButtonPressed by remember { mutableStateOf(true) }
+
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
