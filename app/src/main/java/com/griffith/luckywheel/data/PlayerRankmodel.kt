@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
-data class PlayerRankModel(
+data class PlayerRank(
     val id: Int,
     val name: String,
     val score: Int,

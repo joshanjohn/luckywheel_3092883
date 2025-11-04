@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
-import com.griffith.luckywheel.data.PlayerRankModel
+import com.griffith.luckywheel.data.PlayerRank
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.leaderboard.components.LeaderboardListView
 import com.griffith.luckywheel.ui.screens.leaderboard.components.RankingHeader
@@ -37,7 +37,7 @@ fun LeaderBoardScreen(
     val firebaseService = remember { FireBaseService() }
 
     // Holds the latest leaderboard data from Firebase
-    var leaderboardList by remember { mutableStateOf<List<PlayerRankModel>>(emptyList()) }
+    var leaderboardList by remember { mutableStateOf<List<PlayerRank>>(emptyList()) }
 
     // Stream player updates in real time
     LaunchedEffect(Unit) {
@@ -45,7 +45,7 @@ fun LeaderBoardScreen(
             onPlayersUpdated = { players ->
                 // Map Player objects to PlayerRankModel with rank positions
                 leaderboardList = players.mapIndexed { index, player ->
-                    PlayerRankModel(
+                    PlayerRank(
                         id = index,
                         name = player.playerName,
                         score = player.gold,
@@ -98,7 +98,7 @@ fun LeaderBoardScreen(
 
 
 @Composable
-fun LeaderboardItem(entry: PlayerRankModel) {
+fun LeaderboardItem(entry: PlayerRank) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
