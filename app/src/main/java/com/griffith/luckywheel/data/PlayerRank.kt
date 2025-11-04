@@ -10,5 +10,5 @@ data class PlayerRank(
     val name: String,
     val score: Int,
     val rank: Int,
-    val avatarRes: ImageVector = Icons.Default.Person
+    val playerIcon: ImageVector = Icons.Default.Person
 )

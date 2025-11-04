@@ -114,7 +114,7 @@ fun LeaderboardItem(entry: PlayerRank) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = entry.avatarRes,
+                imageVector = entry.playerIcon,
                 contentDescription = "Avatar",
                 tint = Color.White,
                 modifier = Modifier.size(32.dp)
