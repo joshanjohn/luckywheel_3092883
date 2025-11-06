@@ -42,17 +42,21 @@ fun CustomWheelScreen(
     var wheelItems by remember {
         mutableStateOf(
             listOf(
-                SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.0f),
-                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.CUSTOM, 0, 0.0f)
+                SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.5f),
+                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.CUSTOM, 0, 0.5f)
             )
         )
     }
 
-    // --- Wheel Angles ---
-    val totalItems = wheelItems.size
-    val wheelItemsWithAngles = remember(totalItems, wheelItems) {
-        val fractionPerItem = 1f / totalItems
-        wheelItems.map { it.copy(percent = fractionPerItem) }
+    // --- Wheel Angles (Fixed Section) ---
+    val totalPercent = wheelItems.sumOf { it.percent.toDouble() }.toFloat()
+    val wheelItemsWithAngles = remember(wheelItems) {
+        if (totalPercent == 0f) {
+            val equalFraction = 1f / wheelItems.size.coerceAtLeast(1)
+            wheelItems.map { it.copy(percent = equalFraction) }
+        } else {
+            wheelItems.map { it.copy(percent = it.percent / totalPercent) }
+        }
     }
 
     // --- Spin Logic ---
@@ -209,7 +213,7 @@ fun CustomWheelScreen(
         }
 
         // --- Reusable Bottom Sheet Composable ---
-        EditBottomSheet (
+        EditBottomSheet(
             showBottomSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false },
             wheelItems = wheelItems,
