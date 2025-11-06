@@ -210,7 +210,7 @@ fun GoldWheelScreen(
 
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
-            var isButtonPressed by remember { mutableStateOf(true) }
+            var isButtonPressed by remember { mutableStateOf(false) }
 
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 
