@@ -38,7 +38,7 @@ fun CustomWheelScreen(
 ) {
     val context = navController.context
 
-    // --- Wheel Items State (use mutableStateListOf to ensure observable mutations) ---
+    // --- Wheel Items State
     val wheelItems = remember {
         mutableStateListOf(
             SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.5f),
@@ -55,7 +55,6 @@ fun CustomWheelScreen(
         wheelItems.map { it.copy(percent = it.percent / totalPercent) }
     }
 
-    // --- rememberUpdatedState ensures coroutines/closures read the latest list when they run ---
     val latestWheelItems = rememberUpdatedState(wheelItemsWithAngles)
 
     // --- Spin Logic ---
@@ -215,7 +214,6 @@ fun CustomWheelScreen(
         }
     }
 
-    // --- Reusable Bottom Sheet (placed OUTSIDE Scaffold) ---
     EditBottomSheet(
         showBottomSheet = showBottomSheet,
         onDismiss = { showBottomSheet = false },
