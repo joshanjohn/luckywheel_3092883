@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,8 +26,8 @@ import com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen
 fun PlayGround(navController: NavHostController, playerId: String?) {
     val bottomNavController = rememberNavController()
     val items = listOf(
-        BottomNavItem("GoldWheel", "goldwheel", Icons.Default.Star),
-        BottomNavItem("Custom Pi", "custompi", Icons.Default.Add)
+        BottomNavItem("Gold Game", "goldwheel", Icons.Default.Home),
+        BottomNavItem("Custom Wheel", "custompi", Icons.Default.Add)
     )
 
     Scaffold(
