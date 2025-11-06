@@ -38,26 +38,24 @@ fun CustomWheelScreen(
 ) {
     val context = navController.context
 
-    // --- Wheel Items State ---
-    var wheelItems by remember {
-        mutableStateOf(
-            listOf(
-                SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.5f),
-                SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.CUSTOM, 0, 0.5f)
-            )
+    // --- Wheel Items State
+    val wheelItems = remember {
+        mutableStateListOf(
+            SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.5f),
+            SpinWheelItem("Bob", Color(0xFFFFC107), SpinActionType.CUSTOM, 0, 0.5f)
         )
     }
 
-    // --- Wheel Angles (Fixed Section) ---
+    // --- Wheel Angles (auto-normalize every recomposition) ---
     val totalPercent = wheelItems.sumOf { it.percent.toDouble() }.toFloat()
-    val wheelItemsWithAngles = remember(wheelItems) {
-        if (totalPercent == 0f) {
-            val equalFraction = 1f / wheelItems.size.coerceAtLeast(1)
-            wheelItems.map { it.copy(percent = equalFraction) }
-        } else {
-            wheelItems.map { it.copy(percent = it.percent / totalPercent) }
-        }
+    val wheelItemsWithAngles = if (totalPercent == 0f) {
+        val equalFraction = 1f / wheelItems.size.coerceAtLeast(1)
+        wheelItems.map { it.copy(percent = equalFraction) }
+    } else {
+        wheelItems.map { it.copy(percent = it.percent / totalPercent) }
     }
+
+    val latestWheelItems = rememberUpdatedState(wheelItemsWithAngles)
 
     // --- Spin Logic ---
     var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
@@ -66,8 +64,9 @@ fun CustomWheelScreen(
     var showResultDialog by remember { mutableStateOf(false) }
     var chosenItem by remember { mutableStateOf<SpinWheelItem?>(null) }
 
+    // processResult now uses latestWheelItems.value so it never reads a stale snapshot
     fun processResult() {
-        val resultItem = getResultFromAngle(currentRotationDegrees, wheelItemsWithAngles)
+        val resultItem = getResultFromAngle(currentRotationDegrees, latestWheelItems.value)
         chosenItem = resultItem
         showResultDialog = true
         sensorEnabled = false
@@ -92,10 +91,11 @@ fun CustomWheelScreen(
     }
 
     // --- Rotation Animation ---
+    // This coroutine continuously runs, but processResult() will always use latestWheelItems.value
     LaunchedEffect(Unit) {
         while (true) {
             if (rotationSpeed > 0f) {
-                currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360
+                currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360f
                 rotationSpeed *= 0.98f
                 if (rotationSpeed < 0.1f) {
                     rotationSpeed = 0f
@@ -131,6 +131,7 @@ fun CustomWheelScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
+            // --- Edit Button ---
             Button(
                 onClick = { showBottomSheet = true },
                 shape = RoundedCornerShape(12.dp),
@@ -146,7 +147,7 @@ fun CustomWheelScreen(
                     .aspectRatio(1f),
                 contentAlignment = Alignment.Center
             ) {
-                SpinWheel(items = wheelItemsWithAngles, rotationDegrees = currentRotationDegrees)
+                SpinWheel(items = latestWheelItems.value, rotationDegrees = currentRotationDegrees)
             }
 
             // --- Instruction Text ---
@@ -211,13 +212,16 @@ fun CustomWheelScreen(
                 }
             }
         }
-
-        // --- Reusable Bottom Sheet Composable ---
-        EditBottomSheet(
-            showBottomSheet = showBottomSheet,
-            onDismiss = { showBottomSheet = false },
-            wheelItems = wheelItems,
-            onUpdateItems = { updated -> wheelItems = updated }
-        )
     }
+
+    EditBottomSheet(
+        showBottomSheet = showBottomSheet,
+        onDismiss = { showBottomSheet = false },
+        wheelItems = wheelItems.toList(),
+        onUpdateItems = { updated ->
+            // mutate the observable list so Compose will recompose
+            wheelItems.clear()
+            wheelItems.addAll(updated)
+        }
+    )
 }
