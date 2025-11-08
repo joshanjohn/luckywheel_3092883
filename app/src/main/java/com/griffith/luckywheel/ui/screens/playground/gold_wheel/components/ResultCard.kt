@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkGreenColor
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor

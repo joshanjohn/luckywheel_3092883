@@ -20,6 +20,7 @@ fun AppRoute() {
     val coroutineScope = rememberCoroutineScope()
     var startDestination by remember { mutableStateOf("login") }
 
+    // auto routing for previously logged in users
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             val player = dataStoreService.getPlayer()

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,8 +18,6 @@ import com.griffith.luckywheel.data.BottomNavItem
 import com.griffith.luckywheel.ui.screens.playground.components.BottomNavBar
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.CustomWheelScreen
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen
-
-// ------------------------ MAIN PLAYGROUND WITH BOTTOM NAV ------------------------
 
 @Composable
 fun PlayGround(navController: NavHostController, playerId: String?) {

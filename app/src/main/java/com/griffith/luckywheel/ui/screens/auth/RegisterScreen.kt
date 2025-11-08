@@ -119,7 +119,7 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-
+                // title
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Color.White)) {
@@ -141,6 +141,7 @@ fun RegisterScreen(
 
                 Spacer(Modifier.height(24.dp))
 
+                // player name textfield
                 CustomTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -150,6 +151,7 @@ fun RegisterScreen(
 
                 Spacer(Modifier.height(16.dp))
 
+                // emall textfield
                 CustomTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -159,6 +161,7 @@ fun RegisterScreen(
 
                 Spacer(Modifier.height(16.dp))
 
+                // password textfield
                 CustomTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -169,6 +172,7 @@ fun RegisterScreen(
 
                 Spacer(Modifier.height(24.dp))
 
+                // submit button
                 AuthSubmitBtn(
                     onSubmit = { onRegister() },
                     label = "Register",
@@ -177,6 +181,7 @@ fun RegisterScreen(
 
                 Spacer(Modifier.height(40.dp))
 
+                // nav to login
                 TextButton(
                     onClick = {
                         navController.navigate("login") {

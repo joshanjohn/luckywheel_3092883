@@ -44,6 +44,7 @@ fun LoginScreen(navController: NavHostController) {
     val firebaseService = remember { FireBaseService() }
     val coroutineScope = rememberCoroutineScope()
 
+    //TODO need to solve this cognitive complexity in milestone 2
     fun onLogin() {
         email = email.trim()
         password = password.trim()
@@ -69,7 +70,7 @@ fun LoginScreen(navController: NavHostController) {
                     firebaseService.getPlayerInfo(playerId) { player ->
                         if (player != null) {
                             coroutineScope.launch {
-                                dataStoreService.clear()      // optional: clear old player
+                                dataStoreService.clear()
                                 dataStoreService.savePlayer(player)
 
                                 // Debug print
@@ -110,6 +111,7 @@ fun LoginScreen(navController: NavHostController) {
                 verticalArrangement = Arrangement.Center
             ) {
 
+                // Title
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Color.White)) {
@@ -131,6 +133,7 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(24.dp))
 
+                // email textfield
                 CustomTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -140,6 +143,7 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(16.dp))
 
+                // password textfield
                 CustomTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -150,6 +154,7 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(24.dp))
 
+                //submit button
                 AuthSubmitBtn(
                     label = "Login",
                     onSubmit = { onLogin() }
@@ -157,6 +162,7 @@ fun LoginScreen(navController: NavHostController) {
 
                 Spacer(Modifier.height(40.dp))
 
+                // nav to register
                 TextButton(
                     onClick = {
                         navController.navigate("register") {

@@ -26,7 +26,7 @@ import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.EditBottomSheet
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
@@ -38,7 +38,7 @@ fun CustomWheelScreen(
 ) {
     val context = navController.context
 
-    // --- Wheel Items State
+    //  Wheel Items Default
     val wheelItems = remember {
         mutableStateListOf(
             SpinWheelItem("Alice", Color(0xFF4CAF50), SpinActionType.CUSTOM, 0, 0.5f),
@@ -46,7 +46,7 @@ fun CustomWheelScreen(
         )
     }
 
-    // --- Wheel Angles (auto-normalize every recomposition) ---
+    //  Wheel Angles (auto-normalize every recomposition) 
     val totalPercent = wheelItems.sumOf { it.percent.toDouble() }.toFloat()
     val wheelItemsWithAngles = if (totalPercent == 0f) {
         val equalFraction = 1f / wheelItems.size.coerceAtLeast(1)
@@ -57,7 +57,7 @@ fun CustomWheelScreen(
 
     val latestWheelItems = rememberUpdatedState(wheelItemsWithAngles)
 
-    // --- Spin Logic ---
+    //  Spin Logic variables
     var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
     var rotationSpeed by remember { mutableFloatStateOf(0f) }
     var sensorEnabled by remember { mutableStateOf(false) }
@@ -72,7 +72,7 @@ fun CustomWheelScreen(
         sensorEnabled = false
     }
 
-    // --- Shake Detection ---
+    //  Shake Detection 
     DisposableEffect(sensorEnabled) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -90,8 +90,7 @@ fun CustomWheelScreen(
         onDispose { sensorManager.unregisterListener(listener) }
     }
 
-    // --- Rotation Animation ---
-    // This coroutine continuously runs, but processResult() will always use latestWheelItems.value
+    //  Rotation Animation & logic
     LaunchedEffect(Unit) {
         while (true) {
             if (rotationSpeed > 0f) {
@@ -106,10 +105,10 @@ fun CustomWheelScreen(
         }
     }
 
-    // --- Bottom Sheet State ---
+    //  Bottom Sheet State 
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    // --- UI ---
+    //  UI 
     Scaffold(
         topBar = { AppBar(navController) },
         modifier = Modifier
@@ -131,7 +130,7 @@ fun CustomWheelScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
-            // --- Edit Button ---
+            // Edit Button
             Button(
                 onClick = { showBottomSheet = true },
                 shape = RoundedCornerShape(12.dp),
@@ -140,7 +139,7 @@ fun CustomWheelScreen(
                 Text("Edit Wheel", color = Color.White)
             }
 
-            // --- Wheel Display ---
+            // Wheel Display
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -150,12 +149,12 @@ fun CustomWheelScreen(
                 SpinWheel(items = latestWheelItems.value, rotationDegrees = currentRotationDegrees)
             }
 
-            // --- Instruction Text ---
+            //  Instruction Text 
             AnimatedText(
                 text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake your phone!",
             )
 
-            // --- Spin Button ---
+            //  Spin Button 
             var isButtonPressed by remember { mutableStateOf(false) }
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 
@@ -189,7 +188,7 @@ fun CustomWheelScreen(
                 }
             }
 
-            // --- Result Dialog ---
+            //  Result Dialog 
             if (showResultDialog) {
                 chosenItem?.let { item ->
                     AlertDialog(

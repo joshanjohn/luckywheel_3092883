@@ -22,13 +22,6 @@ import com.griffith.luckywheel.ui.theme.lightGreenColor
 @Composable
 fun AuthSubmitBtn(label: String, onSubmit: () -> Unit) {
     Button(
-//        onClick = { onSubmit() },
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(12.dp),                         // border radius
-//        border = BorderStroke(1.5.dp, Color(0xFF010300)),                   // border color & width
-//        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF107807)), // fill color
-//        contentPadding = PaddingValues(vertical = 20.dp)
-
         onClick = { onSubmit() },
         modifier = Modifier
             .fillMaxWidth()
@@ -40,16 +33,16 @@ fun AuthSubmitBtn(label: String, onSubmit: () -> Unit) {
                         lightGreenColor
                     )
                 ),
-                shape = RoundedCornerShape(50.dp) // keep rounded shape
+                shape = RoundedCornerShape(50.dp)
             ),
         shape = RoundedCornerShape(50.dp),
         border = BorderStroke(1.5.dp, darkGreenColor),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // make transparent so gradient shows
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         contentPadding = PaddingValues(vertical = 20.dp)
     ) {
         Text(
             text = label,
-            fontSize = 18.sp,          // text font size
+            fontSize = 18.sp,
             color = Color.White,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center

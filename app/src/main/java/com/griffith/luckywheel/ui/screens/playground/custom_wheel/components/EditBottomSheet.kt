@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
@@ -37,10 +37,7 @@ fun EditBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var expandedIndex by remember { mutableStateOf<Int?>(null) }
 
-    /**
-     * Adjusts all other item percentages proportionally
-     * after setting a new percentage for one specific item.
-     */
+    
     fun rebalanceItemPercentagesAfterChange(
         items: List<SpinWheelItem>,
         updatedIndex: Int,
@@ -62,7 +59,7 @@ fun EditBottomSheet(
                 else item.copy(percent = equalShare)
             }
         } else {
-            // redistribute proportionally
+            // redistribute equaly
             items.mapIndexed { i, item ->
                 if (i == updatedIndex) item.copy(percent = clampedPercent)
                 else item.copy(percent = (item.percent / totalOtherPercent) * remainingPercent)
@@ -70,10 +67,7 @@ fun EditBottomSheet(
         }
     }
 
-    /**
-     * Normalizes all percentages so their sum equals 1.0.
-     * If total is zero, assigns equal fractions to all.
-     */
+
     fun normalizePercentagesToOne(items: List<SpinWheelItem>): List<SpinWheelItem> {
         if (items.isEmpty()) return items
         val total = items.sumOf { it.percent.toDouble() }.toFloat()
@@ -102,7 +96,7 @@ fun EditBottomSheet(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // --- Expandable Cards List ---
+            //  Expandable Cards List 
             wheelItems.forEachIndexed { index, item ->
                 var tempLabel by remember(item) { mutableStateOf(item.label) }
                 var tempColor by remember(item) { mutableStateOf(item.color) }
@@ -128,7 +122,7 @@ fun EditBottomSheet(
                 ) {
                     Column(Modifier.padding(12.dp)) {
 
-                        // --- Card Header ---
+                        //  Card Header 
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -177,7 +171,7 @@ fun EditBottomSheet(
                             }
                         }
 
-                        // --- Expanded Edit Section ---
+                        //  Expanded Edit Section 
                         if (expandedIndex == index) {
                             Spacer(Modifier.height(8.dp))
 
@@ -263,7 +257,7 @@ fun EditBottomSheet(
                 }
             }
 
-            // --- Add New Item Button ---
+            //  Add New Item Button 
             Button(
                 onClick = {
                     val newItem = SpinWheelItem(

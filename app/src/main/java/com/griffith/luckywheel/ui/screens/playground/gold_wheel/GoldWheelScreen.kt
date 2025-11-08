@@ -58,7 +58,7 @@ import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.model.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.lightGreenColor
@@ -78,6 +78,7 @@ fun GoldWheelScreen(
     val context = navController.context
     val fireBaseService = remember { FireBaseService() }
 
+    //  Wheel Items Default
     val wheelItems = remember {
         listOf(
             SpinWheelItem("+100", lightGreenColor, SpinActionType.GAIN_GOLD, 100, 0.125f),
@@ -114,6 +115,7 @@ fun GoldWheelScreen(
         }
     }
 
+    //  Spin Logic variables
     var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
     var rotationSpeed by remember { mutableFloatStateOf(0f) }
     var showResultDialog by remember { mutableStateOf(false) }
@@ -130,7 +132,7 @@ fun GoldWheelScreen(
         sensorEnabled = false
     }
 
-    // Sensor Handling
+    //  Shake Detection
     DisposableEffect(sensorEnabled) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -188,6 +190,7 @@ fun GoldWheelScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 GoldCountComponent(playerName, playerGold)
+                // Trophy Icon - leaderboard
                 Button(
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(0.dp),
@@ -201,6 +204,7 @@ fun GoldWheelScreen(
                 }
             }
 
+            // Wheel Display
             Box(
                 modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                 contentAlignment = Alignment.Center
@@ -208,10 +212,11 @@ fun GoldWheelScreen(
                 SpinWheel(items = wheelItems, rotationDegrees = currentRotationDegrees)
             }
 
+            //  Instruction Text
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
+            //  Spin Button
             var isButtonPressed by remember { mutableStateOf(false) }
-
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -248,6 +253,7 @@ fun GoldWheelScreen(
             }
         }
 
+        //  Result Dialog
         if (showResultDialog) {
             lastSpinResult?.let { result ->
                 ResultCard (

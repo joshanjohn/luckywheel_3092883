@@ -51,7 +51,7 @@ fun SpinWheel(
         val center = Offset(centerX, centerY)
         val radius = (size.minDimension / 2) * 0.9f
 
-        // --- Outer Wheel Border 1 ---
+        //  Outer Wheel Border 1 
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(Color(0xFF055C09), Color(0xFF4CAF50)),
@@ -63,7 +63,7 @@ fun SpinWheel(
             alpha = 0.3f
         )
 
-        // --- Outer Circle Border 2 ---
+        //  Outer Circle Border 2 
         drawCircle(
             color = Color(0xFF23B62A),
             radius = radius + 8f,
@@ -71,7 +71,7 @@ fun SpinWheel(
             style = Stroke(width = 10f)
         )
 
-        // --- Wheel Slices (updated for percent) ---
+        //  Wheel Slices (updated for percent) 
         rotate(rotationDegrees, pivot = center) {
             var startAngle = 0f
 
@@ -115,7 +115,7 @@ fun SpinWheel(
             }
         }
 
-        // --- Center Circle Hub ---
+        //  Center Circle Hub 
         drawCircle(
             color = Color(0xFF1C273A),
             radius = radius * 0.12f,
@@ -128,7 +128,7 @@ fun SpinWheel(
             center = center
         )
 
-        // --- Center Text: "GOLD SHAKE" ---
+        //  Center Text: "GOLD SHAKE" 
         val text = buildAnnotatedString {
             withStyle(
                 style = TextStyle(
@@ -153,7 +153,7 @@ fun SpinWheel(
             )
         )
 
-        // --- Pointer Triangle ---
+        //  Pointer Triangle 
         val pointerPath = Path().apply {
             val pointerWidth = 60f
             val pointerHeight = 50f
