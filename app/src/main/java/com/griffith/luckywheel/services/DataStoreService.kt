@@ -32,15 +32,6 @@ class DataStoreService(private val context: Context) {
         }
     }
 
-    // Get player as Flow
-    val playerFlow: Flow<Player> = dataStore.data.map { prefs ->
-        Player(
-            playerId = prefs[PLAYER_ID] ?: "",
-            playerName = prefs[PLAYER_NAME] ?: "",
-            gold = prefs[GOLD] ?: 0
-        )
-    }
-
     // Read player once
     suspend fun getPlayer(): Player {
         val prefs = dataStore.data.first()
