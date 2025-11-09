@@ -1,6 +1,7 @@
 package com.griffith.luckywheel.ui.screens.auth
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -38,32 +39,33 @@ fun LoginScreen(navController: NavHostController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
     val firebaseService = remember { FireBaseService() }
     val coroutineScope = rememberCoroutineScope()
 
-    //TODO need to solve this cognitive complexity in milestone 2
     fun onLogin() {
         email = email.trim()
         password = password.trim()
 
-        // validate email
         val emailError = validateEmail(email)
         if (emailError != null) {
             Toast.makeText(context, emailError, Toast.LENGTH_SHORT).show()
             return
         }
 
-        // validate password
         val passwordError = validatePassword(password, disable_string_validations = true)
         if (passwordError != null) {
             Toast.makeText(context, passwordError, Toast.LENGTH_SHORT).show()
             return
         }
 
+        isLoading = true
+
         firebaseService.loginUser(email, password) { success, message ->
+            isLoading = false
             if (success) {
                 val playerId = firebaseService.getCurrentUserId() ?: ""
                 if (playerId.isNotEmpty()) {
@@ -72,10 +74,6 @@ fun LoginScreen(navController: NavHostController) {
                             coroutineScope.launch {
                                 dataStoreService.clear()
                                 dataStoreService.savePlayer(player)
-
-                                // Debug print
-                                val prefs = dataStoreService.getPlayer()
-                                println("Player DataStore: $prefs")
                             }
                         }
                     }
@@ -94,88 +92,98 @@ fun LoginScreen(navController: NavHostController) {
     }
 
     AuthBgWallpaper {
-        Scaffold(
-            containerColor = Color.Transparent
-        ) { innerPadding ->
+        Scaffold(containerColor = Color.Transparent) { innerPadding ->
 
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .focusGroup()
-                    .navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-
-                // Title
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color.White)) {
-                            append("BACK TO EARN\n\nMORE ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                color = goldColor,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append("GOLD")
-                        }
-                    },
-                    fontSize = 48.sp,
-                    textAlign = TextAlign.Center,
-                    fontFamily = BubbleFontFamily
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                // email textfield
-                CustomTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = "Email",
-                    leadingIcon = Icons.Default.Email
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // password textfield
-                CustomTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = "Password",
-                    leadingIcon = Icons.Default.Lock,
-                    isPassword = true
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                //submit button
-                AuthSubmitBtn(
-                    label = "Login",
-                    onSubmit = { onLogin() }
-                )
-
-                Spacer(Modifier.height(40.dp))
-
-                // nav to register
-                TextButton(
-                    onClick = {
-                        navController.navigate("register") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState())
+                        .imePadding()
+                        .focusGroup()
+                        .navigationBarsPadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Text("Don't have an account? Register", color = Color.White)
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = Color.White)) {
+                                append("BACK TO EARN\n\nMORE ")
+                            }
+                            withStyle(
+                                style = SpanStyle(
+                                    color = goldColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append("GOLD")
+                            }
+                        },
+                        fontSize = 48.sp,
+                        textAlign = TextAlign.Center,
+                        fontFamily = BubbleFontFamily
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    CustomTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = "Email",
+                        leadingIcon = Icons.Default.Email,
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    CustomTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = "Password",
+                        leadingIcon = Icons.Default.Lock,
+                        isPassword = true,
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    AuthSubmitBtn(
+                        label = if (isLoading) "Logging in..." else "Login",
+                        onSubmit = { if (!isLoading) onLogin() },
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(40.dp))
+
+                    TextButton(
+                        onClick = {
+                            if (!isLoading) {
+                                navController.navigate("register") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Don't have an account? Register", color = Color.White)
+                    }
                 }
 
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = goldColor)
+                    }
+                }
             }
-
         }
     }
-
 }

@@ -26,7 +26,7 @@ import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.EditBottomSheet
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt

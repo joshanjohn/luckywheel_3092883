@@ -1,6 +1,7 @@
 package com.griffith.luckywheel.ui.screens.auth
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -36,13 +37,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
-    navController: NavHostController
-) {
+fun RegisterScreen(navController: NavHostController) {
 
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
@@ -54,35 +54,32 @@ fun RegisterScreen(
         email = email.trim()
         password = password.trim()
 
-        // validate email
         val emailError = validateEmail(email)
         if (emailError != null) {
             Toast.makeText(context, emailError, Toast.LENGTH_SHORT).show()
             return
         }
 
-        // validate password
         val passwordError = validatePassword(password)
         if (passwordError != null) {
             Toast.makeText(context, passwordError, Toast.LENGTH_SHORT).show()
             return
         }
 
+        isLoading = true
+
         firebaseService.registerUserWithPlayer(name, email, password) { success, message ->
+            isLoading = false
             if (success) {
                 val userId = firebaseService.getCurrentUserId()
                 if (userId != null) {
                     firebaseService.getPlayerInfoById(userId) { player ->
                         if (player != null) {
-                            // Save player info in DataStore using coroutineScope
                             coroutineScope.launch {
-                                dataStoreService.clear()  // optional: clear old player
+                                dataStoreService.clear()
                                 dataStoreService.savePlayer(player)
 
-                                // Debug print
                                 val prefs: Player = dataStoreService.getPlayer()
-                                println("Player DataStore: $prefs")
-
                                 Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                                 navController.navigate("play/${prefs.playerId}") {
                                     popUpTo("register") { inclusive = true }
@@ -91,7 +88,6 @@ fun RegisterScreen(
                         }
                     }
                 }
-
             } else {
                 Toast.makeText(
                     context,
@@ -103,93 +99,107 @@ fun RegisterScreen(
     }
 
     AuthBgWallpaper {
-        Scaffold(
-            containerColor = Color.Transparent
-        ) { innerPadding ->
+        Scaffold(containerColor = Color.Transparent) { innerPadding ->
 
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .focusGroup()
-                    .navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-                // title
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color.White)) {
-                            append("SHAKE & EARN\n\n")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                color = goldColor,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append("GOLD")
-                        }
-                    },
-                    fontSize = 48.sp,
-                    textAlign = TextAlign.Center,
-                    fontFamily = BubbleFontFamily
-                )
 
-                Spacer(Modifier.height(24.dp))
-
-                // player name textfield
-                CustomTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = "Name",
-                    leadingIcon = Icons.Default.Person
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // emall textfield
-                CustomTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = "Email",
-                    leadingIcon = Icons.Default.Email
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // password textfield
-                CustomTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = "Password",
-                    leadingIcon = Icons.Default.Lock,
-                    isPassword = true
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                // submit button
-                AuthSubmitBtn(
-                    onSubmit = { onRegister() },
-                    label = "Register",
-                )
-
-
-                Spacer(Modifier.height(40.dp))
-
-                // nav to login
-                TextButton(
-                    onClick = {
-                        navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
-                        }
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState())
+                        .imePadding()
+                        .focusGroup()
+                        .navigationBarsPadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Text("Already have an account? Login", color = Color.White)
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = Color.White)) {
+                                append("SHAKE & EARN\n\n")
+                            }
+                            withStyle(
+                                style = SpanStyle(
+                                    color = goldColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append("GOLD")
+                            }
+                        },
+                        fontSize = 48.sp,
+                        textAlign = TextAlign.Center,
+                        fontFamily = BubbleFontFamily
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    CustomTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = "Name",
+                        leadingIcon = Icons.Default.Person,
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    CustomTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = "Email",
+                        leadingIcon = Icons.Default.Email,
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    CustomTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = "Password",
+                        leadingIcon = Icons.Default.Lock,
+                        isPassword = true,
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    AuthSubmitBtn(
+                        onSubmit = { if (!isLoading) onRegister() },
+                        label = if (isLoading) "Registering..." else "Register",
+                        enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(40.dp))
+
+                    TextButton(
+                        onClick = {
+                            if (!isLoading) {
+                                navController.navigate("login") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Already have an account? Login", color = Color.White)
+                    }
+                }
+
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = goldColor)
+                    }
                 }
             }
         }

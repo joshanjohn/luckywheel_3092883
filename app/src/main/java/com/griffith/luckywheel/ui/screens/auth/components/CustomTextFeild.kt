@@ -26,7 +26,8 @@ fun CustomTextField(
     label: String,
     leadingIcon: ImageVector,
     isPassword: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -41,6 +42,7 @@ fun CustomTextField(
                 tint = Color.White
             )
         },
+        enabled = enabled,
 
         textStyle = LocalTextStyle.current.copy(color = Color.White),
         shape = RoundedCornerShape(16.dp),
