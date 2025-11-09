@@ -2,6 +2,26 @@
 [![Lint debug](https://github.com/joshanjohn/luckywheel_3092883/actions/workflows/luckywheel_lint_ci.yml/badge.svg)](https://github.com/joshanjohn/luckywheel_3092883/actions/workflows/luckywheel_lint_ci.yml)
 
 
-Gaming Android compose app using kotlin
+Lucky Wheel is a gaming app. The main goal of the app is to have a compe<<ve gameplay for
+collec<ng the gold by spinning a wheel using a mobile sensor . The spinning wheel will land the
+pointer on a random choice (arch) on the spinning wheel. The player can earn or lose gold by
+spinning the lucky wheel. The app shows Real-<me data ranking for players with high gold
+count.
 
 <img width="387" height="531" alt="image" src="https://github.com/user-attachments/assets/62cf3f12-37bf-41a1-aa62-4ce18c9684d1" />
+
+
+## Project Architecture
+The project is developed in an agile SDCL method. The project uses the Model View Controller (MVC) 3-level design architecture paTern. All the model classes, defined as data classes in Kotlin, are organized within the data package.The services package contains all service and controller-related code, including the Firebase service, authen<ca<on service, and data store service. The UI elements, such as themes, screens, components, and UI logic, are placed in the UI package, along with the themes.
+
+
+## Colour Theme
+The App uses the following colours for the app scaﬀold background colour, in a linear gradient
+fashion. For some elements, it has a golden yellow colour.
+
+
+ ## Project Development 
+ - Milestone 1 - https://github.com/joshanjohn/luckywheel_3092883/blob/main/docs/Joshan_John_3092883_milestone1.pdf
+ - Milestone 2 - in progress
+ - Milestone 3 - in progress
+
