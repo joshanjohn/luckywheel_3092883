@@ -58,7 +58,7 @@ import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
-import com.griffith.luckywheel.ui.screens.playground.gold_wheel.enum.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.lightGreenColor
