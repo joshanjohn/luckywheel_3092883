@@ -3,6 +3,7 @@ package com.griffith.luckywheel.services
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.griffith.luckywheel.data.Player
+import com.griffith.luckywheel.data.SpinWheelItem
 import kotlinx.coroutines.tasks.await
 
 class FireBaseService {
@@ -102,7 +103,6 @@ class FireBaseService {
             }
         })
     }
-
 
 
     fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {

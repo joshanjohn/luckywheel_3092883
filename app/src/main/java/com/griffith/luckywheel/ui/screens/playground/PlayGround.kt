@@ -50,12 +50,7 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
             )
         ) {
             composable("goldwheel") { GoldWheelScreen(navController, playerId) }
-            composable("custompi") { CustomWheelScreen(navController) }
+            composable("custompi") { CustomWheelScreen(navController, playerId) }
         }
     }
 }
-
-
-
-
-

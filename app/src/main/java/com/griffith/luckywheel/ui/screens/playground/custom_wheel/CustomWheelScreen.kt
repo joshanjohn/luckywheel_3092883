@@ -10,6 +10,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.griffith.luckywheel.data.SavedGame
 import com.griffith.luckywheel.data.SpinWheelItem
+import com.griffith.luckywheel.services.toSpinWheelItems
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
@@ -34,9 +38,19 @@ import kotlin.math.sqrt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomWheelScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    playerId: String?
 ) {
     val context = navController.context
+
+    // Check for loaded game from navigation
+    val loadedGame = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<SavedGame>("loaded_game")
+
+    // Current game tracking
+    var currentGameId by remember { mutableStateOf<String?>(null) }
+    var currentGameName by remember { mutableStateOf<String?>(null) }
 
     //  Wheel Items Default
     val wheelItems = remember {
@@ -46,7 +60,19 @@ fun CustomWheelScreen(
         )
     }
 
-    //  Wheel Angles (auto-normalize every recomposition) 
+    // Load saved game if provided
+    LaunchedEffect(loadedGame) {
+        loadedGame?.let { game ->
+            currentGameId = game.gameId
+            currentGameName = game.gameName
+            wheelItems.clear()
+            wheelItems.addAll(game.toSpinWheelItems())
+            // Clear the saved state
+            navController.currentBackStackEntry?.savedStateHandle?.remove<SavedGame>("loaded_game")
+        }
+    }
+
+    //  Wheel Angles (auto-normalize every recomposition)
     val totalPercent = wheelItems.sumOf { it.percent.toDouble() }.toFloat()
     val wheelItemsWithAngles = if (totalPercent == 0f) {
         val equalFraction = 1f / wheelItems.size.coerceAtLeast(1)
@@ -64,7 +90,6 @@ fun CustomWheelScreen(
     var showResultDialog by remember { mutableStateOf(false) }
     var chosenItem by remember { mutableStateOf<SpinWheelItem?>(null) }
 
-    // processResult now uses latestWheelItems.value so it never reads a stale snapshot
     fun processResult() {
         val resultItem = getResultFromAngle(currentRotationDegrees, latestWheelItems.value)
         chosenItem = resultItem
@@ -72,7 +97,7 @@ fun CustomWheelScreen(
         sensorEnabled = false
     }
 
-    //  Shake Detection 
+    //  Shake Detection
     DisposableEffect(sensorEnabled) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -105,10 +130,10 @@ fun CustomWheelScreen(
         }
     }
 
-    //  Bottom Sheet State 
+    //  Bottom Sheet State
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    //  UI 
+    //  UI
     Scaffold(
         topBar = { AppBar(navController) },
         modifier = Modifier
@@ -130,13 +155,47 @@ fun CustomWheelScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
-            // Edit Button
-            Button(
-                onClick = { showBottomSheet = true },
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49A84D))
+            // Top Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Edit Wheel", color = Color.White)
+                // Edit Button
+                Button(
+                    onClick = { showBottomSheet = true },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49A84D))
+                ) {
+                    Text("Edit Wheel", color = Color.White)
+                }
+
+                // Load Games Button
+                Button(
+                    onClick = {
+                        navController.navigate("loadgames/$playerId")
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0BA136)),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.List,
+                        contentDescription = "Load Games",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text("Load", color = Color.White)
+                }
+            }
+
+            // Current Game Name Display
+            if (currentGameName != null) {
+                Text(
+                    text = "Playing: $currentGameName",
+                    color = Color(0xFFFFD700),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
 
             // Wheel Display
@@ -149,12 +208,12 @@ fun CustomWheelScreen(
                 SpinWheel(items = latestWheelItems.value, rotationDegrees = currentRotationDegrees)
             }
 
-            //  Instruction Text 
+            //  Instruction Text
             AnimatedText(
                 text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake your phone!",
             )
 
-            //  Spin Button 
+            //  Spin Button
             var isButtonPressed by remember { mutableStateOf(false) }
             LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
 
@@ -188,7 +247,7 @@ fun CustomWheelScreen(
                 }
             }
 
-            //  Result Dialog 
+            //  Result Dialog
             if (showResultDialog) {
                 chosenItem?.let { item ->
                     AlertDialog(
@@ -218,9 +277,15 @@ fun CustomWheelScreen(
         onDismiss = { showBottomSheet = false },
         wheelItems = wheelItems.toList(),
         onUpdateItems = { updated ->
-            // mutate the observable list so Compose will recompose
             wheelItems.clear()
             wheelItems.addAll(updated)
+        },
+        playerId = playerId,
+        currentGameId = currentGameId,
+        currentGameName = currentGameName,
+        onGameSaved = { gameId, gameName ->
+            currentGameId = gameId
+            currentGameName = gameName
         }
     )
 }
