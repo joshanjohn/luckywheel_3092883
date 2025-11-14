@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.SavedGame
 import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.services.toSpinWheelItems
+import com.griffith.luckywheel.data.toSpinWheelItems
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel

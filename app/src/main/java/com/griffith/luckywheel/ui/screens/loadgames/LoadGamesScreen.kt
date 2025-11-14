@@ -18,9 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.data.SavedGame
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.services.deleteGame
-import com.griffith.luckywheel.services.loadPlayerGames
-import com.griffith.luckywheel.services.updateGameName
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.loadgames.components.GameCard
 import com.griffith.luckywheel.ui.theme.MeriendaFontFamily
