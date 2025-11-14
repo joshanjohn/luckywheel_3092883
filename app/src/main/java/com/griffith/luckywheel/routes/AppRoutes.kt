@@ -37,13 +37,16 @@ fun AppRoute() {
             val playerId = backStackEntry.arguments?.getString("playerId")
             PlayGround(navController, playerId)
         }
-        composable("register") { RegisterScreen(navController) }
-        composable("login") { LoginScreen(navController) }
-        composable("settings") { SettingsScreen(navController) }
-        composable("leaderboard") { LeaderBoardScreen(navController) }
+
         composable("loadgames/{playerId}") { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
             LoadGamesScreen(navController, playerId)
         }
+
+        composable("register") { RegisterScreen(navController) }
+        composable("login") { LoginScreen(navController) }
+        composable("settings") { SettingsScreen(navController) }
+        composable("leaderboard") { LeaderBoardScreen(navController) }
+
     }
 }
