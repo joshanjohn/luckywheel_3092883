@@ -1,6 +1,7 @@
 package com.griffith.luckywheel.ui.screens.playground.custom_wheel.components
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.models.enum.SpinActionType
@@ -29,6 +31,7 @@ import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlin.random.Random
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,15 +115,24 @@ fun EditBottomSheet(
                     fontWeight = FontWeight.Bold
                 )
 
-                IconButton(
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = darkerGreenColor),
                     onClick = { showSaveDialog = true },
                     enabled = wheelItems.isNotEmpty() && playerId != null
                 ) {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = "Save Game",
-                        tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.Gray
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Save", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(R.drawable.icons_save_game),
+                            contentDescription = "Save Game",
+                            modifier = Modifier.size(18.dp),
+                            tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.Gray
+                        )
+                    }
+
                 }
             }
 
