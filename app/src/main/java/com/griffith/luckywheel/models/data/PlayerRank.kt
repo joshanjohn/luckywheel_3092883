@@ -1,4 +1,4 @@
-package com.griffith.luckywheel.data
+package com.griffith.luckywheel.models.data
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person

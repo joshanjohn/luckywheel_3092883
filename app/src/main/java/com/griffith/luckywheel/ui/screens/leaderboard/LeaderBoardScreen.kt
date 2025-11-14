@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
-import com.griffith.luckywheel.data.PlayerRank
+import com.griffith.luckywheel.models.data.PlayerRank
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.leaderboard.components.LeaderboardListView
 import com.griffith.luckywheel.ui.screens.leaderboard.components.RankingHeader

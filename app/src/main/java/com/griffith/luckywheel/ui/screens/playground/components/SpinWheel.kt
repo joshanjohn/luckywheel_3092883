@@ -24,7 +24,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.data.SpinWheelItem
+import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import kotlin.math.cos
 import kotlin.math.sin

@@ -22,9 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.griffith.luckywheel.data.SpinWheelItem
+import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
+import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor

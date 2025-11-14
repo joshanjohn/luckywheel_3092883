@@ -18,8 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.data.SavedGame
-import com.griffith.luckywheel.data.toSpinWheelItems
+import com.griffith.luckywheel.models.data.SavedGame
+import com.griffith.luckywheel.models.data.toSpinWheelItems
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import java.text.SimpleDateFormat

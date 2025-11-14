@@ -1,6 +1,4 @@
-package com.griffith.luckywheel.data
-
-import com.griffith.luckywheel.data.SpinWheelItem
+package com.griffith.luckywheel.models.data
 
 data class Player(
     val playerId: String = "",

@@ -23,7 +23,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.griffith.luckywheel.data.Player
+import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail

@@ -1,7 +1,7 @@
-package com.griffith.luckywheel.data
+package com.griffith.luckywheel.models.data
 
 import androidx.compose.ui.graphics.Color
-import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
+import com.griffith.luckywheel.models.enum.SpinActionType
 
 data class SpinWheelItem(
     val label: String,
