@@ -8,6 +8,7 @@ import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.ui.screens.auth.LoginScreen
 import com.griffith.luckywheel.ui.screens.auth.RegisterScreen
 import com.griffith.luckywheel.ui.screens.leaderboard.LeaderBoardScreen
+import com.griffith.luckywheel.ui.screens.loadgames.LoadGamesScreen
 import com.griffith.luckywheel.ui.screens.playground.PlayGround
 import com.griffith.luckywheel.ui.screens.settings.SettingsScreen
 import kotlinx.coroutines.launch
@@ -36,9 +37,16 @@ fun AppRoute() {
             val playerId = backStackEntry.arguments?.getString("playerId")
             PlayGround(navController, playerId)
         }
+
+        composable("loadgames/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            LoadGamesScreen(navController, playerId)
+        }
+
         composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("settings") { SettingsScreen(navController) }
         composable("leaderboard") { LeaderBoardScreen(navController) }
+
     }
 }

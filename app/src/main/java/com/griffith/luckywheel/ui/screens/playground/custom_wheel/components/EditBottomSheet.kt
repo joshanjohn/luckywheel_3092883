@@ -1,11 +1,15 @@
 package com.griffith.luckywheel.ui.screens.playground.custom_wheel.components
 
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
@@ -15,14 +19,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
+import com.griffith.luckywheel.R
+import com.griffith.luckywheel.models.data.SpinWheelItem
+import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlin.random.Random
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,14 +39,21 @@ fun EditBottomSheet(
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
     wheelItems: List<SpinWheelItem>,
-    onUpdateItems: (List<SpinWheelItem>) -> Unit
+    onUpdateItems: (List<SpinWheelItem>) -> Unit,
+    playerId: String?,
+    currentGameId: String? = null,
+    currentGameName: String? = null,
+    onGameSaved: (String, String) -> Unit = { _, _ -> } // gameId, gameName
 ) {
     if (!showBottomSheet) return
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var expandedIndex by remember { mutableStateOf<Int?>(null) }
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var gameName by remember(currentGameName) { mutableStateOf(currentGameName ?: "") }
+    val context = LocalContext.current
+    val firebaseService = remember { FireBaseService() }
 
-    
     fun rebalanceItemPercentagesAfterChange(
         items: List<SpinWheelItem>,
         updatedIndex: Int,
@@ -52,21 +68,18 @@ fun EditBottomSheet(
         val totalOtherPercent = otherItems.sumOf { it.percent.toDouble() }.toFloat()
 
         return if (totalOtherPercent <= 0f) {
-            // if others had no share, divide remaining equally
             val equalShare = remainingPercent / otherItems.size
             items.mapIndexed { i, item ->
                 if (i == updatedIndex) item.copy(percent = clampedPercent)
                 else item.copy(percent = equalShare)
             }
         } else {
-            // redistribute equaly
             items.mapIndexed { i, item ->
                 if (i == updatedIndex) item.copy(percent = clampedPercent)
                 else item.copy(percent = (item.percent / totalOtherPercent) * remainingPercent)
             }
         }
     }
-
 
     fun normalizePercentagesToOne(items: List<SpinWheelItem>): List<SpinWheelItem> {
         if (items.isEmpty()) return items
@@ -88,21 +101,49 @@ fun EditBottomSheet(
             Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                "Edit Wheel Items",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            // Header with Save Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Edit Wheel Items",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
 
-            //  Expandable Cards List 
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = darkerGreenColor),
+                    onClick = { showSaveDialog = true },
+                    enabled = wheelItems.isNotEmpty() && playerId != null
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Save", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(R.drawable.icons_save_game),
+                            contentDescription = "Save Game",
+                            modifier = Modifier.size(18.dp),
+                            tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.Gray
+                        )
+                    }
+
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            //  Expandable Cards List
             wheelItems.forEachIndexed { index, item ->
                 var tempLabel by remember(item) { mutableStateOf(item.label) }
                 var tempColor by remember(item) { mutableStateOf(item.color) }
                 var tempPercent by remember(item) { mutableStateOf(item.percent.coerceIn(0f, 1f)) }
 
-                // Stable random dark colors
                 val randomDarkColors = remember(item) {
                     List(5) {
                         Color(
@@ -121,8 +162,6 @@ fun EditBottomSheet(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(Modifier.padding(12.dp)) {
-
-                        //  Card Header 
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -171,11 +210,9 @@ fun EditBottomSheet(
                             }
                         }
 
-                        //  Expanded Edit Section 
                         if (expandedIndex == index) {
                             Spacer(Modifier.height(8.dp))
 
-                            // Label Input
                             OutlinedTextField(
                                 value = tempLabel,
                                 onValueChange = { tempLabel = it },
@@ -257,30 +294,95 @@ fun EditBottomSheet(
                 }
             }
 
-            //  Add New Item Button 
+            //  Add New Item Button
             Button(
                 onClick = {
                     val newItem = SpinWheelItem(
                         label = "New Item ${wheelItems.size + 1}",
                         color = Color(
-                            red = Random.nextInt(0, 80),
-                            green = Random.nextInt(30, 100),
-                            blue = Random.nextInt(0, 80)
+                            red = Random.nextInt(0, 255),
+                            green = Random.nextInt(0, 255),
+                            blue = Random.nextInt(0, 255)
                         ),
-                        type = SpinActionType.GAIN_GOLD,
+                        type = SpinActionType.CUSTOM,
                         value = 0,
                         percent = 0f
                     )
                     val addedList = wheelItems + newItem
                     onUpdateItems(normalizePercentagesToOne(addedList))
                 },
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Add Item", color = darkerGreenColor)
             }
         }
+    }
+
+    // Save Game Dialog
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text(if (currentGameId != null) "Update Game" else "Save Game", color = Color.White) },
+            text = {
+                Column {
+                    Text("Enter a name for this game:", color = Color.White)
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = gameName,
+                        onValueChange = { gameName = it },
+                        label = { Text("Game Name") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color(0xFF0B3A24),
+                            unfocusedContainerColor = Color(0xFF0B3A24),
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (gameName.isBlank()) {
+                            Toast.makeText(context, "Please enter a game name", Toast.LENGTH_SHORT).show()
+                            return@TextButton
+                        }
+
+                        playerId?.let { pid ->
+                            firebaseService.saveCustomGame(
+                                playerId = pid,
+                                gameName = gameName.trim(),
+                                wheelItems = wheelItems,
+                                gameId = currentGameId
+                            ) { success, gameId ->
+                                if (success && gameId != null) {
+                                    Toast.makeText(
+                                        context,
+                                        if (currentGameId != null) "Game updated!" else "Game saved!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    onGameSaved(gameId, gameName.trim())
+                                    showSaveDialog = false
+                                    onDismiss()
+                                } else {
+                                    Toast.makeText(context, "Failed to save game", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text(if (currentGameId != null) "Update" else "Save", color = lightGreenColor)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveDialog = false }) {
+                    Text("Cancel", color = Color.White)
+                }
+            },
+            containerColor = Color(0xFF01150B)
+        )
     }
 }

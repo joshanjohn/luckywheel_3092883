@@ -22,8 +22,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
-import com.griffith.luckywheel.data.SpinWheelItem
-import com.griffith.luckywheel.ui.screens.playground.enums.SpinActionType
+import com.griffith.luckywheel.models.data.SpinWheelItem
+import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkGreenColor
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor

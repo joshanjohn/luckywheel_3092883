@@ -14,7 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.griffith.luckywheel.data.BottomNavItem
+import com.griffith.luckywheel.models.data.BottomNavItem
 import com.griffith.luckywheel.ui.screens.playground.components.BottomNavBar
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.CustomWheelScreen
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen
@@ -50,12 +50,7 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
             )
         ) {
             composable("goldwheel") { GoldWheelScreen(navController, playerId) }
-            composable("custompi") { CustomWheelScreen(navController) }
+            composable("custompi") { CustomWheelScreen(navController, playerId) }
         }
     }
 }
-
-
-
-
-

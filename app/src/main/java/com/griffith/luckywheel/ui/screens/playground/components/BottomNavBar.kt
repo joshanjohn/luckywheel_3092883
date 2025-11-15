@@ -24,7 +24,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.griffith.luckywheel.data.BottomNavItem
+import com.griffith.luckywheel.models.data.BottomNavItem
 import com.griffith.luckywheel.ui.theme.extraDarkerGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlin.collections.forEach
