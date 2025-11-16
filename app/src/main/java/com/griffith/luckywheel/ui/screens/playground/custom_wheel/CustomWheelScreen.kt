@@ -31,6 +31,7 @@ import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.EditBottomSheet
 import com.griffith.luckywheel.models.enum.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
@@ -248,24 +249,35 @@ fun CustomWheelScreen(
             }
 
             //  Result Dialog
+//            if (showResultDialog) {
+//                chosenItem?.let { item ->
+//                    AlertDialog(
+//                        onDismissRequest = { showResultDialog = false },
+//                        confirmButton = {
+//                            TextButton(onClick = { showResultDialog = false }) {
+//                                Text("OK", color = Color.White)
+//                            }
+//                        },
+//                        title = { Text("Result", color = Color.White) },
+//                        text = {
+//                            Text(
+//                                text = "🎉 ${item.label} was chosen!",
+//                                color = Color.White,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                        },
+//                        containerColor = Color(0xFF01150B)
+//                    )
+//                }
+//            }
+
+
+            //  Result Dialog
             if (showResultDialog) {
                 chosenItem?.let { item ->
-                    AlertDialog(
-                        onDismissRequest = { showResultDialog = false },
-                        confirmButton = {
-                            TextButton(onClick = { showResultDialog = false }) {
-                                Text("OK", color = Color.White)
-                            }
-                        },
-                        title = { Text("Result", color = Color.White) },
-                        text = {
-                            Text(
-                                text = "🎉 ${item.label} was chosen!",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        containerColor = Color(0xFF01150B)
+                    ResultCard(
+                        wheelResult = item,
+                        onDismiss = { showResultDialog = false }
                     )
                 }
             }
