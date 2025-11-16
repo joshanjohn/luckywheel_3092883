@@ -121,11 +121,17 @@ fun LoadGamesScreen(
                             GameCard(
                                 game = game,
                                 onLoad = {
-                                    // Navigate back to custom wheel with the game data
-                                    navController.previousBackStackEntry
+                                    // Navigate to PlayGround with the loaded game
+                                    navController.navigate("play/$playerId") {
+                                        popUpTo("loadgames/{playerId}") { inclusive = true }
+                                    }
+                                    // Set the loaded game and flag to show custom wheel
+                                    navController.currentBackStackEntry
                                         ?.savedStateHandle
                                         ?.set("loaded_game", game)
-                                    navController.popBackStack()
+                                    navController.currentBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set("navigate_to_custom", true)
                                 },
                                 onDelete = { gameToDelete ->
                                     firebaseService.deleteGame(gameToDelete.gameId) { success ->
