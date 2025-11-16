@@ -32,10 +32,19 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
         ?.savedStateHandle
         ?.get<Boolean>("navigate_to_custom") ?: false
 
-    // Set start destination based on flag
-    val startDestination = if (navigateToCustom) "custompi" else "goldwheel"
+    // Check if there's a loaded game
+    val hasLoadedGame = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.contains("loaded_game") ?: false
 
-    // Clear the flag after using it
+    // Set start destination based on flags
+    val startDestination = when {
+        hasLoadedGame -> "custompi"  // If there's a loaded game, go to custom wheel
+        navigateToCustom -> "custompi"
+        else -> "goldwheel"
+    }
+
+    // Clear the navigate_to_custom flag after using it
     LaunchedEffect(navigateToCustom) {
         if (navigateToCustom) {
             navController.currentBackStackEntry
