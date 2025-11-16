@@ -27,6 +27,23 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
         BottomNavItem("Custom Wheel", "custompi", Icons.Default.Add)
     )
 
+    // Check if we should navigate to custom wheel
+    val navigateToCustom = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<Boolean>("navigate_to_custom") ?: false
+
+    // Set start destination based on flag
+    val startDestination = if (navigateToCustom) "custompi" else "goldwheel"
+
+    // Clear the flag after using it
+    LaunchedEffect(navigateToCustom) {
+        if (navigateToCustom) {
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.remove<Boolean>("navigate_to_custom")
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -44,7 +61,7 @@ fun PlayGround(navController: NavHostController, playerId: String?) {
     ) { innerPadding ->
         NavHost(
             navController = bottomNavController,
-            startDestination = "goldwheel",
+            startDestination = startDestination,
             modifier = Modifier.padding(
                 PaddingValues(bottom = innerPadding.calculateBottomPadding())
             )
