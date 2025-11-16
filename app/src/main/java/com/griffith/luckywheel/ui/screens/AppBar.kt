@@ -2,7 +2,9 @@ package com.griffith.luckywheel.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -35,6 +37,7 @@ fun AppBar(
 
     TopAppBar(
         title = {
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -61,7 +64,7 @@ fun AppBar(
                 // Empty placeholder to satisfy type
                 Box(
                     modifier = Modifier.width(30.dp),
-                ) {}
+                )
             }
         },
         actions = {
@@ -77,6 +80,10 @@ fun AppBar(
                     )
                 }
             }
+
+            Spacer(
+                modifier = Modifier.width(20.dp)
+            )
 
         },
         // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))

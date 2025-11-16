@@ -248,29 +248,6 @@ fun CustomWheelScreen(
                 }
             }
 
-            //  Result Dialog
-//            if (showResultDialog) {
-//                chosenItem?.let { item ->
-//                    AlertDialog(
-//                        onDismissRequest = { showResultDialog = false },
-//                        confirmButton = {
-//                            TextButton(onClick = { showResultDialog = false }) {
-//                                Text("OK", color = Color.White)
-//                            }
-//                        },
-//                        title = { Text("Result", color = Color.White) },
-//                        text = {
-//                            Text(
-//                                text = "🎉 ${item.label} was chosen!",
-//                                color = Color.White,
-//                                fontWeight = FontWeight.Bold
-//                            )
-//                        },
-//                        containerColor = Color(0xFF01150B)
-//                    )
-//                }
-//            }
-
 
             //  Result Dialog
             if (showResultDialog) {
