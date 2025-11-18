@@ -150,7 +150,29 @@ fun LoginScreen(navController: NavHostController) {
                         enabled = !isLoading
                     )
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(8.dp))
+
+                    // Forgot Password Link
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = {
+                                if (!isLoading) {
+                                    navController.navigate("forgotpassword")
+                                }
+                            }
+                        ) {
+                            Text(
+                                "Forgot Password?",
+                                color = goldColor,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
 
                     AuthSubmitBtn(
                         label = if (isLoading) "Logging in..." else "Login",

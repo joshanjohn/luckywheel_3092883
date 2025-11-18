@@ -25,16 +25,48 @@ class FireBaseService {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val regUserId = getCurrentUserId() ?: ""
-                    val player = Player(playerId = regUserId, playerName = playerName, gold = 0)
 
-                    database.child("players").child(player.playerId).setValue(player)
-                        .addOnCompleteListener { dbTask ->
-                            if (dbTask.isSuccessful) {
-                                onResult(true, null)
-                            } else {
-                                onResult(false, dbTask.exception?.message)
+                    // Set display name for Firebase Auth user
+                    val user = auth.currentUser
+                    val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                        displayName = playerName
+                    }
+
+                    user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
+                        // Continue with database save regardless of profile update
+                        val player = Player(playerId = regUserId, playerName = playerName, gold = 0)
+
+                        database.child("players").child(player.playerId).setValue(player)
+                            .addOnCompleteListener { dbTask ->
+                                if (dbTask.isSuccessful) {
+                                    onResult(true, null)
+                                } else {
+                                    onResult(false, dbTask.exception?.message)
+                                }
                             }
-                        }
+                    }
+                } else {
+                    onResult(false, task.exception?.message)
+                }
+            }
+    }
+
+    fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, null)
+                } else {
+                    onResult(false, task.exception?.message)
+                }
+            }
+    }
+
+    fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, null)
                 } else {
                     onResult(false, task.exception?.message)
                 }
@@ -81,10 +113,8 @@ class FireBaseService {
         onPlayersUpdated: (List<Player>) -> Unit,
         onError: (Exception) -> Unit = {}
     ) {
-        // Reference to 'players' in Firebase
         val playersRef = database.child("players")
 
-        // Add a real-time listener
         playersRef.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
             override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
                 val playerList = mutableListOf<Player>()
@@ -96,10 +126,7 @@ class FireBaseService {
                     }
                 }
 
-                // Sort players by gold in descending order
                 val sortedList = playerList.sortedByDescending { it.gold }
-
-                // Return the updated sorted list in real-time
                 onPlayersUpdated(sortedList)
             }
 
@@ -109,7 +136,6 @@ class FireBaseService {
         })
     }
 
-
     fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {
         database.child("players").child(playerId).setValue(updatedPlayer)
             .addOnCompleteListener { task ->
@@ -117,22 +143,11 @@ class FireBaseService {
             }
     }
 
-    fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
-            }
-    }
-
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     fun logout() = auth.signOut()
 
-    // Game management methods (moved from FireBaseGameService)
+    // Game management methods
     fun saveCustomGame(
         playerId: String,
         gameName: String,
@@ -165,7 +180,6 @@ class FireBaseService {
             updatedAt = System.currentTimeMillis()
         )
 
-        // Preserve createdAt if updating
         if (gameId != null) {
             database.child("savedGames").child(id).child("createdAt").get()
                 .addOnSuccessListener { snapshot ->
@@ -209,7 +223,6 @@ class FireBaseService {
                             games.add(game)
                         }
                     }
-                    // Sort by most recently updated
                     onGamesLoaded(games.sortedByDescending { it.updatedAt })
                 }
 
