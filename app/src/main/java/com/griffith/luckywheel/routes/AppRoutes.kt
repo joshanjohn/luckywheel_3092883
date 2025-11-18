@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.griffith.luckywheel.services.DataStoreService
+import com.griffith.luckywheel.ui.screens.auth.ForgotPasswordScreen
 import com.griffith.luckywheel.ui.screens.auth.LoginScreen
 import com.griffith.luckywheel.ui.screens.auth.RegisterScreen
 import com.griffith.luckywheel.ui.screens.leaderboard.LeaderBoardScreen
@@ -21,7 +22,7 @@ fun AppRoute() {
     val coroutineScope = rememberCoroutineScope()
     var startDestination by remember { mutableStateOf("login") }
 
-    // auto routing for previously logged in users
+    // Auto routing for previously logged in users
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             val player = dataStoreService.getPlayer()
@@ -45,8 +46,8 @@ fun AppRoute() {
 
         composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen(navController) }
+        composable("forgotpassword") { ForgotPasswordScreen(navController) }
         composable("settings") { SettingsScreen(navController) }
         composable("leaderboard") { LeaderBoardScreen(navController) }
-
     }
 }
