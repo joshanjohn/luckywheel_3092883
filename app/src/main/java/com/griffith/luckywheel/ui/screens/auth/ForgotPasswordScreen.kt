@@ -1,6 +1,7 @@
 package com.griffith.luckywheel.ui.screens.auth
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +30,7 @@ import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import com.griffith.luckywheel.ui.theme.goldColor
+import com.griffith.luckywheel.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,16 +155,21 @@ fun ForgotPasswordScreen(navController: NavHostController) {
                         }
                     } else {
                         // Success state
-                        Text(
-                            text = "📧",
-                            fontSize = 72.sp
+                        Image(
+                            painter = painterResource(R.drawable.icon_mail_sent),
+                            contentDescription = "icon of mail sent",
                         )
 
                         Spacer(Modifier.height(24.dp))
 
                         Text(
                             text = buildAnnotatedString {
-                                withStyle(style = SpanStyle(color = goldColor, fontWeight = FontWeight.Bold)) {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = goldColor,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                ) {
                                     append("EMAIL SENT!")
                                 }
                             },
