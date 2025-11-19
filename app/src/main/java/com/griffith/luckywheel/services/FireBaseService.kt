@@ -1,7 +1,16 @@
 package com.griffith.luckywheel.services
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.ui.graphics.toArgb
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -10,11 +19,122 @@ import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.models.data.SavedGame
 import com.griffith.luckywheel.models.data.SavedWheelItem
 import com.griffith.luckywheel.models.data.SpinWheelItem
+import com.griffith.luckywheel.BuildConfig
+
 
 class FireBaseService {
     private val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance().reference
 
+    // Google Sign-In Configuration
+    fun getGoogleSignInClient(context: Context): GoogleSignInClient {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
+            .requestEmail()
+            .build()
+
+        return GoogleSignIn.getClient(context, gso)
+    }
+
+    // Get Google Sign-In Intent
+    fun getGoogleSignInIntent(context: Context): Intent {
+        return getGoogleSignInClient(context).signInIntent
+    }
+
+    // Handle Google Sign-In Result
+    fun handleGoogleSignInResult(
+        data: Intent?,
+        onResult: (Boolean, String?, String?) -> Unit
+    ) {
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val account = task.getResult(ApiException::class.java)
+
+            if (account != null) {
+                signInWithGoogleAccount(account, onResult)
+            } else {
+                onResult(false, "Google sign-in failed: No account found", null)
+            }
+        } catch (e: ApiException) {
+            onResult(false, "Google sign-in failed: ${e.message}", null)
+        } catch (e: Exception) {
+            onResult(false, "Google sign-in failed: ${e.message}", null)
+        }
+    }
+
+    // Sign in with Google Account
+    private fun signInWithGoogleAccount(
+        account: GoogleSignInAccount,
+        onResult: (Boolean, String?, String?) -> Unit
+    ) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val userId = user?.uid
+                    val displayName = user?.displayName ?: account.displayName ?: "User"
+
+                    if (userId != null) {
+                        // Check if player exists in database
+                        checkAndCreatePlayer(userId, displayName, onResult)
+                    } else {
+                        onResult(false, "Failed to get user ID", null)
+                    }
+                } else {
+                    onResult(false, "Firebase authentication failed: ${task.exception?.message}", null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                onResult(false, "Firebase authentication error: ${exception.message}", null)
+            }
+    }
+
+    // Check if player exists, create if not
+    private fun checkAndCreatePlayer(
+        userId: String,
+        displayName: String,
+        onResult: (Boolean, String?, String?) -> Unit
+    ) {
+        database.child("players").child(userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Player exists, return success
+                    onResult(true, "Sign in successful", userId)
+                } else {
+                    // Player doesn't exist, create new player
+                    val newPlayer = Player(
+                        playerId = userId,
+                        playerName = displayName,
+                        gold = 0
+                    )
+
+                    database.child("players").child(userId).setValue(newPlayer)
+                        .addOnCompleteListener { dbTask ->
+                            if (dbTask.isSuccessful) {
+                                onResult(true, "Account created successfully", userId)
+                            } else {
+                                onResult(false, "Failed to create player profile: ${dbTask.exception?.message}", userId)
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener { exception ->
+                onResult(false, "Failed to check player data: ${exception.message}", null)
+            }
+    }
+
+    // Sign out from Google
+    fun signOutGoogle(context: Context, onComplete: () -> Unit = {}) {
+        auth.signOut()
+        getGoogleSignInClient(context).signOut().addOnCompleteListener {
+            onComplete()
+        }
+    }
+
+    // Email Password Registration
     fun registerUserWithPlayer(
         playerName: String,
         email: String,
@@ -28,7 +148,7 @@ class FireBaseService {
 
                     // Set display name for Firebase Auth user
                     val user = auth.currentUser
-                    val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                    val profileUpdates = userProfileChangeRequest {
                         displayName = playerName
                     }
 
@@ -51,6 +171,7 @@ class FireBaseService {
             }
     }
 
+    // Email/Password Login
     fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->

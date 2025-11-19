@@ -1,6 +1,8 @@
 package com.griffith.luckywheel.ui.screens.auth
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
@@ -21,7 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
+import com.google.android.gms.common.SignInButton
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail
@@ -45,6 +49,42 @@ fun LoginScreen(navController: NavHostController) {
     val dataStoreService = remember { DataStoreService(context) }
     val firebaseService = remember { FireBaseService() }
     val coroutineScope = rememberCoroutineScope()
+
+    // Google Sign-In Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        isLoading = true
+        firebaseService.handleGoogleSignInResult(result.data) { success, message, userId ->
+            isLoading = false
+            if (success && userId != null) {
+                firebaseService.getPlayerInfo(userId) { player ->
+                    if (player != null) {
+                        coroutineScope.launch {
+                            dataStoreService.clear()
+                            dataStoreService.savePlayer(player)
+
+                            Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
+                            navController.navigate("play/$userId") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Failed to load player data", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(context, message ?: "Google sign in failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun onGoogleSignIn() {
+        if (!isLoading) {
+            val signInIntent = firebaseService.getGoogleSignInIntent(context)
+            googleSignInLauncher.launch(signInIntent)
+        }
+    }
 
     fun onLogin() {
         email = email.trim()
@@ -178,6 +218,44 @@ fun LoginScreen(navController: NavHostController) {
                         label = if (isLoading) "Logging in..." else "Login",
                         onSubmit = { if (!isLoading) onLogin() },
                         enabled = !isLoading
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // Divider with "OR"
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.White.copy(alpha = 0.3f)
+                        )
+                        Text(
+                            text = " OR ",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.White.copy(alpha = 0.3f)
+                        )
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // Google Sign-In Button
+                    AndroidView(
+                        modifier = Modifier.fillMaxWidth(),
+                        factory = { context ->
+                            SignInButton(context).apply {
+                                setSize(SignInButton.SIZE_WIDE)
+                                setOnClickListener {
+                                    onGoogleSignIn()
+                                }
+                            }
+                        }
                     )
 
                     Spacer(Modifier.height(40.dp))
