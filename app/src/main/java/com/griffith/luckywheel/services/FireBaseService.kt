@@ -91,18 +91,18 @@ class FireBaseService {
             }
     }
 
-    // Check if player exists, create if not
-    private fun checkAndCreatePlayer(
+    // Check if player exists, create if not (used by AuthenticationService)
+    fun checkAndCreatePlayerIfNeeded(
         userId: String,
         displayName: String,
-        onResult: (Boolean, String?, String?) -> Unit
+        onResult: (Boolean, String?) -> Unit
     ) {
         database.child("players").child(userId)
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
                     // Player exists, return success
-                    onResult(true, "Sign in successful", userId)
+                    onResult(true, "Sign in successful")
                 } else {
                     // Player doesn't exist, create new player
                     val newPlayer = Player(
@@ -114,16 +114,27 @@ class FireBaseService {
                     database.child("players").child(userId).setValue(newPlayer)
                         .addOnCompleteListener { dbTask ->
                             if (dbTask.isSuccessful) {
-                                onResult(true, "Account created successfully", userId)
+                                onResult(true, "Account created successfully")
                             } else {
-                                onResult(false, "Failed to create player profile: ${dbTask.exception?.message}", userId)
+                                onResult(false, "Failed to create player profile: ${dbTask.exception?.message}")
                             }
                         }
                 }
             }
             .addOnFailureListener { exception ->
-                onResult(false, "Failed to check player data: ${exception.message}", null)
+                onResult(false, "Failed to check player data: ${exception.message}")
             }
+    }
+
+    // Check if player exists, create if not (legacy method for backward compatibility)
+    private fun checkAndCreatePlayer(
+        userId: String,
+        displayName: String,
+        onResult: (Boolean, String?, String?) -> Unit
+    ) {
+        checkAndCreatePlayerIfNeeded(userId, displayName) { success, message ->
+            onResult(success, message, userId)
+        }
     }
 
     // Sign out from Google

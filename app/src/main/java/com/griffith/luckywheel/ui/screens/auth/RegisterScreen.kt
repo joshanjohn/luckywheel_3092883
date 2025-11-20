@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,10 +26,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
-import com.google.android.gms.common.SignInButton
+import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.Player
+import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.validateEmail
@@ -50,6 +52,7 @@ fun RegisterScreen(navController: NavHostController) {
 
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
+    val authService = remember { AuthenticationService(context) }
     val firebaseService = remember { FireBaseService() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -58,7 +61,7 @@ fun RegisterScreen(navController: NavHostController) {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         isLoading = true
-        firebaseService.handleGoogleSignInResult(result.data) { success, message, userId ->
+        authService.handleGoogleSignInResult(result.data) { success, message, userId ->
             isLoading = false
             if (success && userId != null) {
                 firebaseService.getPlayerInfo(userId) { player ->
@@ -84,7 +87,7 @@ fun RegisterScreen(navController: NavHostController) {
 
     fun onGoogleSignIn() {
         if (!isLoading) {
-            val signInIntent = firebaseService.getGoogleSignInIntent(context)
+            val signInIntent = authService.getGoogleSignInIntent()
             googleSignInLauncher.launch(signInIntent)
         }
     }
@@ -108,22 +111,18 @@ fun RegisterScreen(navController: NavHostController) {
 
         isLoading = true
 
-        firebaseService.registerUserWithPlayer(name, email, password) { success, message ->
+        authService.registerWithEmailPassword(name, email, password) { success, message, userId ->
             isLoading = false
-            if (success) {
-                val userId = firebaseService.getCurrentUserId()
-                if (userId != null) {
-                    firebaseService.getPlayerInfoById(userId) { player ->
-                        if (player != null) {
-                            coroutineScope.launch {
-                                dataStoreService.clear()
-                                dataStoreService.savePlayer(player)
+            if (success && userId != null) {
+                firebaseService.getPlayerInfoById(userId) { player ->
+                    if (player != null) {
+                        coroutineScope.launch {
+                            dataStoreService.clear()
+                            dataStoreService.savePlayer(player)
 
-                                val prefs: Player = dataStoreService.getPlayer()
-                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                                navController.navigate("play/${prefs.playerId}") {
-                                    popUpTo("register") { inclusive = true }
-                                }
+                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                            navController.navigate("play/$userId") {
+                                popUpTo("register") { inclusive = true }
                             }
                         }
                     }
@@ -263,18 +262,43 @@ fun RegisterScreen(navController: NavHostController) {
 
                     Spacer(Modifier.height(24.dp))
 
-                    // Google Sign-In Button
-                    AndroidView(
-                        modifier = Modifier.fillMaxWidth(),
-                        factory = { context ->
-                            SignInButton(context).apply {
-                                setSize(SignInButton.SIZE_WIDE)
-                                setOnClickListener {
-                                    onGoogleSignIn()
-                                }
-                            }
+                    // Custom Google Sign-In Button
+                    Button(
+                        onClick = { onGoogleSignIn() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 2.dp,
+                            pressedElevation = 4.dp
+                        ),
+                        enabled = !isLoading
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.icon_google_logo),
+                                contentDescription = "Google Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = "Sign in with Google",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF757575)
+                            )
                         }
-                    )
+                    }
 
                     Spacer(Modifier.height(40.dp))
 

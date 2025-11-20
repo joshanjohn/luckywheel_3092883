@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.ui.screens.AppBar
@@ -52,8 +53,9 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     navController: NavHostController
 ) {
-    val dataStoreService = remember { DataStoreService(navController.context) }
-    val firebaseService = remember { FireBaseService() }
+    val context = navController.context
+    val dataStoreService = remember { DataStoreService(context) }
+    val authService = remember { AuthenticationService(context) }
     val coroutineScope = rememberCoroutineScope()
 
     var playerId by remember { mutableStateOf<String?>(null) }
@@ -158,11 +160,13 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .height(80.dp)
                         .clickable {
-                            firebaseService.logout()
-                            coroutineScope.launch {
-                                dataStoreService.clear()
-                                navController.navigate("login") {
-                                    popUpTo(0)
+                            // Logout from both Firebase and Google Sign-In
+                            authService.logout {
+                                coroutineScope.launch {
+                                    dataStoreService.clear()
+                                    navController.navigate("login") {
+                                        popUpTo(0)
+                                    }
                                 }
                             }
                         },

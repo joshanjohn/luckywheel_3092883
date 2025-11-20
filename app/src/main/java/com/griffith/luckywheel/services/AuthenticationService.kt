@@ -1,0 +1,173 @@
+package com.griffith.luckywheel.services
+
+import android.content.Context
+import android.content.Intent
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.userProfileChangeRequest
+import com.griffith.luckywheel.BuildConfig
+import com.griffith.luckywheel.models.data.Player
+
+// Handles all authentication operations: Google Sign-In, email/password auth, and logout
+class AuthenticationService(private val context: Context) {
+    private val auth = FirebaseAuth.getInstance()
+    private val firebaseService = FireBaseService()
+    
+    private fun getGoogleSignInClient(): GoogleSignInClient {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
+            .requestEmail()
+            .build()
+        
+        return GoogleSignIn.getClient(context, gso)
+    }
+    
+    // Returns intent to launch Google account picker
+    fun getGoogleSignInIntent(): Intent {
+        return getGoogleSignInClient().signInIntent
+    }
+    
+    // Processes Google Sign-In result and authenticates with Firebase
+    fun handleGoogleSignInResult(
+        data: Intent?,
+        onResult: (success: Boolean, message: String?, userId: String?) -> Unit
+    ) {
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val account = task.getResult(ApiException::class.java)
+            
+            if (account != null) {
+                signInWithGoogleAccount(account, onResult)
+            } else {
+                onResult(false, "Google sign-in failed: No account found", null)
+            }
+        } catch (e: ApiException) {
+            onResult(false, "Google sign-in failed: ${e.message}", null)
+        } catch (e: Exception) {
+            onResult(false, "Google sign-in failed: ${e.message}", null)
+        }
+    }
+    
+    // Authenticates with Firebase using Google credentials
+    private fun signInWithGoogleAccount(
+        account: GoogleSignInAccount,
+        onResult: (success: Boolean, message: String?, userId: String?) -> Unit
+    ) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+        
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val userId = user?.uid
+                    val displayName = user?.displayName ?: account.displayName ?: "User"
+                    
+                    if (userId != null) {
+                        // Check if player exists in database, create if not
+                        firebaseService.checkAndCreatePlayerIfNeeded(userId, displayName) { success, message ->
+                            if (success) {
+                                onResult(true, "Sign in successful", userId)
+                            } else {
+                                onResult(false, message, userId)
+                            }
+                        }
+                    } else {
+                        onResult(false, "Failed to get user ID", null)
+                    }
+                } else {
+                    onResult(false, "Firebase authentication failed: ${task.exception?.message}", null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                onResult(false, "Firebase authentication error: ${exception.message}", null)
+            }
+    }
+    
+    // Creates new user account with email and password
+    fun registerWithEmailPassword(
+        playerName: String,
+        email: String,
+        password: String,
+        onResult: (success: Boolean, message: String?, userId: String?) -> Unit
+    ) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = auth.currentUser?.uid
+                    
+                    if (userId != null) {
+                        // Set display name for Firebase Auth user
+                        val profileUpdates = userProfileChangeRequest {
+                            displayName = playerName
+                        }
+                        
+                        auth.currentUser?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                            // Create player in database
+                            val player = Player(playerId = userId, playerName = playerName, gold = 0)
+                            firebaseService.database.child("players").child(userId).setValue(player)
+                                .addOnCompleteListener { dbTask ->
+                                    if (dbTask.isSuccessful) {
+                                        onResult(true, "Registration successful", userId)
+                                    } else {
+                                        onResult(false, dbTask.exception?.message, userId)
+                                    }
+                                }
+                        }
+                    } else {
+                        onResult(false, "Failed to get user ID", null)
+                    }
+                } else {
+                    onResult(false, task.exception?.message, null)
+                }
+            }
+    }
+    
+    // Authenticates existing user with email and password
+    fun loginWithEmailPassword(
+        email: String,
+        password: String,
+        onResult: (success: Boolean, message: String?, userId: String?) -> Unit
+    ) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = auth.currentUser?.uid
+                    onResult(true, "Login successful", userId)
+                } else {
+                    onResult(false, task.exception?.message, null)
+                }
+            }
+    }
+    
+    // Sends password reset email to user
+    fun sendPasswordResetEmail(
+        email: String,
+        onResult: (success: Boolean, message: String?) -> Unit
+    ) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, "Password reset email sent")
+                } else {
+                    onResult(false, task.exception?.message)
+                }
+            }
+    }
+    
+    // Signs out from both Firebase and Google, ensuring account picker shows on next login
+    fun logout(onComplete: () -> Unit = {}) {
+        auth.signOut()
+        getGoogleSignInClient().signOut().addOnCompleteListener {
+            onComplete()
+        }
+    }
+    
+    fun getCurrentUserId(): String? = auth.currentUser?.uid
+    
+    fun isUserAuthenticated(): Boolean = auth.currentUser != null
+}
