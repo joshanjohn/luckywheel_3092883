@@ -83,10 +83,10 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.libraries.identity.googleid:googleid:<latest version>")
-    implementation("androidx.credentials:credentials")
-    implementation("com.google.android.gms:play-services-auth")
-    implementation("androidx.credentials:credentials-play-services-auth")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.google.android.gms:play-services-basement:18.2.0")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
