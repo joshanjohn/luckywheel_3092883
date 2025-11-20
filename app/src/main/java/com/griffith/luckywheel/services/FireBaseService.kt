@@ -11,65 +11,41 @@ import com.griffith.luckywheel.models.data.SavedGame
 import com.griffith.luckywheel.models.data.SavedWheelItem
 import com.griffith.luckywheel.models.data.SpinWheelItem
 
+// Handles all Firebase Realtime Database operations for players and games
 class FireBaseService {
     private val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance().reference
 
-    fun registerUserWithPlayer(
-        playerName: String,
-        email: String,
-        password: String,
+    // Player database operations
+    
+    fun checkAndCreatePlayerIfNeeded(
+        userId: String,
+        displayName: String,
         onResult: (Boolean, String?) -> Unit
     ) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val regUserId = getCurrentUserId() ?: ""
-
-                    // Set display name for Firebase Auth user
-                    val user = auth.currentUser
-                    val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
-                        displayName = playerName
-                    }
-
-                    user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
-                        // Continue with database save regardless of profile update
-                        val player = Player(playerId = regUserId, playerName = playerName, gold = 0)
-
-                        database.child("players").child(player.playerId).setValue(player)
-                            .addOnCompleteListener { dbTask ->
-                                if (dbTask.isSuccessful) {
-                                    onResult(true, null)
-                                } else {
-                                    onResult(false, dbTask.exception?.message)
-                                }
+        database.child("players").child(userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    onResult(true, "Sign in successful")
+                } else {
+                    val newPlayer = Player(
+                        playerId = userId,
+                        playerName = displayName,
+                        gold = 0
+                    )
+                    database.child("players").child(userId).setValue(newPlayer)
+                        .addOnCompleteListener { dbTask ->
+                            if (dbTask.isSuccessful) {
+                                onResult(true, "Account created successfully")
+                            } else {
+                                onResult(false, "Failed to create player profile: ${dbTask.exception?.message}")
                             }
-                    }
-                } else {
-                    onResult(false, task.exception?.message)
+                        }
                 }
             }
-    }
-
-    fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
-            }
-    }
-
-    fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
-        auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
+            .addOnFailureListener { exception ->
+                onResult(false, "Failed to check player data: ${exception.message}")
             }
     }
 
@@ -90,7 +66,6 @@ class FireBaseService {
             onResult(null)
             return
         }
-
         database.child("players").child(playerId)
             .get()
             .addOnSuccessListener { snapshot ->
@@ -109,33 +84,6 @@ class FireBaseService {
             }
     }
 
-    fun getPlayerRanking(
-        onPlayersUpdated: (List<Player>) -> Unit,
-        onError: (Exception) -> Unit = {}
-    ) {
-        val playersRef = database.child("players")
-
-        playersRef.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                val playerList = mutableListOf<Player>()
-
-                for (playerSnap in snapshot.children) {
-                    val player = playerSnap.getValue(Player::class.java)
-                    if (player != null) {
-                        playerList.add(player)
-                    }
-                }
-
-                val sortedList = playerList.sortedByDescending { it.gold }
-                onPlayersUpdated(sortedList)
-            }
-
-            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                onError(Exception(error.message))
-            }
-        })
-    }
-
     fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {
         database.child("players").child(playerId).setValue(updatedPlayer)
             .addOnCompleteListener { task ->
@@ -143,11 +91,32 @@ class FireBaseService {
             }
     }
 
-    fun getCurrentUserId(): String? = auth.currentUser?.uid
+    fun getPlayerRanking(
+        onPlayersUpdated: (List<Player>) -> Unit,
+        onError: (Exception) -> Unit = {}
+    ) {
+        val playersRef = database.child("players")
+        playersRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val playerList = mutableListOf<Player>()
+                for (playerSnap in snapshot.children) {
+                    val player = playerSnap.getValue(Player::class.java)
+                    if (player != null) {
+                        playerList.add(player)
+                    }
+                }
+                val sortedList = playerList.sortedByDescending { it.gold }
+                onPlayersUpdated(sortedList)
+            }
 
-    fun logout() = auth.signOut()
+            override fun onCancelled(error: DatabaseError) {
+                onError(Exception(error.message))
+            }
+        })
+    }
 
-    // Game management methods
+    // Game database operations
+    
     fun saveCustomGame(
         playerId: String,
         gameName: String,
@@ -232,21 +201,14 @@ class FireBaseService {
             })
     }
 
-    fun deleteGame(
-        gameId: String,
-        onResult: (Boolean) -> Unit
-    ) {
+    fun deleteGame(gameId: String, onResult: (Boolean) -> Unit) {
         database.child("savedGames").child(gameId).removeValue()
             .addOnCompleteListener { task ->
                 onResult(task.isSuccessful)
             }
     }
 
-    fun updateGameName(
-        gameId: String,
-        newName: String,
-        onResult: (Boolean) -> Unit
-    ) {
+    fun updateGameName(gameId: String, newName: String, onResult: (Boolean) -> Unit) {
         val updates = mapOf(
             "gameName" to newName,
             "updatedAt" to System.currentTimeMillis()

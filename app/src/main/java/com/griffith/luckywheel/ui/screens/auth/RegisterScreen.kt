@@ -1,10 +1,13 @@
 package com.griffith.luckywheel.ui.screens.auth
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -15,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -23,11 +27,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.Player
+import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.services.validateEmail
-import com.griffith.luckywheel.services.validatePassword
+import com.griffith.luckywheel.utils.validateEmail
+import com.griffith.luckywheel.utils.validatePassword
 import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
 import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
@@ -46,8 +52,45 @@ fun RegisterScreen(navController: NavHostController) {
 
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
+    val authService = remember { AuthenticationService(context) }
     val firebaseService = remember { FireBaseService() }
     val coroutineScope = rememberCoroutineScope()
+
+    // Google Sign-In Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        isLoading = true
+        authService.handleGoogleSignInResult(result.data) { success, message, userId ->
+            isLoading = false
+            if (success && userId != null) {
+                firebaseService.getPlayerInfo(userId) { player ->
+                    if (player != null) {
+                        coroutineScope.launch {
+                            dataStoreService.clear()
+                            dataStoreService.savePlayer(player)
+
+                            Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
+                            navController.navigate("play/$userId") {
+                                popUpTo("register") { inclusive = true }
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Failed to load player data", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(context, message ?: "Google sign in failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun onGoogleSignIn() {
+        if (!isLoading) {
+            val signInIntent = authService.getGoogleSignInIntent()
+            googleSignInLauncher.launch(signInIntent)
+        }
+    }
 
     fun onRegister() {
         name = name.trim()
@@ -68,22 +111,18 @@ fun RegisterScreen(navController: NavHostController) {
 
         isLoading = true
 
-        firebaseService.registerUserWithPlayer(name, email, password) { success, message ->
+        authService.registerWithEmailPassword(name, email, password) { success, message, userId ->
             isLoading = false
-            if (success) {
-                val userId = firebaseService.getCurrentUserId()
-                if (userId != null) {
-                    firebaseService.getPlayerInfoById(userId) { player ->
-                        if (player != null) {
-                            coroutineScope.launch {
-                                dataStoreService.clear()
-                                dataStoreService.savePlayer(player)
+            if (success && userId != null) {
+                firebaseService.getPlayerInfoById(userId) { player ->
+                    if (player != null) {
+                        coroutineScope.launch {
+                            dataStoreService.clear()
+                            dataStoreService.savePlayer(player)
 
-                                val prefs: Player = dataStoreService.getPlayer()
-                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                                navController.navigate("play/${prefs.playerId}") {
-                                    popUpTo("register") { inclusive = true }
-                                }
+                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                            navController.navigate("play/$userId") {
+                                popUpTo("register") { inclusive = true }
                             }
                         }
                     }
@@ -197,6 +236,69 @@ fun RegisterScreen(navController: NavHostController) {
                         label = if (isLoading) "Registering..." else "Register",
                         enabled = !isLoading
                     )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // Divider with "OR"
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.White.copy(alpha = 0.3f)
+                        )
+                        Text(
+                            text = " OR ",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color.White.copy(alpha = 0.3f)
+                        )
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // Custom Google Sign-In Button
+                    Button(
+                        onClick = { onGoogleSignIn() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 2.dp,
+                            pressedElevation = 4.dp
+                        ),
+                        enabled = !isLoading
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.icon_google_logo),
+                                contentDescription = "Google Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = "Sign in with Google",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF757575)
+                            )
+                        }
+                    }
 
                     Spacer(Modifier.height(40.dp))
 

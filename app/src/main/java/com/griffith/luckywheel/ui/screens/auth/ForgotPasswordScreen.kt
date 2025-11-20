@@ -23,8 +23,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.services.validateEmail
+import com.griffith.luckywheel.services.AuthenticationService
+import com.griffith.luckywheel.utils.validateEmail
 import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
 import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
@@ -41,7 +41,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
     var emailSent by remember { mutableStateOf(false) }
 
     val context = navController.context
-    val firebaseService = remember { FireBaseService() }
+    val authService = remember { AuthenticationService(context) }
 
     fun onResetPassword() {
         email = email.trim()
@@ -54,7 +54,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
 
         isLoading = true
 
-        firebaseService.sendPasswordResetEmail(email) { success, message ->
+        authService.sendPasswordResetEmail(email) { success, message ->
             isLoading = false
             if (success) {
                 emailSent = true

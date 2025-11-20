@@ -15,7 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "928336816033-51ml22ielvm7jvt19tae0rcf6qsuts1r.apps.googleusercontent.com",
+          "client_id": "928336816033-sl538gcuotittmb73bsp1g19ekqn69jk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.griffith.luckywheel",
+            "certificate_hash": "c28d8bfdb9000783e1dd3bde916c4fe0c6fdf1f0"
+          }
+        },
+        {
+          "client_id": "928336816033-dh6ascb5v1tqf54mlbpsl4arjtgmfa8q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
