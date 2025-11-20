@@ -77,27 +77,33 @@ fun ProfileScreen(navController: NavHostController) {
         val currentPlayer = player ?: return
         isDeleting = true
 
-        // First delete all player data from database
-        firebaseService.deleteAllPlayerData(currentPlayer.playerId) { dbSuccess, dbMessage ->
-            if (dbSuccess) {
-                // Then delete Firebase Auth account
-                authService.deleteAccount { authSuccess, authMessage ->
+        // First delete Firebase Auth account
+        authService.deleteAccount { authSuccess, authMessage ->
+            if (authSuccess) {
+                // Then delete all player data from database
+                firebaseService.deleteAllPlayerData(currentPlayer.playerId) { dbSuccess, dbMessage ->
                     isDeleting = false
-                    if (authSuccess) {
-                        coroutineScope.launch {
-                            dataStoreService.clear()
+                    coroutineScope.launch {
+                        // Clear local data store
+                        dataStoreService.clear()
+                        
+                        if (dbSuccess) {
                             Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
-                            navController.navigate("login") {
-                                popUpTo(0) { inclusive = true }
-                            }
+                        } else {
+                            // Auth account is deleted, but database cleanup failed
+                            Toast.makeText(context, "Account deleted, but some data cleanup failed", Toast.LENGTH_LONG).show()
                         }
-                    } else {
-                        Toast.makeText(context, authMessage ?: "Failed to delete account", Toast.LENGTH_LONG).show()
+                        
+                        // Navigate to login screen regardless of database deletion result
+                        // since the auth account is already deleted
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             } else {
                 isDeleting = false
-                Toast.makeText(context, dbMessage ?: "Failed to delete player data", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, authMessage ?: "Failed to delete account", Toast.LENGTH_LONG).show()
             }
         }
     }
