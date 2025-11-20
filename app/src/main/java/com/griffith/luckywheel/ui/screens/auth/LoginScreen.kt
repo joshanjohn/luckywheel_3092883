@@ -29,8 +29,8 @@ import androidx.navigation.NavHostController
 import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.services.validateEmail
-import com.griffith.luckywheel.services.validatePassword
+import com.griffith.luckywheel.utils.validateEmail
+import com.griffith.luckywheel.utils.validatePassword
 import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
 import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
@@ -100,7 +100,7 @@ fun LoginScreen(navController: NavHostController) {
             return
         }
 
-        val passwordError = validatePassword(password, disable_string_validations = true)
+        val passwordError = validatePassword(password, disableStringValidations = true)
         if (passwordError != null) {
             Toast.makeText(context, passwordError, Toast.LENGTH_SHORT).show()
             return
