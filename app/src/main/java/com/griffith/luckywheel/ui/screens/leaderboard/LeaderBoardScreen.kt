@@ -31,7 +31,7 @@ import java.util.Locale
 
 
 @Composable
-fun LeaderBoardScreen(
+fun LeaderboardScreen(
     navController: NavHostController
 ) {
     val firebaseService = remember { FireBaseService() }

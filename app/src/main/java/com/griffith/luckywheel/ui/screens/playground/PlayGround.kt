@@ -20,7 +20,7 @@ import com.griffith.luckywheel.ui.screens.playground.custom_wheel.CustomWheelScr
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen
 
 @Composable
-fun PlayGround(navController: NavHostController, playerId: String?) {
+fun PlaygroundScreen(navController: NavHostController, playerId: String?) {
     val bottomNavController = rememberNavController()
     val items = listOf(
         BottomNavItem("Gold Game", "goldwheel", Icons.Default.Home),

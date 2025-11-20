@@ -218,4 +218,68 @@ class FireBaseService {
                 onResult(task.isSuccessful)
             }
     }
+    
+    // Deletes all player data including profile and saved games
+    fun deleteAllPlayerData(playerId: String, onResult: (success: Boolean, message: String?) -> Unit) {
+        if (playerId.isBlank()) {
+            onResult(false, "Invalid player ID")
+            return
+        }
+        
+        var playerDeleted = false
+        var gamesDeleted = false
+        var playerError: String? = null
+        var gamesError: String? = null
+        
+        fun checkDeletionComplete() {
+            if (playerDeleted && gamesDeleted) {
+                if (playerError == null && gamesError == null) {
+                    onResult(true, "All player data deleted successfully")
+                } else {
+                    val errorMsg = listOfNotNull(playerError, gamesError).joinToString("; ")
+                    onResult(false, "Partial deletion failure: $errorMsg")
+                }
+            }
+        }
+        
+        // Delete player profile
+        database.child("players").child(playerId).removeValue()
+            .addOnCompleteListener { playerTask ->
+                playerDeleted = true
+                if (!playerTask.isSuccessful) {
+                    playerError = playerTask.exception?.message
+                }
+                checkDeletionComplete()
+            }
+        
+        // Delete all saved games by this player
+        database.child("savedGames")
+            .orderByChild("playerId")
+            .equalTo(playerId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    val deletePromises = mutableListOf<com.google.android.gms.tasks.Task<Void>>()
+                    for (gameSnapshot in snapshot.children) {
+                        deletePromises.add(gameSnapshot.ref.removeValue())
+                    }
+                    com.google.android.gms.tasks.Tasks.whenAll(deletePromises)
+                        .addOnCompleteListener { gamesTask ->
+                            gamesDeleted = true
+                            if (!gamesTask.isSuccessful) {
+                                gamesError = gamesTask.exception?.message
+                            }
+                            checkDeletionComplete()
+                        }
+                } else {
+                    gamesDeleted = true
+                    checkDeletionComplete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                gamesDeleted = true
+                gamesError = exception.message
+                checkDeletionComplete()
+            }
+    }
 }
