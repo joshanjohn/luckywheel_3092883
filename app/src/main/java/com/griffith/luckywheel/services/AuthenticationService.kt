@@ -170,4 +170,23 @@ class AuthenticationService(private val context: Context) {
     fun getCurrentUserId(): String? = auth.currentUser?.uid
     
     fun isUserAuthenticated(): Boolean = auth.currentUser != null
+    
+    // Permanently deletes the user's Firebase Auth account
+    fun deleteAccount(onResult: (success: Boolean, message: String?) -> Unit) {
+        val user = auth.currentUser
+        if (user != null) {
+            user.delete()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // Also sign out from Google
+                        getGoogleSignInClient().signOut()
+                        onResult(true, "Account deleted successfully")
+                    } else {
+                        onResult(false, task.exception?.message ?: "Failed to delete account")
+                    }
+                }
+        } else {
+            onResult(false, "No user is currently signed in")
+        }
+    }
 }

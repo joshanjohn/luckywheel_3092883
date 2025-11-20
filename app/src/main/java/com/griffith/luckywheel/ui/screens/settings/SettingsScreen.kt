@@ -147,6 +147,17 @@ fun SettingsScreen(
                         }
                     }
                 )
+
+                // Profile Card
+                GameModeButton(
+                    title = "PROFILE",
+                    description = "Manage your account",
+                    icon = R.drawable.icon_rank,
+                    borderColor = Color(0xFF9C27B0),
+                    onClick = {
+                        navController.navigate("profile")
+                    }
+                )
             }
 
             // Logout Card
