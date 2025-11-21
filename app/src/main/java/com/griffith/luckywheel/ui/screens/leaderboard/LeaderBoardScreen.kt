@@ -22,7 +22,7 @@ import com.griffith.luckywheel.models.data.PlayerRank
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.leaderboard.components.LeaderboardListView
 import com.griffith.luckywheel.ui.screens.leaderboard.components.RankingHeader
-import com.griffith.luckywheel.ui.theme.BronzeColor
+import com.griffith.luckywheel.ui.theme.bronzeColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.silverColor
 import java.util.Locale
@@ -158,7 +158,7 @@ fun RankBadge(rank: Int) {
     val (color, imgIcon) = when (rank) {
         1 -> goldColor to R.drawable.icon_gold_wreath
         2 -> silverColor to R.drawable.icon_silver_wreath
-        3 -> BronzeColor to R.drawable.icon_bronze_wreath
+        3 -> bronzeColor to R.drawable.icon_bronze_wreath
         else -> Color.Transparent to R.drawable.icon_player_circle // replace with a generic image for others
     }
 

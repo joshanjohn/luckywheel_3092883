@@ -2,6 +2,7 @@ package com.griffith.luckywheel.models.data
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
+import android.graphics.Color.parseColor
 import com.griffith.luckywheel.models.enum.SpinActionType
 import kotlinx.parcelize.Parcelize
 
@@ -33,7 +34,7 @@ fun SavedGame.toSpinWheelItems(): List<SpinWheelItem> {
     return wheelItems.map { saved ->
         SpinWheelItem(
             label = saved.label,
-            color = Color(android.graphics.Color.parseColor(saved.colorHex)),
+            color = Color(parseColor(saved.colorHex)),
             type = try {
                 SpinActionType.valueOf(saved.type)
             } catch (e: Exception) {
