@@ -18,6 +18,26 @@ The project is developed in an agile SDCL method. The project uses the Model Vie
 To enable Google authentication feature, it needs google web client id 
 and store inside `local.properties` file as `GOOGLE_CLIENT_ID` variable.
 
+## Dependency Security Management
+
+This repository uses **[Mend Bolt](https://www.mend.io/free-developer-tools/bolt/)** for automated dependency security scanning and vulnerability management.
+
+### What Mend Bolt Does
+- 🔍 **Automatic Scanning**: Scans all dependencies on every pull request
+- 🛡️ **CVE Detection**: Identifies known security vulnerabilities (CVEs) in dependencies
+- 🎯 **Severity Filtering**: Reports MEDIUM, HIGH, and CRITICAL vulnerabilities
+- 📋 **Auto Issue Creation**: Automatically creates GitHub issues for detected vulnerabilities
+- ✅ **PR Blocking**: Prevents merging pull requests with critical security issues
+- 📜 **License Compliance**: Checks for license violations and incompatibilities
+
+### Security Configuration
+- **Minimum Severity**: MEDIUM and above
+- **Strict Mode**: Enabled (blocks PRs with vulnerabilities)
+- **Base Branch**: `main`
+- **Issue Type**: Dependency vulnerabilities
+
+All security findings are automatically tracked in the [Issues](../../issues?q=is%3Aissue+label%3Asecurity) tab with the `security` label.
+
 ## Colour Theme
 The App uses the following colours for the app scaﬀold background colour, in a linear gradient
 fashion. For some elements, it has a golden yellow colour.
