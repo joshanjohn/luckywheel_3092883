@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavHostController) {
+fun ProfileScreen(navController: NavHostController, playerId: String?) {
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
     val authService = remember { AuthenticationService(context) }
@@ -46,9 +46,27 @@ fun ProfileScreen(navController: NavHostController) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        player = dataStoreService.getPlayer()
-        editedName = player?.playerName ?: ""
+    // Real-time Firebase listener for player updates
+    DisposableEffect(playerId) {
+        if (playerId.isNullOrBlank()) {
+            onDispose {}
+        } else {
+            val listener = firebaseService.listenToPlayerUpdates(playerId) { updatedPlayer ->
+                updatedPlayer?.let {
+                    player = it
+                    if (!isEditing) {
+                        editedName = it.playerName
+                    }
+                    // Update DataStore with latest data
+                    coroutineScope.launch {
+                        dataStoreService.savePlayer(it)
+                    }
+                }
+            }
+            onDispose {
+                firebaseService.removePlayerListener(playerId, listener)
+            }
+        }
     }
 
     fun savePlayerName() {

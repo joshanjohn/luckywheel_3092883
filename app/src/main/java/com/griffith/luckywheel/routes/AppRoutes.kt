@@ -50,7 +50,10 @@ fun AppRoute() {
         composable("login") { LoginScreen(navController) }
         composable("forgotpassword") { ForgotPasswordScreen(navController) }
         composable("settings") { SettingsScreen(navController) }
-        composable("profile") { ProfileScreen(navController) }
+        composable("profile/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            ProfileScreen(navController, playerId)
+        }
         composable("leaderboard") { LeaderboardScreen(navController) }
     }
 }

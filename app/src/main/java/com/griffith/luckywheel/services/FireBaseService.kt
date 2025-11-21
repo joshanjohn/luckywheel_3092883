@@ -115,6 +115,31 @@ class FireBaseService {
         })
     }
 
+    // Listen to real-time updates for a specific player
+    fun listenToPlayerUpdates(
+        playerId: String,
+        onPlayerUpdated: (Player?) -> Unit
+    ): ValueEventListener {
+        val playerRef = database.child("players").child(playerId)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val player = snapshot.getValue(Player::class.java)
+                onPlayerUpdated(player)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onPlayerUpdated(null)
+            }
+        }
+        playerRef.addValueEventListener(listener)
+        return listener
+    }
+
+    // Remove a specific listener
+    fun removePlayerListener(playerId: String, listener: ValueEventListener) {
+        database.child("players").child(playerId).removeEventListener(listener)
+    }
+
     // Game database operations
     
     fun saveCustomGame(
