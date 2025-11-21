@@ -152,7 +152,7 @@ fun SettingsScreen(
                 GameModeButton(
                     title = "PROFILE",
                     description = "Manage your account",
-                    icon = R.drawable.icon_rank,
+                    icon = R.drawable.icon_profile,
                     borderColor = Color(0xFF9C27B0),
                     onClick = {
                         navController.navigate("profile")

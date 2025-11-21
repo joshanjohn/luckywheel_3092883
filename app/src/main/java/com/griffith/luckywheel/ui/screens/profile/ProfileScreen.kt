@@ -347,7 +347,7 @@ fun ProfileScreen(navController: NavHostController) {
                         containerColor = Color(0xFFD50505)
                     )
                 ) {
-                    Text("Delete Forever", fontWeight = FontWeight.Bold)
+                    Text("Delete Forever", fontWeight = FontWeight.Bold, color = Color.White)
                 }
             },
             dismissButton = {
