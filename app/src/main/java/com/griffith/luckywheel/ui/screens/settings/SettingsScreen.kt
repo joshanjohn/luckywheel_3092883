@@ -155,7 +155,9 @@ fun SettingsScreen(
                     icon = R.drawable.icon_profile,
                     borderColor = Color(0xFF9C27B0),
                     onClick = {
-                        navController.navigate("profile")
+                        playerId?.let { id ->
+                            navController.navigate("profile/$id")
+                        }
                     }
                 )
             }
