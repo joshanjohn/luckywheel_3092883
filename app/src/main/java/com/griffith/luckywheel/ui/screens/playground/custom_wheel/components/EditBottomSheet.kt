@@ -306,16 +306,23 @@ fun EditBottomSheet(
                         ),
                         type = SpinActionType.CUSTOM,
                         value = 0,
-                        percent = 0f
+                        percent = 0.1f // Set default to 10%
                     )
                     val addedList = wheelItems + newItem
+                    // Rebalance percentages after adding the new item
                     onUpdateItems(normalizePercentagesToOne(addedList))
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(8.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (wheelItems.size >= 6) Color.Gray else Color.White
+                ),
+                shape = RoundedCornerShape(8.dp),
+                enabled = wheelItems.size < 6
             ) {
-                Text("Add Item", color = darkerGreenColor)
+                Text(
+                    text = if (wheelItems.size >= 6) "Maximum only 6 Items Only" else "Add Item",
+                    color = if (wheelItems.size >= 6) Color.White else darkerGreenColor
+                )
             }
         }
     }
