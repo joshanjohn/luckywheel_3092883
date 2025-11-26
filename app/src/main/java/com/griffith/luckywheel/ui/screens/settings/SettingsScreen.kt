@@ -162,7 +162,7 @@ fun SettingsScreen(
                 )
             }
 
-            // Logout Card
+            // Logout Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
