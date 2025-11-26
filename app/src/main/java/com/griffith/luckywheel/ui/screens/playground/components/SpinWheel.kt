@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
-import com.griffith.luckywheel.ui.theme.bodyFontFamily
 import com.griffith.luckywheel.utils.isColorDark
 import kotlin.math.cos
 import kotlin.math.sin
