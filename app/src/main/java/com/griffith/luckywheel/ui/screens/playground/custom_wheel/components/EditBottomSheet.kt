@@ -30,6 +30,7 @@ import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
@@ -48,6 +49,7 @@ fun EditBottomSheet(
     if (!showBottomSheet) return
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
     var expandedIndex by remember { mutableStateOf<Int?>(null) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var gameName by remember(currentGameName) { mutableStateOf(currentGameName ?: "") }
@@ -359,13 +361,15 @@ fun EditBottomSheet(
                         }
 
                         playerId?.let { pid ->
-                            firebaseService.saveCustomGame(
-                                playerId = pid,
-                                gameName = gameName.trim(),
-                                wheelItems = wheelItems,
-                                gameId = currentGameId
-                            ) { success, gameId ->
-                                if (success && gameId != null) {
+                            coroutineScope.launch {
+                                val result = firebaseService.saveCustomGame(
+                                    playerId = pid,
+                                    gameName = gameName.trim(),
+                                    wheelItems = wheelItems,
+                                    gameId = currentGameId
+                                )
+                                
+                                result.onSuccess { gameId ->
                                     Toast.makeText(
                                         context,
                                         if (currentGameId != null) "Game updated!" else "Game saved!",
@@ -374,8 +378,12 @@ fun EditBottomSheet(
                                     onGameSaved(gameId, gameName.trim())
                                     showSaveDialog = false
                                     onDismiss()
-                                } else {
-                                    Toast.makeText(context, "Failed to save game", Toast.LENGTH_SHORT).show()
+                                }.onFailure { exception ->
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to save game: ${exception.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         }

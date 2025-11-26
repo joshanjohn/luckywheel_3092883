@@ -77,16 +77,16 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
         }
 
         val updatedPlayer = currentPlayer.copy(playerName = editedName)
-        firebaseService.updatePlayerInfo(currentPlayer.playerId, updatedPlayer) { success ->
-            if (success) {
-                coroutineScope.launch {
-                    dataStoreService.savePlayer(updatedPlayer)
-                    player = updatedPlayer
-                    isEditing = false
-                    Toast.makeText(context, "Name updated successfully", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(context, "Failed to update name", Toast.LENGTH_SHORT).show()
+        coroutineScope.launch {
+            val result = firebaseService.updatePlayerInfo(currentPlayer.playerId, updatedPlayer)
+            
+            result.onSuccess {
+                dataStoreService.savePlayer(updatedPlayer)
+                player = updatedPlayer
+                isEditing = false
+                Toast.makeText(context, "Name updated successfully", Toast.LENGTH_SHORT).show()
+            }.onFailure { exception ->
+                Toast.makeText(context, "Failed to update name: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -99,24 +99,24 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
         authService.deleteAccount { authSuccess, authMessage ->
             if (authSuccess) {
                 // Then delete all player data from database
-                firebaseService.deleteAllPlayerData(currentPlayer.playerId) { dbSuccess, dbMessage ->
+                coroutineScope.launch {
+                    val result = firebaseService.deleteAllPlayerData(currentPlayer.playerId)
+                    
+                    // Clear local data store
+                    dataStoreService.clear()
                     isDeleting = false
-                    coroutineScope.launch {
-                        // Clear local data store
-                        dataStoreService.clear()
-                        
-                        if (dbSuccess) {
-                            Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
-                        } else {
-                            // Auth account is deleted, but database cleanup failed
-                            Toast.makeText(context, "Account deleted, but some data cleanup failed", Toast.LENGTH_LONG).show()
-                        }
-                        
-                        // Navigate to login screen regardless of database deletion result
-                        // since the auth account is already deleted
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
+                    
+                    result.onSuccess { message ->
+                        Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                    }.onFailure { exception ->
+                        // Auth account is deleted, but database cleanup failed
+                        Toast.makeText(context, "Account deleted, but some data cleanup failed: ${exception.message}", Toast.LENGTH_LONG).show()
+                    }
+                    
+                    // Navigate to login screen regardless of database deletion result
+                    // since the auth account is already deleted
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             } else {

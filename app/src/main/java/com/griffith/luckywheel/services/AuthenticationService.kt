@@ -12,6 +12,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
 import com.griffith.luckywheel.BuildConfig
 import com.griffith.luckywheel.models.data.Player
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // Handles all authentication operations: Google Sign-In, email/password auth, and logout
 class AuthenticationService(private val context: Context) {
@@ -69,11 +73,15 @@ class AuthenticationService(private val context: Context) {
                     
                     if (userId != null) {
                         // Check if player exists in database, create if not
-                        firebaseService.checkAndCreatePlayerIfNeeded(userId, displayName) { success, message ->
-                            if (success) {
-                                onResult(true, "Sign in successful", userId)
-                            } else {
-                                onResult(false, message, userId)
+                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                            val result = firebaseService.checkAndCreatePlayerIfNeeded(userId, displayName)
+                            
+                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                result.onSuccess { message ->
+                                    onResult(true, message, userId)
+                                }.onFailure { exception ->
+                                    onResult(false, exception.message, userId)
+                                }
                             }
                         }
                     } else {

@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.component3
@@ -124,12 +126,18 @@ fun GoldWheelScreen(
     var lastSpinResult by remember { mutableStateOf<SpinWheelItem?>(null) }
     val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
     var sensorEnabled by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     fun processResult() {
         val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
         lastSpinResult = resultItem
         playerGold = updatePlayerGold(playerGold, resultItem)
-        playerId?.let { fireBaseService.updatePlayerGold(it, playerGold) {} }
+        // Update gold in Firebase (fire-and-forget)
+        playerId?.let { id ->
+            coroutineScope.launch {
+                fireBaseService.updatePlayerGold(id, playerGold)
+            }
+        }
         showResultDialog = true
         sensorEnabled = false
     }
