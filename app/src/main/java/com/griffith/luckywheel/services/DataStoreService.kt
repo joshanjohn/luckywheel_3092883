@@ -6,10 +6,13 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.griffith.luckywheel.models.data.Player
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 private val Context.playerPrefDataStore by preferencesDataStore(name = "player_pref")
 
+// Handles all local data storage operations for player preferences
 class DataStoreService(private val context: Context) {
 
     private val dataStore = context.playerPrefDataStore
@@ -20,8 +23,8 @@ class DataStoreService(private val context: Context) {
         val GOLD = intPreferencesKey("gold")
     }
 
-    //Save (or replace) single player
-    suspend fun savePlayer(player: Player) {
+    // Save (or replace) player data - runs on IO thread
+    suspend fun savePlayer(player: Player) = withContext(Dispatchers.IO) {
         dataStore.edit { prefs ->
             prefs.clear()
             prefs[PLAYER_ID] = player.playerId
@@ -30,18 +33,18 @@ class DataStoreService(private val context: Context) {
         }
     }
 
-    // Read player once
-    suspend fun getPlayer(): Player {
+    // Read player data once - runs on IO thread
+    suspend fun getPlayer(): Player = withContext(Dispatchers.IO) {
         val prefs = dataStore.data.first()
-        return Player(
+        Player(
             playerId = prefs[PLAYER_ID] ?: "",
             playerName = prefs[PLAYER_NAME] ?: "",
             gold = prefs[GOLD] ?: 0
         )
     }
 
-    // Update only gold value
-    suspend fun updateGold(newGold: Int) {
+    // Update only gold value - runs on IO thread
+    suspend fun updateGold(newGold: Int) = withContext(Dispatchers.IO) {
         dataStore.edit { prefs ->
             val currentId = prefs[PLAYER_ID] ?: ""
             val currentName = prefs[PLAYER_NAME] ?: ""
@@ -51,8 +54,8 @@ class DataStoreService(private val context: Context) {
         }
     }
 
-    // Clear player info
-    suspend fun clear() {
+    // Clear all player data - runs on IO thread
+    suspend fun clear() = withContext(Dispatchers.IO) {
         dataStore.edit { prefs -> prefs.clear() }
     }
 }

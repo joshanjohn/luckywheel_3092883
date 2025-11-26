@@ -62,24 +62,25 @@ fun RegisterScreen(navController: NavHostController) {
     ) { result ->
         isLoading = true
         authService.handleGoogleSignInResult(result.data) { success, message, userId ->
-            isLoading = false
             if (success && userId != null) {
-                firebaseService.getPlayerInfo(userId) { player ->
-                    if (player != null) {
-                        coroutineScope.launch {
-                            dataStoreService.clear()
-                            dataStoreService.savePlayer(player)
+                coroutineScope.launch {
+                    val playerResult = firebaseService.getPlayerInfo(userId)
+                    isLoading = false
+                    
+                    playerResult.onSuccess { player ->
+                        dataStoreService.clear()
+                        dataStoreService.savePlayer(player)
 
-                            Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
-                            navController.navigate("play/$userId") {
-                                popUpTo("register") { inclusive = true }
-                            }
+                        Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
+                        navController.navigate("play/$userId") {
+                            popUpTo("register") { inclusive = true }
                         }
-                    } else {
-                        Toast.makeText(context, "Failed to load player data", Toast.LENGTH_SHORT).show()
+                    }.onFailure { exception ->
+                        Toast.makeText(context, "Failed to load player data: ${exception.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
+                isLoading = false
                 Toast.makeText(context, message ?: "Google sign in failed", Toast.LENGTH_SHORT).show()
             }
         }
@@ -112,22 +113,25 @@ fun RegisterScreen(navController: NavHostController) {
         isLoading = true
 
         authService.registerWithEmailPassword(name, email, password) { success, message, userId ->
-            isLoading = false
             if (success && userId != null) {
-                firebaseService.getPlayerInfoById(userId) { player ->
-                    if (player != null) {
-                        coroutineScope.launch {
-                            dataStoreService.clear()
-                            dataStoreService.savePlayer(player)
+                coroutineScope.launch {
+                    val playerResult = firebaseService.getPlayerInfoById(userId)
+                    isLoading = false
+                    
+                    playerResult.onSuccess { player ->
+                        dataStoreService.clear()
+                        dataStoreService.savePlayer(player)
 
-                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                            navController.navigate("play/$userId") {
-                                popUpTo("register") { inclusive = true }
-                            }
+                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                        navController.navigate("play/$userId") {
+                            popUpTo("register") { inclusive = true }
                         }
+                    }.onFailure { exception ->
+                        Toast.makeText(context, "Failed to load player data: ${exception.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
+                isLoading = false
                 Toast.makeText(
                     context,
                     message ?: "Failed to register",

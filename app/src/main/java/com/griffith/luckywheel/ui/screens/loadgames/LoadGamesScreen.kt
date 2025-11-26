@@ -21,6 +21,7 @@ import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.loadgames.components.GameCard
 import com.griffith.luckywheel.ui.theme.MeriendaFontFamily
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoadGamesScreen(
@@ -28,27 +29,30 @@ fun LoadGamesScreen(
     playerId: String?
 ) {
     val firebaseService = remember { FireBaseService() }
+    val coroutineScope = rememberCoroutineScope()
     var savedGames by remember { mutableStateOf<List<SavedGame>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(playerId) {
         if (playerId != null) {
-            firebaseService.loadPlayerGames(
-                playerId = playerId,
-                onGamesLoaded = { games ->
-                    savedGames = games
-                    isLoading = false
-                },
-                onError = {
-                    isLoading = false
-                    Toast.makeText(
-                        navController.context,
-                        "Failed to load games",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            )
+            android.util.Log.d("LoadGamesScreen", "Loading games for player: $playerId")
+            val result = firebaseService.getPlayerGames(playerId)
+            
+            result.onSuccess { games ->
+                android.util.Log.d("LoadGamesScreen", "Successfully loaded ${games.size} games")
+                savedGames = games
+                isLoading = false
+            }.onFailure { exception ->
+                android.util.Log.e("LoadGamesScreen", "Failed to load games", exception)
+                isLoading = false
+                Toast.makeText(
+                    navController.context,
+                    "Failed to load games: ${exception.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         } else {
+            android.util.Log.w("LoadGamesScreen", "No player ID provided")
             isLoading = false
         }
     }
@@ -134,20 +138,30 @@ fun LoadGamesScreen(
                                         ?.set("navigate_to_custom", true)
                                 },
                                 onDelete = { gameToDelete ->
-                                    firebaseService.deleteGame(gameToDelete.gameId) { success ->
-                                        if (success) {
+                                    coroutineScope.launch {
+                                        val result = firebaseService.deleteGame(gameToDelete.gameId)
+                                        
+                                        result.onSuccess {
                                             savedGames = savedGames.filter { it.gameId != gameToDelete.gameId }
                                             Toast.makeText(
                                                 navController.context,
                                                 "Game deleted",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                        }.onFailure { exception ->
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Failed to delete: ${exception.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     }
                                 },
                                 onRename = { gameToRename, newName ->
-                                    firebaseService.updateGameName(gameToRename.gameId, newName) { success ->
-                                        if (success) {
+                                    coroutineScope.launch {
+                                        val result = firebaseService.updateGameName(gameToRename.gameId, newName)
+                                        
+                                        result.onSuccess {
                                             savedGames = savedGames.map {
                                                 if (it.gameId == gameToRename.gameId) {
                                                     it.copy(gameName = newName)
@@ -156,6 +170,12 @@ fun LoadGamesScreen(
                                             Toast.makeText(
                                                 navController.context,
                                                 "Game renamed",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }.onFailure { exception ->
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Failed to rename: ${exception.message}",
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }

@@ -10,6 +10,11 @@ import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.models.data.SavedGame
 import com.griffith.luckywheel.models.data.SavedWheelItem
 import com.griffith.luckywheel.models.data.SpinWheelItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 // Handles all Firebase Realtime Database operations for players and games
 class FireBaseService {
@@ -18,79 +23,121 @@ class FireBaseService {
 
     // Player database operations
     
-    fun checkAndCreatePlayerIfNeeded(
+    // Check if player exists, create if needed - runs on IO thread
+    suspend fun checkAndCreatePlayerIfNeeded(
         userId: String,
-        displayName: String,
-        onResult: (Boolean, String?) -> Unit
-    ) {
-        database.child("players").child(userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    onResult(true, "Sign in successful")
-                } else {
-                    val newPlayer = Player(
-                        playerId = userId,
-                        playerName = displayName,
-                        gold = 0
-                    )
-                    database.child("players").child(userId).setValue(newPlayer)
-                        .addOnCompleteListener { dbTask ->
-                            if (dbTask.isSuccessful) {
-                                onResult(true, "Account created successfully")
-                            } else {
-                                onResult(false, "Failed to create player profile: ${dbTask.exception?.message}")
-                            }
+        displayName: String
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("players").child(userId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        if (snapshot.exists()) {
+                            continuation.resume(Result.success("Sign in successful"))
+                        } else {
+                            val newPlayer = Player(
+                                playerId = userId,
+                                playerName = displayName,
+                                gold = 0
+                            )
+                            database.child("players").child(userId).setValue(newPlayer)
+                                .addOnCompleteListener { dbTask ->
+                                    if (dbTask.isSuccessful) {
+                                        continuation.resume(Result.success("Account created successfully"))
+                                    } else {
+                                        continuation.resume(
+                                            Result.failure(
+                                                Exception("Failed to create player profile: ${dbTask.exception?.message}")
+                                            )
+                                        )
+                                    }
+                                }
                         }
-                }
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resume(Result.failure(exception))
+                    }
             }
-            .addOnFailureListener { exception ->
-                onResult(false, "Failed to check player data: ${exception.message}")
-            }
-    }
-
-    fun getPlayerInfo(playerId: String, onResult: (Player?) -> Unit) {
-        database.child("players").child(playerId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val player = snapshot.getValue(Player::class.java)
-                onResult(player)
-            }
-            .addOnFailureListener {
-                onResult(null)
-            }
-    }
-
-    fun getPlayerInfoById(playerId: String, onResult: (Player?) -> Unit) {
-        if (playerId.isBlank()) {
-            onResult(null)
-            return
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-        database.child("players").child(playerId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val player = snapshot.getValue(Player::class.java)
-                onResult(player)
-            }
-            .addOnFailureListener {
-                onResult(null)
-            }
     }
 
-    fun updatePlayerGold(playerId: String, newGold: Int, onResult: (Boolean) -> Unit) {
-        database.child("players").child(playerId).child("gold").setValue(newGold)
-            .addOnCompleteListener { task ->
-                onResult(task.isSuccessful)
+    // Get player info by ID - runs on IO thread
+    suspend fun getPlayerInfo(playerId: String): Result<Player> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("players").child(playerId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val player = snapshot.getValue(Player::class.java)
+                        if (player != null) {
+                            continuation.resume(Result.success(player))
+                        } else {
+                            continuation.resume(Result.failure(Exception("Player not found")))
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resume(Result.failure(exception))
+                    }
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun updatePlayerInfo(playerId: String, updatedPlayer: Player, onResult: (Boolean) -> Unit) {
-        database.child("players").child(playerId).setValue(updatedPlayer)
-            .addOnCompleteListener { task ->
-                onResult(task.isSuccessful)
-            }
+    // Get player info by ID (alternative name for compatibility)
+    suspend fun getPlayerInfoById(playerId: String): Result<Player> {
+        if (playerId.isBlank()) {
+            return Result.failure(Exception("Invalid player ID"))
+        }
+        return getPlayerInfo(playerId)
     }
 
+    // Update player gold - runs on IO thread
+    suspend fun updatePlayerGold(playerId: String, newGold: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("players").child(playerId).child("gold").setValue(newGold)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            continuation.resume(Result.success(Unit))
+                        } else {
+                            continuation.resume(
+                                Result.failure(task.exception ?: Exception("Failed to update gold"))
+                            )
+                        }
+                    }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Update player info - runs on IO thread
+    suspend fun updatePlayerInfo(playerId: String, updatedPlayer: Player): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("players").child(playerId).setValue(updatedPlayer)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            continuation.resume(Result.success(Unit))
+                        } else {
+                            continuation.resume(
+                                Result.failure(task.exception ?: Exception("Failed to update player info"))
+                            )
+                        }
+                    }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Real-time listeners - Keep callback-based for continuous updates
+    
+    // Get player ranking with real-time updates
     fun getPlayerRanking(
         onPlayersUpdated: (List<Player>) -> Unit,
         onError: (Exception) -> Unit = {}
@@ -140,66 +187,114 @@ class FireBaseService {
         database.child("players").child(playerId).removeEventListener(listener)
     }
 
-    // Game database operations
+    // Game database operations - Suspend Functions
     
-    fun saveCustomGame(
+    // Save or update custom game - runs on IO thread
+    suspend fun saveCustomGame(
         playerId: String,
         gameName: String,
         wheelItems: List<SpinWheelItem>,
-        gameId: String? = null,
-        onResult: (Boolean, String?) -> Unit
-    ) {
-        val id = gameId ?: database.child("savedGames").push().key ?: ""
-        if (id.isEmpty()) {
-            onResult(false, "Failed to generate game ID")
-            return
-        }
+        gameId: String? = null
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val id = gameId ?: database.child("savedGames").push().key
+            if (id.isNullOrEmpty()) {
+                return@withContext Result.failure(Exception("Failed to generate game ID"))
+            }
 
-        val savedWheelItems = wheelItems.map { item ->
-            SavedWheelItem(
-                label = item.label,
-                colorHex = String.format("#%08X", item.color.toArgb()),
-                type = item.type.name,
-                value = item.value,
-                percent = item.percent
-            )
-        }
+            val savedWheelItems = wheelItems.map { item ->
+                SavedWheelItem(
+                    label = item.label,
+                    colorHex = String.format("#%08X", item.color.toArgb()),
+                    type = item.type.name,
+                    value = item.value,
+                    percent = item.percent
+                )
+            }
 
-        val savedGame = SavedGame(
-            gameId = id,
-            gameName = gameName,
-            playerId = playerId,
-            wheelItems = savedWheelItems,
-            createdAt = if (gameId == null) System.currentTimeMillis() else 0,
-            updatedAt = System.currentTimeMillis()
-        )
-
-        if (gameId != null) {
-            database.child("savedGames").child(id).child("createdAt").get()
-                .addOnSuccessListener { snapshot ->
-                    val createdAt = snapshot.getValue(Long::class.java) ?: System.currentTimeMillis()
-                    val updatedGame = savedGame.copy(createdAt = createdAt)
-                    database.child("savedGames").child(id).setValue(updatedGame)
+            suspendCancellableCoroutine { continuation ->
+                if (gameId != null) {
+                    // Updating existing game - preserve createdAt
+                    database.child("savedGames").child(id).child("createdAt").get()
+                        .addOnSuccessListener { snapshot ->
+                            val createdAt = snapshot.getValue(Long::class.java) ?: System.currentTimeMillis()
+                            val savedGame = SavedGame(
+                                gameId = id,
+                                gameName = gameName,
+                                playerId = playerId,
+                                wheelItems = savedWheelItems,
+                                createdAt = createdAt,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                            database.child("savedGames").child(id).setValue(savedGame)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        continuation.resume(Result.success(id))
+                                    } else {
+                                        continuation.resume(
+                                            Result.failure(task.exception ?: Exception("Failed to update game"))
+                                        )
+                                    }
+                                }
+                        }
+                        .addOnFailureListener { exception ->
+                            continuation.resume(Result.failure(exception))
+                        }
+                } else {
+                    // Creating new game
+                    val savedGame = SavedGame(
+                        gameId = id,
+                        gameName = gameName,
+                        playerId = playerId,
+                        wheelItems = savedWheelItems,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    database.child("savedGames").child(id).setValue(savedGame)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                onResult(true, id)
+                                continuation.resume(Result.success(id))
                             } else {
-                                onResult(false, task.exception?.message)
+                                continuation.resume(
+                                    Result.failure(task.exception ?: Exception("Failed to save game"))
+                                )
                             }
                         }
                 }
-        } else {
-            database.child("savedGames").child(id).setValue(savedGame)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        onResult(true, id)
-                    } else {
-                        onResult(false, task.exception?.message)
-                    }
-                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
+    // Load player games once (one-time fetch) - runs on IO thread
+    suspend fun getPlayerGames(playerId: String): Result<List<SavedGame>> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("savedGames")
+                    .orderByChild("playerId")
+                    .equalTo(playerId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val games = mutableListOf<SavedGame>()
+                        for (gameSnapshot in snapshot.children) {
+                            val game = gameSnapshot.getValue(SavedGame::class.java)
+                            if (game != null) {
+                                games.add(game)
+                            }
+                        }
+                        continuation.resume(Result.success(games.sortedByDescending { it.updatedAt }))
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resume(Result.failure(exception))
+                    }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Load player games with real-time updates (keep for backward compatibility)
     fun loadPlayerGames(
         playerId: String,
         onGamesLoaded: (List<SavedGame>) -> Unit,
@@ -226,85 +321,116 @@ class FireBaseService {
             })
     }
 
-    fun deleteGame(gameId: String, onResult: (Boolean) -> Unit) {
-        database.child("savedGames").child(gameId).removeValue()
-            .addOnCompleteListener { task ->
-                onResult(task.isSuccessful)
+    // Delete game - runs on IO thread
+    suspend fun deleteGame(gameId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                database.child("savedGames").child(gameId).removeValue()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            continuation.resume(Result.success(Unit))
+                        } else {
+                            continuation.resume(
+                                Result.failure(task.exception ?: Exception("Failed to delete game"))
+                            )
+                        }
+                    }
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun updateGameName(gameId: String, newName: String, onResult: (Boolean) -> Unit) {
-        val updates = mapOf(
-            "gameName" to newName,
-            "updatedAt" to System.currentTimeMillis()
-        )
-        database.child("savedGames").child(gameId).updateChildren(updates)
-            .addOnCompleteListener { task ->
-                onResult(task.isSuccessful)
+    // Update game name - runs on IO thread
+    suspend fun updateGameName(gameId: String, newName: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            suspendCancellableCoroutine { continuation ->
+                val updates = mapOf(
+                    "gameName" to newName,
+                    "updatedAt" to System.currentTimeMillis()
+                )
+                database.child("savedGames").child(gameId).updateChildren(updates)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            continuation.resume(Result.success(Unit))
+                        } else {
+                            continuation.resume(
+                                Result.failure(task.exception ?: Exception("Failed to update game name"))
+                            )
+                        }
+                    }
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
     
-    // Deletes all player data including profile and saved games
-    fun deleteAllPlayerData(playerId: String, onResult: (success: Boolean, message: String?) -> Unit) {
+    // Delete all player data including profile and saved games - runs on IO thread
+    suspend fun deleteAllPlayerData(playerId: String): Result<String> = withContext(Dispatchers.IO) {
         if (playerId.isBlank()) {
-            onResult(false, "Invalid player ID")
-            return
+            return@withContext Result.failure(Exception("Invalid player ID"))
         }
         
-        var playerDeleted = false
-        var gamesDeleted = false
-        var playerError: String? = null
-        var gamesError: String? = null
-        
-        fun checkDeletionComplete() {
-            if (playerDeleted && gamesDeleted) {
-                if (playerError == null && gamesError == null) {
-                    onResult(true, "All player data deleted successfully")
-                } else {
-                    val errorMsg = listOfNotNull(playerError, gamesError).joinToString("; ")
-                    onResult(false, "Partial deletion failure: $errorMsg")
-                }
-            }
-        }
-        
-        // Delete player profile
-        database.child("players").child(playerId).removeValue()
-            .addOnCompleteListener { playerTask ->
-                playerDeleted = true
-                if (!playerTask.isSuccessful) {
-                    playerError = playerTask.exception?.message
-                }
-                checkDeletionComplete()
-            }
-        
-        // Delete all saved games by this player
-        database.child("savedGames")
-            .orderByChild("playerId")
-            .equalTo(playerId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    val deletePromises = mutableListOf<com.google.android.gms.tasks.Task<Void>>()
-                    for (gameSnapshot in snapshot.children) {
-                        deletePromises.add(gameSnapshot.ref.removeValue())
+        try {
+            suspendCancellableCoroutine { continuation ->
+                var playerDeleted = false
+                var gamesDeleted = false
+                var playerError: String? = null
+                var gamesError: String? = null
+                
+                fun checkDeletionComplete() {
+                    if (playerDeleted && gamesDeleted) {
+                        if (playerError == null && gamesError == null) {
+                            continuation.resume(Result.success("All player data deleted successfully"))
+                        } else {
+                            val errorMsg = listOfNotNull(playerError, gamesError).joinToString("; ")
+                            continuation.resume(Result.failure(Exception("Partial deletion failure: $errorMsg")))
+                        }
                     }
-                    com.google.android.gms.tasks.Tasks.whenAll(deletePromises)
-                        .addOnCompleteListener { gamesTask ->
-                            gamesDeleted = true
-                            if (!gamesTask.isSuccessful) {
-                                gamesError = gamesTask.exception?.message
+                }
+                
+                // Delete player profile
+                database.child("players").child(playerId).removeValue()
+                    .addOnCompleteListener { playerTask ->
+                        playerDeleted = true
+                        if (!playerTask.isSuccessful) {
+                            playerError = playerTask.exception?.message
+                        }
+                        checkDeletionComplete()
+                    }
+                
+                // Delete all saved games by this player
+                database.child("savedGames")
+                    .orderByChild("playerId")
+                    .equalTo(playerId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        if (snapshot.exists()) {
+                            val deletePromises = mutableListOf<com.google.android.gms.tasks.Task<Void>>()
+                            for (gameSnapshot in snapshot.children) {
+                                deletePromises.add(gameSnapshot.ref.removeValue())
                             }
+                            com.google.android.gms.tasks.Tasks.whenAll(deletePromises)
+                                .addOnCompleteListener { gamesTask ->
+                                    gamesDeleted = true
+                                    if (!gamesTask.isSuccessful) {
+                                        gamesError = gamesTask.exception?.message
+                                    }
+                                    checkDeletionComplete()
+                                }
+                        } else {
+                            gamesDeleted = true
                             checkDeletionComplete()
                         }
-                } else {
-                    gamesDeleted = true
-                    checkDeletionComplete()
-                }
+                    }
+                    .addOnFailureListener { exception ->
+                        gamesDeleted = true
+                        gamesError = exception.message
+                        checkDeletionComplete()
+                    }
             }
-            .addOnFailureListener { exception ->
-                gamesDeleted = true
-                gamesError = exception.message
-                checkDeletionComplete()
-            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
