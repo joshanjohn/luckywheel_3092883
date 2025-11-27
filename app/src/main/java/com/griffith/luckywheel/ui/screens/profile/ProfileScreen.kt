@@ -95,33 +95,40 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
         val currentPlayer = player ?: return
         isDeleting = true
 
-        // First delete Firebase Auth account
-        authService.deleteAccount { authSuccess, authMessage ->
-            if (authSuccess) {
-                //  Then delete all player data from database
-                coroutineScope.launch {
-                    val result = firebaseService.deleteAllPlayerData(currentPlayer.playerId)
-                    
-                    // Clear local data store
-                    dataStoreService.clear()
-                    isDeleting = false
-                    
-                    result.onSuccess { message ->
-                        Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
-                    }.onFailure { exception ->
-                        // Auth account is deleted, but database cleanup failed
-                        Toast.makeText(context, "Account deleted, but some data cleanup failed: ${exception.message}", Toast.LENGTH_LONG).show()
-                    }
-                    
-                    // Navigate to login screen regardless of database deletion result
-                    // since the auth account is already deleted
-                    navController.navigate("login") {
-                        popUpTo(0) { inclusive = true }
+        // First delete all player data from database (while user is still authenticated)
+        coroutineScope.launch {
+            val result = firebaseService.deleteAllPlayerData(currentPlayer.playerId)
+            
+            result.onSuccess { message ->
+                // Database cleanup successful, now delete Firebase Auth account
+                authService.deleteAccount { authSuccess, authMessage ->
+                    if (authSuccess) {
+                        // Clear local data store
+                        coroutineScope.launch {
+                            dataStoreService.clear()
+                            isDeleting = false
+                            Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                            
+                            // Navigate to login screen
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    } else {
+                        // Database deleted but auth deletion failed (rare case)
+                        isDeleting = false
+                        Toast.makeText(context, "Data deleted but auth removal failed: $authMessage", Toast.LENGTH_LONG).show()
+                        
+                        // Still navigate to login since data is deleted
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
-            } else {
+            }.onFailure { exception ->
+                // Database cleanup failed, don't delete auth account
                 isDeleting = false
-                Toast.makeText(context, authMessage ?: "Failed to delete account", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Failed to delete account data: ${exception.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

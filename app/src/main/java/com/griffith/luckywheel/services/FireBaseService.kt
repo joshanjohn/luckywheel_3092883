@@ -1,5 +1,6 @@
 package com.griffith.luckywheel.services
 
+import android.util.Log
 import androidx.compose.ui.graphics.toArgb
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -376,59 +377,76 @@ class FireBaseService {
                 var gamesDeleted = false
                 var playerError: String? = null
                 var gamesError: String? = null
+                var gamesCount = 0
                 
                 fun checkDeletionComplete() {
                     if (playerDeleted && gamesDeleted) {
                         if (playerError == null && gamesError == null) {
+                            Log.d("FireBaseService", "All player data deleted successfully. Games deleted: $gamesCount")
                             continuation.resume(Result.success("All player data deleted successfully"))
                         } else {
                             val errorMsg = listOfNotNull(playerError, gamesError).joinToString("; ")
+                            Log.e("FireBaseService", "Partial deletion failure: $errorMsg")
                             continuation.resume(Result.failure(Exception("Partial deletion failure: $errorMsg")))
                         }
                     }
                 }
                 
                 // Delete player profile
+                Log.d("FireBaseService", "Starting player profile deletion for: $playerId")
                 database.child("players").child(playerId).removeValue()
                     .addOnCompleteListener { playerTask ->
                         playerDeleted = true
-                        if (!playerTask.isSuccessful) {
-                            playerError = playerTask.exception?.message
+                        if (playerTask.isSuccessful) {
+                            Log.d("FireBaseService", "Player profile deleted successfully")
+                        } else {
+                            playerError = playerTask.exception?.message ?: "Unknown error"
+                            Log.e("FireBaseService", "Player profile deletion failed: $playerError")
                         }
                         checkDeletionComplete()
                     }
                 
                 // Delete all saved games by this player
+                Log.d("FireBaseService", "Querying saved games for player: $playerId")
                 database.child("savedGames")
                     .orderByChild("playerId")
                     .equalTo(playerId)
                     .get()
                     .addOnSuccessListener { snapshot ->
                         if (snapshot.exists()) {
+                            gamesCount = snapshot.childrenCount.toInt()
+                            Log.d("FireBaseService", "Found $gamesCount saved games to delete")
                             val deletePromises = mutableListOf<com.google.android.gms.tasks.Task<Void>>()
                             for (gameSnapshot in snapshot.children) {
+                                Log.d("FireBaseService", "Deleting game: ${gameSnapshot.key}")
                                 deletePromises.add(gameSnapshot.ref.removeValue())
                             }
                             com.google.android.gms.tasks.Tasks.whenAll(deletePromises)
                                 .addOnCompleteListener { gamesTask ->
                                     gamesDeleted = true
-                                    if (!gamesTask.isSuccessful) {
-                                        gamesError = gamesTask.exception?.message
+                                    if (gamesTask.isSuccessful) {
+                                        Log.d("FireBaseService", "All $gamesCount games deleted successfully")
+                                    } else {
+                                        gamesError = gamesTask.exception?.message ?: "Unknown error"
+                                        Log.e("FireBaseService", "Games deletion failed: $gamesError")
                                     }
                                     checkDeletionComplete()
                                 }
                         } else {
+                            Log.d("FireBaseService", "No saved games found for player")
                             gamesDeleted = true
                             checkDeletionComplete()
                         }
                     }
                     .addOnFailureListener { exception ->
                         gamesDeleted = true
-                        gamesError = exception.message
+                        gamesError = exception.message ?: "Unknown error"
+                        Log.e("FireBaseService", "Failed to query saved games: $gamesError")
                         checkDeletionComplete()
                     }
             }
         } catch (e: Exception) {
+            Log.e("FireBaseService", "Exception in deleteAllPlayerData: ${e.message}")
             Result.failure(e)
         }
     }
