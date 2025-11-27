@@ -145,12 +145,18 @@ fun EditBottomSheet(
                 var tempColor by remember(item) { mutableStateOf(item.color) }
                 var tempPercent by remember(item) { mutableStateOf(item.percent.coerceIn(0f, 1f)) }
 
-                val randomDarkColors = remember(item) {
+                val colorfulSuggestions = remember(item) {
                     List(5) {
+                        // Generate vibrant colors by maxing out at least one channel
+                        val channels = listOf(
+                            Random.nextInt(50, 201),
+                            Random.nextInt(50, 201),
+                            255 // Always have one channel at max
+                        ).shuffled()
                         Color(
-                            red = Random.nextInt(0, 80),
-                            green = Random.nextInt(30, 100),
-                            blue = Random.nextInt(0, 80)
+                            red = channels[0],
+                            green = channels[1],
+                            blue = channels[2]
                         )
                     }
                 }
@@ -239,7 +245,7 @@ fun EditBottomSheet(
                                     .padding(vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                randomDarkColors.forEach { color ->
+                                colorfulSuggestions.forEach { color ->
                                     Box(
                                         modifier = Modifier
                                             .size(36.dp)
