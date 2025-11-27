@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 // Handles all Firebase Realtime Database operations for players and games
 class FireBaseService {
@@ -23,7 +22,7 @@ class FireBaseService {
 
     // Player database operations
     
-    // Check if player exists, create if needed - runs on IO thread
+    // Check if player exists, create if needed 
     suspend fun checkAndCreatePlayerIfNeeded(
         userId: String,
         displayName: String
@@ -64,7 +63,7 @@ class FireBaseService {
         }
     }
 
-    // Get player info by ID - runs on IO thread
+    // Get player info by ID 
     suspend fun getPlayerInfo(playerId: String): Result<Player> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -95,7 +94,7 @@ class FireBaseService {
         return getPlayerInfo(playerId)
     }
 
-    // Update player gold - runs on IO thread
+    // Update player gold 
     suspend fun updatePlayerGold(playerId: String, newGold: Int): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -115,7 +114,7 @@ class FireBaseService {
         }
     }
 
-    // Update player info - runs on IO thread
+    // Update player info 
     suspend fun updatePlayerInfo(playerId: String, updatedPlayer: Player): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -189,7 +188,7 @@ class FireBaseService {
 
     // Game database operations - Suspend Functions
     
-    // Save or update custom game - runs on IO thread
+    // Save or update custom game 
     suspend fun saveCustomGame(
         playerId: String,
         gameName: String,
@@ -267,7 +266,7 @@ class FireBaseService {
         }
     }
 
-    // Load player games once (one-time fetch) - runs on IO thread
+    // Load player games once (one-time fetch) 
     suspend fun getPlayerGames(playerId: String): Result<List<SavedGame>> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -321,7 +320,7 @@ class FireBaseService {
             })
     }
 
-    // Delete game - runs on IO thread
+    // Delete game 
     suspend fun deleteGame(gameId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -341,7 +340,7 @@ class FireBaseService {
         }
     }
 
-    // Update game name - runs on IO thread
+    // Update game name 
     suspend fun updateGameName(gameId: String, newName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -365,7 +364,7 @@ class FireBaseService {
         }
     }
     
-    // Delete all player data including profile and saved games - runs on IO thread
+    // Delete all player data including profile and saved games 
     suspend fun deleteAllPlayerData(playerId: String): Result<String> = withContext(Dispatchers.IO) {
         if (playerId.isBlank()) {
             return@withContext Result.failure(Exception("Invalid player ID"))

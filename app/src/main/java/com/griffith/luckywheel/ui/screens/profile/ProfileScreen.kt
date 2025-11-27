@@ -46,7 +46,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
 
-    // Real-time Firebase listener for player updates
+    // Real time Firebase listener for player updates
     DisposableEffect(playerId) {
         if (playerId.isNullOrBlank()) {
             onDispose {}
@@ -57,7 +57,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                     if (!isEditing) {
                         editedName = it.playerName
                     }
-                    // Update DataStore with latest data
+                    //  Update dataStore with latest data
                     coroutineScope.launch {
                         dataStoreService.savePlayer(it)
                     }
@@ -98,7 +98,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
         // First delete Firebase Auth account
         authService.deleteAccount { authSuccess, authMessage ->
             if (authSuccess) {
-                // Then delete all player data from database
+                //  Then delete all player data from database
                 coroutineScope.launch {
                     val result = firebaseService.deleteAllPlayerData(currentPlayer.playerId)
                     

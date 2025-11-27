@@ -179,7 +179,7 @@ class AuthenticationService(private val context: Context) {
     
     fun isUserAuthenticated(): Boolean = auth.currentUser != null
     
-    // Permanently deletes the user's Firebase Auth account
+    // Permanently deletes the users Firebase auth account
     fun deleteAccount(onResult: (success: Boolean, message: String?) -> Unit) {
         val user = auth.currentUser
         if (user != null) {

@@ -41,7 +41,6 @@ import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.DataStoreService
-import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.settings.components.GameModeButton
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
