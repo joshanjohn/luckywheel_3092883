@@ -103,7 +103,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                 // Database cleanup successful, now delete Firebase Auth account
                 authService.deleteAccount { authSuccess, authMessage ->
                     if (authSuccess) {
-                        // Clear local data store
+                        // Auth deletion successful
                         coroutineScope.launch {
                             dataStoreService.clear()
                             isDeleting = false
@@ -115,13 +115,25 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                             }
                         }
                     } else {
-                        // Database deleted but auth deletion failed (rare case)
-                        isDeleting = false
-                        Toast.makeText(context, "Data deleted but auth removal failed: $authMessage", Toast.LENGTH_LONG).show()
-                        
-                        // Still navigate to login since data is deleted
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
+                        // Auth deletion failed (likely due to stale authentication)
+                        // Force logout to ensure clean state
+                        authService.logout {
+                            coroutineScope.launch {
+                                dataStoreService.clear()
+                                isDeleting = false
+                                
+                                // Show detailed error message
+                                Toast.makeText(
+                                    context,
+                                    "Account data deleted. Auth removal failed: $authMessage\nYou have been logged out.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                
+                                // Navigate to login screen
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
                         }
                     }
                 }

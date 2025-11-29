@@ -142,7 +142,9 @@ fun SettingsScreen(
                     borderColor = Color(0xFF49A84D),
                     onClick = {
                         playerId?.let { id ->
-                            navController.navigate("loadgames/$id")
+                            navController.navigate("loadgames/$id") {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 )
@@ -155,7 +157,9 @@ fun SettingsScreen(
                     borderColor = Color(0xFF9C27B0),
                     onClick = {
                         playerId?.let { id ->
-                            navController.navigate("profile/$id")
+                            navController.navigate("profile/$id") {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 )

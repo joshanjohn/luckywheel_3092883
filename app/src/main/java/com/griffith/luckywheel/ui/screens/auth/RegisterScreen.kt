@@ -221,7 +221,9 @@ fun RegisterScreen(navController: NavHostController) {
                         TextButton(
                             onClick = {
                                 if (!isLoading) {
-                                    navController.navigate("forgotpassword")
+                                    navController.navigate("forgotpassword") {
+                                        launchSingleTop = true
+                                    }
                                 }
                             }
                         ) {

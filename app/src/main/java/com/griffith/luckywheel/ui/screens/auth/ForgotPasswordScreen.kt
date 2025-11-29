@@ -269,6 +269,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
                             onClick = {
                                 navController.navigate("login") {
                                     popUpTo("forgotpassword") { inclusive = true }
+                                    launchSingleTop = true
                                 }
                             }
                         ) {

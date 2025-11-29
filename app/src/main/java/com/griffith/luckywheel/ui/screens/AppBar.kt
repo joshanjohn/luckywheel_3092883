@@ -70,7 +70,11 @@ fun AppBar(
 
             if ((currentScreen != "settings")) {
                 IconButton(
-                    onClick = { navController.navigate("settings") }
+                    onClick = { 
+                        navController.navigate("settings") {
+                            launchSingleTop = true
+                        }
+                    }
                 ) {
                     Image(
                         modifier = Modifier.size(100.dp),

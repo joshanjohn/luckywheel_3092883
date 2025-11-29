@@ -203,7 +203,11 @@ fun GoldWheelScreen(
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    onClick = { navController.navigate("leaderboard") }
+                    onClick = { 
+                        navController.navigate("leaderboard") {
+                            launchSingleTop = true
+                        }
+                    }
                 ) {
                     Image(
                         painterResource(R.drawable.icon_trophy),

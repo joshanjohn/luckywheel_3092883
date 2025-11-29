@@ -173,7 +173,9 @@ fun CustomWheelScreen(
                 // Load Games Button
                 Button(
                     onClick = {
-                        navController.navigate("loadgames/$playerId")
+                        navController.navigate("loadgames/$playerId") {
+                            launchSingleTop = true
+                        }
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0BA136)),

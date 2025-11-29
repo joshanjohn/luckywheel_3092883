@@ -190,8 +190,15 @@ class AuthenticationService(private val context: Context) {
                         getGoogleSignInClient().signOut()
                         onResult(true, "Account deleted successfully")
                     } else {
-                        onResult(false, task.exception?.message ?: "Failed to delete account")
+                        // Log the error for debugging
+                        val errorMessage = task.exception?.message ?: "Failed to delete account"
+                        android.util.Log.e("AuthenticationService", "Delete account failed: $errorMessage", task.exception)
+                        onResult(false, errorMessage)
                     }
+                }
+                .addOnFailureListener { exception ->
+                    android.util.Log.e("AuthenticationService", "Delete account exception: ${exception.message}", exception)
+                    onResult(false, exception.message ?: "Failed to delete account")
                 }
         } else {
             onResult(false, "No user is currently signed in")
