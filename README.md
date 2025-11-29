@@ -14,9 +14,10 @@ count.
 ## Project Architecture
 The project is developed in an agile SDCL method. The project uses the Model View Controller (MVC) 3-level design architecture paTern. All the model classes, defined as data classes in Kotlin, are organized within the data package.The services package contains all service and controller-related code, including the Firebase service, authen<ca<on service, and data store service. The UI elements, such as themes, screens, components, and UI logic, are placed in the UI package, along with the themes.
 
-## Google Auth Requirement
-To enable Google authentication feature, it needs google web client id 
-and store inside `local.properties` file as `GOOGLE_CLIENT_ID` variable.
+
+## 📚 SetUp Documentation
+For detailed setup instructions, see the [Project Setup Guide](docs/PROJECT_SETUP.md).
+
 
 ## Dependency Security Management
 
