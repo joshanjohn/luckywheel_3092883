@@ -24,8 +24,10 @@ class DataStoreService(private val context: Context) {
         val PLAYER_ID = stringPreferencesKey("player_id")
         val PLAYER_NAME = stringPreferencesKey("player_name")
         val GOLD = intPreferencesKey("gold")
-        val MUSIC_VOLUME = floatPreferencesKey("music_volume")
-        val MUSIC_MUTED = booleanPreferencesKey("music_muted")
+       private val MUSIC_VOLUME = floatPreferencesKey("music_volume")
+    private val MUSIC_MUTED = booleanPreferencesKey("music_muted")
+    private val SOUND_EFFECTS_VOLUME = floatPreferencesKey("sound_effects_volume")
+    private val SOUND_EFFECTS_MUTED = booleanPreferencesKey("sound_effects_muted")
     }
 
     // Save (or replace) player data - runs on IO thread
@@ -86,5 +88,29 @@ class DataStoreService(private val context: Context) {
     // Get music muted state
     fun getMusicMuted() = dataStore.data.map { prefs ->
         prefs[MUSIC_MUTED] ?: false
+    }
+    
+    // Save sound effects volume (0.0 to 1.0)
+    suspend fun saveSoundEffectsVolume(volume: Float) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[SOUND_EFFECTS_VOLUME] = volume.coerceIn(0f, 1f)
+        }
+    }
+    
+    // Get sound effects volume
+    fun getSoundEffectsVolume() = dataStore.data.map { prefs ->
+        prefs[SOUND_EFFECTS_VOLUME] ?: 0.7f
+    }
+    
+    // Save sound effects muted state
+    suspend fun saveSoundEffectsMuted(muted: Boolean) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[SOUND_EFFECTS_MUTED] = muted
+        }
+    }
+    
+    // Get sound effects muted state
+    fun getSoundEffectsMuted() = dataStore.data.map { prefs ->
+        prefs[SOUND_EFFECTS_MUTED] ?: false
     }
 }

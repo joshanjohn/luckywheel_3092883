@@ -51,6 +51,7 @@ import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.settings.components.GameModeButton
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
@@ -69,15 +70,25 @@ fun SettingsScreen(
 
     var playerId by remember { mutableStateOf<String?>(null) }
     val musicService = remember { BackgroundMusicService.getInstance(context) }
+    val soundEffectService = remember { SoundEffectService(context) }
     
     // Music state
     val musicVolume by dataStoreService.getMusicVolume().collectAsState(initial = 0.5f)
     val musicMuted by dataStoreService.getMusicMuted().collectAsState(initial = false)
     var volumeSlider by remember { mutableFloatStateOf(0.5f) }
     
-    // Initialize volume slider
+    // Sound effects state
+    val soundEffectsVolume by dataStoreService.getSoundEffectsVolume().collectAsState(initial = 0.7f)
+    val soundEffectsMuted by dataStoreService.getSoundEffectsMuted().collectAsState(initial = false)
+    var soundEffectsVolumeSlider by remember { mutableFloatStateOf(0.7f) }
+    
+    // Initialize volume sliders
     LaunchedEffect(musicVolume) {
         volumeSlider = musicVolume
+    }
+    
+    LaunchedEffect(soundEffectsVolume) {
+        soundEffectsVolumeSlider = soundEffectsVolume
     }
 
     LaunchedEffect(Unit) {
@@ -254,6 +265,91 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = !musicMuted,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = goldColor,
+                                    activeTrackColor = lightGreenColor,
+                                    inactiveTrackColor = Color.Gray,
+                                    disabledThumbColor = Color.Gray,
+                                    disabledActiveTrackColor = Color.DarkGray
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Sound Effects Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1E1E1E)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Sound Effects Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "SOUND EFFECTS",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = goldColor,
+                                fontFamily = BubbleFontFamily
+                            )
+                            // Mute Toggle
+                            Button(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        soundEffectService.setMuted(!soundEffectsMuted)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (soundEffectsMuted) Color.Gray else lightGreenColor
+                                )
+                            ) {
+                                Text(
+                                    text = if (soundEffectsMuted) "UNMUTE" else "MUTE",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        
+                        // Volume Slider
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Volume: ${(soundEffectsVolumeSlider * 100).toInt()}%",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Slider(
+                                value = soundEffectsVolumeSlider,
+                                onValueChange = { newValue ->
+                                    soundEffectsVolumeSlider = newValue
+                                },
+                                onValueChangeFinished = {
+                                    coroutineScope.launch {
+                                        soundEffectService.setVolume(soundEffectsVolumeSlider)
+                                    }
+                                },
+                                enabled = !soundEffectsMuted,
                                 colors = SliderDefaults.colors(
                                     thumbColor = goldColor,
                                     activeTrackColor = lightGreenColor,

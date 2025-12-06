@@ -7,11 +7,8 @@ import android.util.Log
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
-/**
- * Service to manage background music playback throughout the app.
- * Supports looping, volume control, and mute functionality.
- * Singleton pattern ensures only one instance exists.
- */
+
+// Background music service with looping, volume control, and mute - singleton pattern
 class BackgroundMusicService private constructor(private val context: Context) {
     
     companion object {
@@ -65,9 +62,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
         }
     }
     
-    /**
-     * Start playing background music
-     */
+    // Start playing background music
     fun play() {
         try {
             mediaPlayer?.let { player ->
@@ -81,9 +76,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
         }
     }
     
-    /**
-     * Pause background music
-     */
+    // Pause background music
     fun pause() {
         try {
             mediaPlayer?.let { player ->
@@ -97,9 +90,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
         }
     }
     
-    /**
-     * Set music volume (0.0 to 1.0)
-     */
+    // Set music volume (0.0 to 1.0)
     suspend fun setVolume(volume: Float) {
         currentVolume = volume.coerceIn(0f, 1f)
         dataStoreService.saveMusicVolume(currentVolume)
@@ -107,9 +98,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
         Log.d("BackgroundMusicService", "Volume set to: $currentVolume")
     }
     
-    /**
-     * Toggle mute state
-     */
+    // Toggle mute state
     suspend fun setMuted(muted: Boolean) {
         isMuted = muted
         dataStoreService.saveMusicMuted(isMuted)
@@ -117,14 +106,10 @@ class BackgroundMusicService private constructor(private val context: Context) {
         Log.d("BackgroundMusicService", "Muted: $isMuted")
     }
     
-    /**
-     * Get current mute state
-     */
+    // Get current mute state
     fun isMuted(): Boolean = isMuted
     
-    /**
-     * Get current volume
-     */
+    // Get current volume
     fun getVolume(): Float = currentVolume
     
     private fun updatePlayerVolume() {
@@ -137,9 +122,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
         }
     }
     
-    /**
-     * Release all resources
-     */
+    // Release all resources
     fun release() {
         try {
             mediaPlayer?.release()
