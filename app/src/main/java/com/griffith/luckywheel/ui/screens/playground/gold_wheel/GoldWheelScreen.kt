@@ -54,6 +54,8 @@ import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.services.HapticFeedbackService
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
@@ -79,6 +81,8 @@ fun GoldWheelScreen(
 ) {
     val context = navController.context
     val fireBaseService = remember { FireBaseService() }
+    val hapticService = remember { HapticFeedbackService(context) }
+    val soundEffectService = remember { SoundEffectService(context) }
 
     //  Wheel Items Default
     val wheelItems = remember {
@@ -125,6 +129,7 @@ fun GoldWheelScreen(
     val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
     var sensorEnabled by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    var lastSegment by remember { mutableIntStateOf(-1) }
 
     fun processResult() {
         val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
@@ -138,6 +143,21 @@ fun GoldWheelScreen(
         }
         showResultDialog = true
         sensorEnabled = false
+        // Strong vibration when wheel stops
+        hapticService.strongVibration()
+        
+        // Play appropriate sound based on result
+        resultItem?.let { item ->
+            when (item.type) {
+                SpinActionType.GAIN_GOLD, SpinActionType.MULTIPLY_GOLD -> {
+                    soundEffectService.playWinSound()
+                }
+                SpinActionType.LOSE_GOLD -> {
+                    soundEffectService.playLoseSound()
+                }
+                else -> {}
+            }
+        }
     }
 
     //  Shake Detection
@@ -155,6 +175,14 @@ fun GoldWheelScreen(
         }
         sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
         onDispose { sensorManager.unregisterListener(listener) }
+    }
+    
+    // Cleanup haptic service on dispose
+    DisposableEffect(Unit) {
+        onDispose { 
+            hapticService.cancel()
+            soundEffectService.release()
+        }
     }
 
     // Rotation logic
@@ -221,7 +249,17 @@ fun GoldWheelScreen(
                 modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                 contentAlignment = Alignment.Center
             ) {
-                SpinWheel(items = wheelItems, rotationDegrees = currentRotationDegrees)
+                SpinWheel(
+                    items = wheelItems, 
+                    rotationDegrees = currentRotationDegrees,
+                    onSegmentChange = { segment ->
+                        // Only trigger feedback when wheel is actively spinning
+                        if (isSpinning && rotationSpeed > 1f && segment != lastSegment) {
+                            lastSegment = segment
+                            hapticService.tick()
+                        }
+                    }
+                )
             }
 
             //  Instruction Text

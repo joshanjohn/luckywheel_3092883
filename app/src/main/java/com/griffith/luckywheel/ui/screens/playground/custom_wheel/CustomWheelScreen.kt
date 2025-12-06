@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import com.griffith.luckywheel.models.data.SavedGame
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.models.data.toSpinWheelItems
+import com.griffith.luckywheel.services.HapticFeedbackService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
@@ -43,6 +44,7 @@ fun CustomWheelScreen(
     playerId: String?
 ) {
     val context = navController.context
+    val hapticService = remember { HapticFeedbackService(context) }
 
     // Check for loaded game from navigation
     val loadedGame = navController.currentBackStackEntry
@@ -90,12 +92,16 @@ fun CustomWheelScreen(
     var sensorEnabled by remember { mutableStateOf(false) }
     var showResultDialog by remember { mutableStateOf(false) }
     var chosenItem by remember { mutableStateOf<SpinWheelItem?>(null) }
+    var lastSegment by remember { mutableIntStateOf(-1) }
+    val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
 
     fun processResult() {
         val resultItem = getResultFromAngle(currentRotationDegrees, latestWheelItems.value)
         chosenItem = resultItem
         showResultDialog = true
         sensorEnabled = false
+        // Strong vibration when wheel stops
+        hapticService.strongVibration()
     }
 
     //  Shake Detection
@@ -114,6 +120,13 @@ fun CustomWheelScreen(
         }
         sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
         onDispose { sensorManager.unregisterListener(listener) }
+    }
+    
+    // Cleanup haptic service on dispose
+    DisposableEffect(Unit) {
+        onDispose { 
+            hapticService.cancel()
+        }
     }
 
     //  Rotation Animation & logic
@@ -208,7 +221,17 @@ fun CustomWheelScreen(
                     .aspectRatio(1f),
                 contentAlignment = Alignment.Center
             ) {
-                SpinWheel(items = latestWheelItems.value, rotationDegrees = currentRotationDegrees)
+                SpinWheel(
+                    items = latestWheelItems.value, 
+                    rotationDegrees = currentRotationDegrees,
+                    onSegmentChange = { segment ->
+                        // Only trigger feedback when wheel is actively spinning
+                        if (isSpinning && rotationSpeed > 1f && segment != lastSegment) {
+                            lastSegment = segment
+                            hapticService.tick()
+                        }
+                    }
+                )
             }
 
             //  Instruction Text
