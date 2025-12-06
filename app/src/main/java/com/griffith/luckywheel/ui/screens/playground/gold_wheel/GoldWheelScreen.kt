@@ -5,8 +5,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,13 +18,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +70,8 @@ import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.Resul
 import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
+import com.griffith.luckywheel.ui.theme.goldColor
+import com.griffith.luckywheel.ui.theme.lightGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -232,6 +240,7 @@ fun GoldWheelScreen(
                     contentPadding = PaddingValues(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     onClick = { 
+                        soundEffectService.playBubbleClickSound()
                         navController.navigate("leaderboard") {
                             launchSingleTop = true
                         }
@@ -265,17 +274,45 @@ fun GoldWheelScreen(
             //  Instruction Text
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 
-            //  Spin Button
+            // Spin Button with state management
             var isButtonPressed by remember { mutableStateOf(false) }
-            LaunchedEffect(isButtonPressed) { sensorEnabled = isButtonPressed }
+            var isButtonEnabled by remember { mutableStateOf(true) }
+            var pressStartTime by remember { mutableStateOf(0L) }
+            
+            // Re-enable button when wheel settles
+            LaunchedEffect(rotationSpeed) {
+                if (rotationSpeed == 0f && !isButtonPressed) {
+                    isButtonEnabled = true
+                }
+            }
+            
+            // Handle button press with 5-second timeout
+            LaunchedEffect(isButtonPressed) {
+                if (isButtonPressed) {
+                    sensorEnabled = true
+                    
+                    // Auto-release after 5 seconds
+                    kotlinx.coroutines.delay(5000)
+                    if (isButtonPressed) {
+                        isButtonPressed = false
+                        sensorEnabled = false
+                        // Only disable if wheel actually started spinning
+                        if (rotationSpeed > 0f) {
+                            isButtonEnabled = false
+                        }
+                    }
+                }
+            }
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Button(
                     onClick = {},
-                    modifier = Modifier.size(90.dp),
+                    enabled = isButtonEnabled,
+                    modifier = Modifier.size(100.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isButtonPressed)  Color(0xFF4CAF50) else Color(0xFF006400)
+                        containerColor = if (isButtonPressed) Color(0xFF4CAF50) else Color(0xFF2E7D32),
+                        disabledContainerColor = Color(0xFF616161)
                     ),
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -283,16 +320,32 @@ fun GoldWheelScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .pointerInput(Unit) {
-                                detectTapGestures(onPress = {
-                                    isButtonPressed = true
-                                    tryAwaitRelease()
-                                    isButtonPressed = false
-                                })
+                                detectTapGestures(
+                                    onPress = {
+                                        if (isButtonEnabled) {
+                                            pressStartTime = System.currentTimeMillis()
+                                            isButtonPressed = true
+                                            tryAwaitRelease()
+                                            val pressDuration = System.currentTimeMillis() - pressStartTime
+                                            isButtonPressed = false
+                                            sensorEnabled = false
+                                            
+                                            // Only disable button if held for at least 500ms AND wheel started spinning
+                                            if (pressDuration >= 500 && rotationSpeed > 0f) {
+                                                isButtonEnabled = false
+                                            }
+                                        }
+                                    }
+                                )
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (isButtonPressed) "Spinning..." else "Hold to \nSpin",
+                            text = when {
+                                !isButtonEnabled -> "Wait..."
+                                isButtonPressed -> "Spinning"
+                                else -> "Hold to\nSpin"
+                            },
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,

@@ -8,16 +8,23 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import com.google.firebase.auth.FirebaseAuth
 import com.griffith.luckywheel.routes.AppRoute
+import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.ui.theme.LuckyWheelTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private var musicService: BackgroundMusicService? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         enableEdgeToEdge()
+        
+        // Initialize and start background music
+        musicService = BackgroundMusicService.getInstance(this)
+        musicService?.play()
         
         setContent {
             LuckyWheelTheme {
@@ -76,6 +83,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        musicService?.play()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        musicService?.pause()
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        musicService?.release()
+        musicService = null
     }
 }
 

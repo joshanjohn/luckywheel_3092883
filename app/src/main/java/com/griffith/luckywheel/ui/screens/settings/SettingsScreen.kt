@@ -91,6 +91,13 @@ fun SettingsScreen(
         soundEffectsVolumeSlider = soundEffectsVolume
     }
 
+    // Cleanup sound service on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            soundEffectService.release()
+        }
+    }
+    
     LaunchedEffect(Unit) {
         val player = dataStoreService.getPlayer()
         playerId = player.playerId.takeIf { it.isNotEmpty() }
@@ -138,6 +145,7 @@ fun SettingsScreen(
                     gradientColors = listOf(Color(0xFF07361D), Color(0xFF0BA136), Color(0xFF07361D)),
                     borderColor = lightGreenColor,
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("play/$id") {
                                 popUpTo("settings") { inclusive = true }
@@ -153,6 +161,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_custom_game,
                     borderColor = goldColor,
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             // Navigate to custom wheel via saved state
                             navController.navigate("play/$id") {
@@ -173,6 +182,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_load_game,
                     borderColor = Color(0xFF49A84D),
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("loadgames/$id") {
                                 launchSingleTop = true
@@ -188,6 +198,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_profile,
                     borderColor = Color(0xFF9C27B0),
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("profile/$id") {
                                 launchSingleTop = true
@@ -228,6 +239,7 @@ fun SettingsScreen(
                             // Mute Toggle
                             Button(
                                 onClick = {
+                                    soundEffectService.playClickSound()
                                     coroutineScope.launch {
                                         musicService.setMuted(!musicMuted)
                                     }
@@ -313,6 +325,7 @@ fun SettingsScreen(
                             // Mute Toggle
                             Button(
                                 onClick = {
+                                    soundEffectService.playClickSound()
                                     coroutineScope.launch {
                                         soundEffectService.setMuted(!soundEffectsMuted)
                                     }
@@ -374,6 +387,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .height(80.dp)
                         .clickable {
+                            soundEffectService.playClickSound()
                             // Logout from both Firebase and Google Sign-In
                             authService.logout {
                                 coroutineScope.launch {

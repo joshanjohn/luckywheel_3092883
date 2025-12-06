@@ -23,11 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.griffith.luckywheel.models.data.ResultThemeData
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.models.enum.SpinActionType
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.theme.*
 
 @Composable
@@ -35,6 +37,16 @@ fun ResultCard(
     wheelResult: SpinWheelItem,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val soundEffectService = remember { SoundEffectService(context) }
+    
+    // Cleanup sound service on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            soundEffectService.release()
+        }
+    }
+    
     val resultTheme = rememberResultTheme(wheelResult)
     val scale = rememberEntranceAnimation()
     val glowAlpha = rememberPulsingGlow()
@@ -62,7 +74,8 @@ fun ResultCard(
                 ResultContent(
                     wheelResult = wheelResult,
                     theme = resultTheme,
-                    onDismiss = onDismiss
+                    onDismiss = onDismiss,
+                    soundEffectService = soundEffectService
                 )
             }
         }
@@ -195,7 +208,8 @@ private fun BoxScope.GlassBackground(theme: ResultThemeData) {
 private fun ResultContent(
     wheelResult: SpinWheelItem,
     theme: ResultThemeData,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    soundEffectService: SoundEffectService
 ) {
     Column(
         modifier = Modifier
@@ -223,7 +237,10 @@ private fun ResultContent(
         ActionButton(
             text = theme.buttonText,
             color = theme.primaryColor,
-            onClick = onDismiss
+            onClick = {
+                soundEffectService.playClickSound()
+                onDismiss()
+            }
         )
     }
 }
