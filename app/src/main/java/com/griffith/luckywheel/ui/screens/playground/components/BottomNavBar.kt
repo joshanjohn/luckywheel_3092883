@@ -13,11 +13,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
@@ -25,6 +28,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.griffith.luckywheel.models.data.BottomNavItem
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.theme.extraDarkerGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import kotlin.collections.forEach
@@ -32,6 +36,16 @@ import kotlin.collections.forEach
 
 @Composable
 fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
+    val context = LocalContext.current
+    val soundEffectService = remember { SoundEffectService(context) }
+    
+    // Cleanup sound service on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            soundEffectService.release()
+        }
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,6 +77,7 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
                             .background(if (selected) extraDarkerGreenColor else Color.Transparent)
                             .clickable {
                                 if (!selected) {
+                                    soundEffectService.playBubbleClickSound()
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.startDestinationId) {
                                             saveState = true

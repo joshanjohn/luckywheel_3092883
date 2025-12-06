@@ -17,14 +17,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,7 +49,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
+import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.settings.components.GameModeButton
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
@@ -58,7 +69,35 @@ fun SettingsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var playerId by remember { mutableStateOf<String?>(null) }
+    val musicService = remember { BackgroundMusicService.getInstance(context) }
+    val soundEffectService = remember { SoundEffectService(context) }
+    
+    // Music state
+    val musicVolume by dataStoreService.getMusicVolume().collectAsState(initial = 0.5f)
+    val musicMuted by dataStoreService.getMusicMuted().collectAsState(initial = false)
+    var volumeSlider by remember { mutableFloatStateOf(0.5f) }
+    
+    // Sound effects state
+    val soundEffectsVolume by dataStoreService.getSoundEffectsVolume().collectAsState(initial = 0.7f)
+    val soundEffectsMuted by dataStoreService.getSoundEffectsMuted().collectAsState(initial = false)
+    var soundEffectsVolumeSlider by remember { mutableFloatStateOf(0.7f) }
+    
+    // Initialize volume sliders
+    LaunchedEffect(musicVolume) {
+        volumeSlider = musicVolume
+    }
+    
+    LaunchedEffect(soundEffectsVolume) {
+        soundEffectsVolumeSlider = soundEffectsVolume
+    }
 
+    // Cleanup sound service on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            soundEffectService.release()
+        }
+    }
+    
     LaunchedEffect(Unit) {
         val player = dataStoreService.getPlayer()
         playerId = player.playerId.takeIf { it.isNotEmpty() }
@@ -106,6 +145,7 @@ fun SettingsScreen(
                     gradientColors = listOf(Color(0xFF07361D), Color(0xFF0BA136), Color(0xFF07361D)),
                     borderColor = lightGreenColor,
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("play/$id") {
                                 popUpTo("settings") { inclusive = true }
@@ -121,6 +161,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_custom_game,
                     borderColor = goldColor,
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             // Navigate to custom wheel via saved state
                             navController.navigate("play/$id") {
@@ -141,6 +182,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_load_game,
                     borderColor = Color(0xFF49A84D),
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("loadgames/$id") {
                                 launchSingleTop = true
@@ -156,6 +198,7 @@ fun SettingsScreen(
                     icon = R.drawable.icon_profile,
                     borderColor = Color(0xFF9C27B0),
                     onClick = {
+                        soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("profile/$id") {
                                 launchSingleTop = true
@@ -163,6 +206,174 @@ fun SettingsScreen(
                         }
                     }
                 )
+                
+                // Music Controls Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF0A2818)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Music Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "BACKGROUND MUSIC",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = goldColor,
+                                fontFamily = BubbleFontFamily
+                            )
+                            // Mute Toggle
+                            Button(
+                                onClick = {
+                                    soundEffectService.playClickSound()
+                                    coroutineScope.launch {
+                                        musicService.setMuted(!musicMuted)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (musicMuted) Color.Gray else lightGreenColor
+                                )
+                            ) {
+                                Text(
+                                    text = if (musicMuted) "UNMUTE" else "MUTE",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        
+                        // Volume Slider
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Volume: ${(volumeSlider * 100).toInt()}%",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Slider(
+                                value = volumeSlider,
+                                onValueChange = { newValue ->
+                                    volumeSlider = newValue
+                                },
+                                onValueChangeFinished = {
+                                    coroutineScope.launch {
+                                        musicService.setVolume(volumeSlider)
+                                    }
+                                },
+                                enabled = !musicMuted,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = goldColor,
+                                    activeTrackColor = lightGreenColor,
+                                    inactiveTrackColor = Color.Gray,
+                                    disabledThumbColor = Color.Gray,
+                                    disabledActiveTrackColor = Color.DarkGray
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Sound Effects Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1E1E1E)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Sound Effects Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "SOUND EFFECTS",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = goldColor,
+                                fontFamily = BubbleFontFamily
+                            )
+                            // Mute Toggle
+                            Button(
+                                onClick = {
+                                    soundEffectService.playClickSound()
+                                    coroutineScope.launch {
+                                        soundEffectService.setMuted(!soundEffectsMuted)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (soundEffectsMuted) Color.Gray else lightGreenColor
+                                )
+                            ) {
+                                Text(
+                                    text = if (soundEffectsMuted) "UNMUTE" else "MUTE",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        
+                        // Volume Slider
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Volume: ${(soundEffectsVolumeSlider * 100).toInt()}%",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Slider(
+                                value = soundEffectsVolumeSlider,
+                                onValueChange = { newValue ->
+                                    soundEffectsVolumeSlider = newValue
+                                },
+                                onValueChangeFinished = {
+                                    coroutineScope.launch {
+                                        soundEffectService.setVolume(soundEffectsVolumeSlider)
+                                    }
+                                },
+                                enabled = !soundEffectsMuted,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = goldColor,
+                                    activeTrackColor = lightGreenColor,
+                                    inactiveTrackColor = Color.Gray,
+                                    disabledThumbColor = Color.Gray,
+                                    disabledActiveTrackColor = Color.DarkGray
+                                )
+                            )
+                        }
+                    }
+                }
             }
 
             // Logout Button
@@ -176,6 +387,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .height(80.dp)
                         .clickable {
+                            soundEffectService.playClickSound()
                             // Logout from both Firebase and Google Sign-In
                             authService.logout {
                                 coroutineScope.launch {

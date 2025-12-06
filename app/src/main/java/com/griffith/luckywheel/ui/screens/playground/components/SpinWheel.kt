@@ -5,6 +5,8 @@ import android.graphics.Rect
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -34,8 +36,32 @@ import kotlin.math.sin
 fun SpinWheel(
     items: List<com.griffith.luckywheel.models.data.SpinWheelItem>,
     rotationDegrees: Float,
+    onSegmentChange: ((Int) -> Unit)? = null
 ) {
     val textMeasurer = rememberTextMeasurer()
+    
+    // Calculate current segment based on rotation
+    val currentSegment = remember(rotationDegrees) {
+        val normalizedAngle = (rotationDegrees + 90f) % 360f
+        val correctedAngle = (360f - normalizedAngle) % 360f
+        var cumulativeAngle = 0f
+        var segmentIndex = 0
+        
+        for ((index, item) in items.withIndex()) {
+            val sliceAngle = item.percent * 360f
+            if (correctedAngle in cumulativeAngle..(cumulativeAngle + sliceAngle)) {
+                segmentIndex = index
+                break
+            }
+            cumulativeAngle += sliceAngle
+        }
+        segmentIndex
+    }
+    
+    // Trigger callback when segment changes
+    androidx.compose.runtime.LaunchedEffect(currentSegment) {
+        onSegmentChange?.invoke(currentSegment)
+    }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         val centerX = size.width / 2

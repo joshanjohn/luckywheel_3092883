@@ -1,13 +1,16 @@
 package com.griffith.luckywheel.services
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.griffith.luckywheel.models.data.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 private val Context.playerPrefDataStore by preferencesDataStore(name = "player_pref")
@@ -21,6 +24,10 @@ class DataStoreService(private val context: Context) {
         val PLAYER_ID = stringPreferencesKey("player_id")
         val PLAYER_NAME = stringPreferencesKey("player_name")
         val GOLD = intPreferencesKey("gold")
+       private val MUSIC_VOLUME = floatPreferencesKey("music_volume")
+    private val MUSIC_MUTED = booleanPreferencesKey("music_muted")
+    private val SOUND_EFFECTS_VOLUME = floatPreferencesKey("sound_effects_volume")
+    private val SOUND_EFFECTS_MUTED = booleanPreferencesKey("sound_effects_muted")
     }
 
     // Save (or replace) player data - runs on IO thread
@@ -57,5 +64,53 @@ class DataStoreService(private val context: Context) {
     // Clear all player data - runs on IO thread
     suspend fun clear() = withContext(Dispatchers.IO) {
         dataStore.edit { prefs -> prefs.clear() }
+    }
+    
+    // Save music volume (0.0 to 1.0)
+    suspend fun saveMusicVolume(volume: Float) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[MUSIC_VOLUME] = volume.coerceIn(0f, 1f)
+        }
+    }
+    
+    // Get music volume
+    fun getMusicVolume() = dataStore.data.map { prefs ->
+        prefs[MUSIC_VOLUME] ?: 0.5f
+    }
+    
+    // Save music muted state
+    suspend fun saveMusicMuted(muted: Boolean) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[MUSIC_MUTED] = muted
+        }
+    }
+    
+    // Get music muted state
+    fun getMusicMuted() = dataStore.data.map { prefs ->
+        prefs[MUSIC_MUTED] ?: false
+    }
+    
+    // Save sound effects volume (0.0 to 1.0)
+    suspend fun saveSoundEffectsVolume(volume: Float) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[SOUND_EFFECTS_VOLUME] = volume.coerceIn(0f, 1f)
+        }
+    }
+    
+    // Get sound effects volume
+    fun getSoundEffectsVolume() = dataStore.data.map { prefs ->
+        prefs[SOUND_EFFECTS_VOLUME] ?: 0.7f
+    }
+    
+    // Save sound effects muted state
+    suspend fun saveSoundEffectsMuted(muted: Boolean) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[SOUND_EFFECTS_MUTED] = muted
+        }
+    }
+    
+    // Get sound effects muted state
+    fun getSoundEffectsMuted() = dataStore.data.map { prefs ->
+        prefs[SOUND_EFFECTS_MUTED] ?: false
     }
 }

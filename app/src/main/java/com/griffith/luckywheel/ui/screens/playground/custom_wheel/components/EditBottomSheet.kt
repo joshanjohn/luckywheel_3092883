@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
@@ -54,6 +55,14 @@ fun EditBottomSheet(
     var gameName by remember(currentGameName) { mutableStateOf(currentGameName ?: "") }
     val context = LocalContext.current
     val firebaseService = remember { FireBaseService() }
+    val soundEffectService = remember { SoundEffectService(context) }
+    
+    // Cleanup sound service on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            soundEffectService.release()
+        }
+    }
 
     fun rebalanceItemPercentagesAfterChange(
         items: List<SpinWheelItem>,
@@ -118,7 +127,10 @@ fun EditBottomSheet(
 
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = darkerGreenColor),
-                    onClick = { showSaveDialog = true },
+                    onClick = { 
+                        soundEffectService.playClickSound()
+                        showSaveDialog = true 
+                    },
                     enabled = wheelItems.isNotEmpty() && playerId != null
                 ) {
                     Row(
@@ -145,13 +157,30 @@ fun EditBottomSheet(
                 var tempColor by remember(item) { mutableStateOf(item.color) }
                 var tempPercent by remember(item) { mutableStateOf(item.percent.coerceIn(0f, 1f)) }
 
-                val colorfulSuggestions = remember(item) {
-                    List(5) {
-                        // Generate vibrant colors by maxing out at least one channel
+                var colorfulSuggestions by remember(item) {
+                    mutableStateOf(
+                        List(5) {
+                            // Generate vibrant colors by maxing out at least one channel
+                            val channels = listOf(
+                                Random.nextInt(50, 201),
+                                Random.nextInt(50, 201),
+                                255 // Always have one channel at max
+                            ).shuffled()
+                            Color(
+                                red = channels[0],
+                                green = channels[1],
+                                blue = channels[2]
+                            )
+                        }
+                    )
+                }
+
+                fun regenerateColors() {
+                    colorfulSuggestions = List(5) {
                         val channels = listOf(
                             Random.nextInt(50, 201),
                             Random.nextInt(50, 201),
-                            255 // Always have one channel at max
+                            255
                         ).shuffled()
                         Color(
                             red = channels[0],
@@ -243,20 +272,47 @@ fun EditBottomSheet(
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                colorfulSuggestions.forEach { color ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .clip(CircleShape)
-                                            .background(color)
-                                            .border(
-                                                if (tempColor == color) 2.dp else 1.dp,
-                                                if (tempColor == color) Color.White else Color.Gray,
-                                                CircleShape
-                                            )
-                                            .clickable { tempColor = color }
+                                // Color palette circles
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    colorfulSuggestions.forEach { color ->
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(color)
+                                                .border(
+                                                    if (tempColor == color) 2.dp else 1.dp,
+                                                    if (tempColor == color) Color.White else Color.Gray,
+                                                    CircleShape
+                                                )
+                                                .clickable { tempColor = color }
+                                        )
+                                    }
+                                }
+                                
+                                // Random/Shuffle button
+                                IconButton(
+                                    onClick = {
+                                        soundEffectService.playClickSound()
+                                        regenerateColors()
+                                    },
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF0B3A24))
+                                        .border(1.dp, goldColor, CircleShape)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.icon_refresh),
+                                        contentDescription = "Shuffle Colors",
+                                        tint = goldColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
@@ -360,6 +416,7 @@ fun EditBottomSheet(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        soundEffectService.playClickSound()
                         if (gameName.isBlank()) {
                             Toast.makeText(context, "Please enter a game name", Toast.LENGTH_SHORT).show()
                             return@TextButton
@@ -398,7 +455,10 @@ fun EditBottomSheet(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) {
+                TextButton(onClick = { 
+                    soundEffectService.playClickSound()
+                    showSaveDialog = false 
+                }) {
                     Text("Cancel", color = Color.White)
                 }
             },
