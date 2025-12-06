@@ -17,14 +17,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
+import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.screens.settings.components.GameModeButton
@@ -58,6 +68,17 @@ fun SettingsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var playerId by remember { mutableStateOf<String?>(null) }
+    val musicService = remember { BackgroundMusicService.getInstance(context) }
+    
+    // Music state
+    val musicVolume by dataStoreService.getMusicVolume().collectAsState(initial = 0.5f)
+    val musicMuted by dataStoreService.getMusicMuted().collectAsState(initial = false)
+    var volumeSlider by remember { mutableFloatStateOf(0.5f) }
+    
+    // Initialize volume slider
+    LaunchedEffect(musicVolume) {
+        volumeSlider = musicVolume
+    }
 
     LaunchedEffect(Unit) {
         val player = dataStoreService.getPlayer()
@@ -163,6 +184,87 @@ fun SettingsScreen(
                         }
                     }
                 )
+                
+                // Music Controls Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF0A2818)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Music Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "BACKGROUND MUSIC",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = goldColor,
+                                fontFamily = BubbleFontFamily
+                            )
+                            // Mute Toggle
+                            Button(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        musicService.setMuted(!musicMuted)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (musicMuted) Color.Gray else lightGreenColor
+                                )
+                            ) {
+                                Text(
+                                    text = if (musicMuted) "UNMUTE" else "MUTE",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        
+                        // Volume Slider
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Volume: ${(volumeSlider * 100).toInt()}%",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Slider(
+                                value = volumeSlider,
+                                onValueChange = { newValue ->
+                                    volumeSlider = newValue
+                                },
+                                onValueChangeFinished = {
+                                    coroutineScope.launch {
+                                        musicService.setVolume(volumeSlider)
+                                    }
+                                },
+                                enabled = !musicMuted,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = goldColor,
+                                    activeTrackColor = lightGreenColor,
+                                    inactiveTrackColor = Color.Gray,
+                                    disabledThumbColor = Color.Gray,
+                                    disabledActiveTrackColor = Color.DarkGray
+                                )
+                            )
+                        }
+                    }
+                }
             }
 
             // Logout Button
