@@ -28,10 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
-import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.services.AuthenticationService
-import com.griffith.luckywheel.services.DataStoreService
-import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.utils.validateEmail
 import com.griffith.luckywheel.utils.validatePassword
 import com.griffith.luckywheel.ui.screens.auth.components.AuthBgWallpaper
@@ -39,7 +36,6 @@ import com.griffith.luckywheel.ui.screens.auth.components.AuthSubmitBtn
 import com.griffith.luckywheel.ui.screens.auth.components.CustomTextField
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import com.griffith.luckywheel.ui.theme.goldColor
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,10 +47,7 @@ fun RegisterScreen(navController: NavHostController) {
     var isLoading by remember { mutableStateOf(false) }
 
     val context = navController.context
-    val dataStoreService = remember { DataStoreService(context) }
     val authService = remember { AuthenticationService(context) }
-    val firebaseService = remember { FireBaseService() }
-    val coroutineScope = rememberCoroutineScope()
 
     // Google Sign-In Launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -62,25 +55,13 @@ fun RegisterScreen(navController: NavHostController) {
     ) { result ->
         isLoading = true
         authService.handleGoogleSignInResult(result.data) { success, message, userId ->
+            isLoading = false
             if (success && userId != null) {
-                coroutineScope.launch {
-                    val playerResult = firebaseService.getPlayerInfo(userId)
-                    isLoading = false
-                    
-                    playerResult.onSuccess { player ->
-                        dataStoreService.clear()
-                        dataStoreService.savePlayer(player)
-
-                        Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
-                        navController.navigate("play/$userId") {
-                            popUpTo("register") { inclusive = true }
-                        }
-                    }.onFailure { exception ->
-                        Toast.makeText(context, "Failed to load player data: ${exception.message}", Toast.LENGTH_SHORT).show()
-                    }
+                Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
+                navController.navigate("play/$userId") {
+                    popUpTo("register") { inclusive = true }
                 }
             } else {
-                isLoading = false
                 Toast.makeText(context, message ?: "Google sign in failed", Toast.LENGTH_SHORT).show()
             }
         }
@@ -113,25 +94,13 @@ fun RegisterScreen(navController: NavHostController) {
         isLoading = true
 
         authService.registerWithEmailPassword(name, email, password) { success, message, userId ->
+            isLoading = false
             if (success && userId != null) {
-                coroutineScope.launch {
-                    val playerResult = firebaseService.getPlayerInfoById(userId)
-                    isLoading = false
-                    
-                    playerResult.onSuccess { player ->
-                        dataStoreService.clear()
-                        dataStoreService.savePlayer(player)
-
-                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                        navController.navigate("play/$userId") {
-                            popUpTo("register") { inclusive = true }
-                        }
-                    }.onFailure { exception ->
-                        Toast.makeText(context, "Failed to load player data: ${exception.message}", Toast.LENGTH_SHORT).show()
-                    }
+                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                navController.navigate("play/$userId") {
+                    popUpTo("register") { inclusive = true }
                 }
             } else {
-                isLoading = false
                 Toast.makeText(
                     context,
                     message ?: "Failed to register",
