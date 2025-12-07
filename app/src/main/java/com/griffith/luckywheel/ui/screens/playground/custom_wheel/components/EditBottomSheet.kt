@@ -388,6 +388,7 @@ fun EditBottomSheet(
             // Add new item to wheel (max 6 items)
             Button(
                 onClick = {
+                    soundEffectService.playAddItemSound()
                     // Calculate equal percentage for all items including the new one
                     val totalItems = wheelItems.size + 1
                     val equalPercent = 1f / totalItems

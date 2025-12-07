@@ -15,6 +15,7 @@ class SoundEffectService(private val context: Context) {
     private var losePlayer: MediaPlayer? = null
     private var clickPlayer: MediaPlayer? = null
     private var bubbleClickPlayer: MediaPlayer? = null
+    private var addItemPlayer: MediaPlayer? = null
     private val dataStoreService = DataStoreService(context)
     private var currentVolume: Float = 0.7f
     private var isMuted: Boolean = false
@@ -105,6 +106,25 @@ class SoundEffectService(private val context: Context) {
             } else {
                 Log.w("SoundEffectService", "bubble_single_click not found in raw resources")
             }
+            
+            // Load add item sound
+            val addItemResourceId = context.resources.getIdentifier("add_item_single_click", "raw", context.packageName)
+            if (addItemResourceId != 0) {
+                addItemPlayer = MediaPlayer().apply {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .build()
+                    )
+                    setDataSource(context, android.net.Uri.parse("android.resource://${context.packageName}/$addItemResourceId"))
+                    prepare()
+                    setVolume(if (isMuted) 0f else currentVolume, if (isMuted) 0f else currentVolume)
+                }
+                Log.d("SoundEffectService", "Add item sound loaded successfully")
+            } else {
+                Log.w("SoundEffectService", "add_item_single_click not found in raw resources")
+            }
         } catch (e: Exception) {
             Log.e("SoundEffectService", "Failed to initialize sound effects", e)
         }
@@ -174,6 +194,22 @@ class SoundEffectService(private val context: Context) {
         }
     }
     
+    // Play add item sound effect (when adding custom wheel items)
+    fun playAddItemSound() {
+        try {
+            addItemPlayer?.let { player ->
+                if (player.isPlaying) {
+                    player.seekTo(0)
+                } else {
+                    player.start()
+                }
+                Log.d("SoundEffectService", "Playing add item sound")
+            }
+        } catch (e: Exception) {
+            Log.e("SoundEffectService", "Failed to play add item sound", e)
+        }
+    }
+    
     // Set sound effects volume (0.0 to 1.0)
     suspend fun setVolume(volume: Float) {
         currentVolume = volume.coerceIn(0f, 1f)
@@ -202,6 +238,7 @@ class SoundEffectService(private val context: Context) {
         losePlayer?.setVolume(effectiveVolume, effectiveVolume)
         clickPlayer?.setVolume(effectiveVolume, effectiveVolume)
         bubbleClickPlayer?.setVolume(effectiveVolume, effectiveVolume)
+        addItemPlayer?.setVolume(effectiveVolume, effectiveVolume)
     }
     
     // Release all resources
@@ -215,6 +252,8 @@ class SoundEffectService(private val context: Context) {
             clickPlayer = null
             bubbleClickPlayer?.release()
             bubbleClickPlayer = null
+            addItemPlayer?.release()
+            addItemPlayer = null
             Log.d("SoundEffectService", "Sound effects released")
         } catch (e: Exception) {
             Log.e("SoundEffectService", "Failed to release resources", e)
