@@ -33,7 +33,8 @@ import com.griffith.luckywheel.R
 @Composable
 fun AppBar(
     navController: NavHostController,
-    title: String = "Lucky Wheel"
+    title: String = "Lucky Wheel",
+    playerId: String? = null
 ) {
     val context = LocalContext.current
     val soundEffectService = remember { SoundEffectService(context) }
@@ -47,6 +48,9 @@ fun AppBar(
     
     val canGoBack = navController.previousBackStackEntry != null
     val currentScreen = navController.currentBackStackEntryAsState().value?.destination?.route
+    
+    // Extract playerId from current route if not provided
+    val currentPlayerId = playerId ?: navController.currentBackStackEntry?.arguments?.getString("playerId")
 
     TopAppBar(
         title = {
@@ -85,12 +89,14 @@ fun AppBar(
         },
         actions = {
 
-            if ((currentScreen != "settings")) {
+            if ((currentScreen != "settings/{playerId}")) {
                 IconButton(
                     onClick = { 
                         soundEffectService.playBubbleClickSound()
-                        navController.navigate("settings") {
-                            launchSingleTop = true
+                        currentPlayerId?.let { id ->
+                            navController.navigate("settings/$id") {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 ) {

@@ -150,7 +150,8 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
         topBar = {
             AppBar(
                 navController = navController,
-                title = "Profile"
+                title = "Profile",
+                playerId = playerId
             )
         },
         modifier = Modifier

@@ -210,7 +210,7 @@ fun GoldWheelScreen(
 
     // UI
     Scaffold(
-        topBar = { AppBar(navController) },
+        topBar = { AppBar(navController, playerId = playerId) },
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -241,7 +241,7 @@ fun GoldWheelScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     onClick = { 
                         soundEffectService.playBubbleClickSound()
-                        navController.navigate("leaderboard") {
+                        navController.navigate("leaderboard?playerId=$playerId") {
                             launchSingleTop = true
                         }
                     }

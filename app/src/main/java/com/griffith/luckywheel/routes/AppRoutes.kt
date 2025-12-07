@@ -31,11 +31,17 @@ fun AppRoute(startDestination: String = "login") {
         composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("forgotpassword") { ForgotPasswordScreen(navController) }
-        composable("settings") { SettingsScreen(navController) }
+        composable("settings/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            SettingsScreen(navController, playerId)
+        }
         composable("profile/{playerId}") { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
             ProfileScreen(navController, playerId)
         }
-        composable("leaderboard") { LeaderboardScreen(navController) }
+        composable("leaderboard?playerId={playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            LeaderboardScreen(navController, playerId)
+        }
     }
 }

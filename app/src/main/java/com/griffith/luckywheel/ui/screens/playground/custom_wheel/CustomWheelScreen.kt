@@ -153,7 +153,7 @@ fun CustomWheelScreen(
 
     //  UI
     Scaffold(
-        topBar = { AppBar(navController) },
+        topBar = { AppBar(navController, playerId = playerId) },
         modifier = Modifier
             .fillMaxSize()
             .background(

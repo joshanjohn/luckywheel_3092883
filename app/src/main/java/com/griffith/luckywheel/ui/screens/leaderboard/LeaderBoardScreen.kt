@@ -32,7 +32,8 @@ import java.util.Locale
 
 @Composable
 fun LeaderboardScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    playerId: String? = null
 ) {
     val firebaseService = remember { FireBaseService() }
 
@@ -65,6 +66,7 @@ fun LeaderboardScreen(
             AppBar(
                 navController = navController,
                 title = "Leaderboard",
+                playerId = playerId
             )
         },
         modifier = Modifier

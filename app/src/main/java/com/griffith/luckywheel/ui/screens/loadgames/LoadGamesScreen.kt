@@ -61,7 +61,8 @@ fun LoadGamesScreen(
         topBar = {
             AppBar(
                 navController = navController,
-                title = "Load Game"
+                title = "Load Game",
+                playerId = playerId
             )
         },
         modifier = Modifier

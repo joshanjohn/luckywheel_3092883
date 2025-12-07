@@ -61,14 +61,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    playerId: String?
 ) {
     val context = navController.context
     val dataStoreService = remember { DataStoreService(context) }
     val authService = remember { AuthenticationService(context) }
     val coroutineScope = rememberCoroutineScope()
 
-    var playerId by remember { mutableStateOf<String?>(null) }
     val musicService = remember { BackgroundMusicService.getInstance(context) }
     val soundEffectService = remember { SoundEffectService(context) }
     
@@ -96,11 +96,6 @@ fun SettingsScreen(
         onDispose {
             soundEffectService.release()
         }
-    }
-    
-    LaunchedEffect(Unit) {
-        val player = dataStoreService.getPlayer()
-        playerId = player.playerId.takeIf { it.isNotEmpty() }
     }
 
     Scaffold(
@@ -148,7 +143,7 @@ fun SettingsScreen(
                         soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("play/$id") {
-                                popUpTo("settings") { inclusive = true }
+                                launchSingleTop = true
                             }
                         }
                     }
@@ -163,14 +158,14 @@ fun SettingsScreen(
                     onClick = {
                         soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
-                            // Navigate to custom wheel via saved state
+                            // First navigate to the play screen
                             navController.navigate("play/$id") {
-                                popUpTo("settings") { inclusive = true }
+                                launchSingleTop = true
                             }
-                            // Set a flag to navigate to custom wheel tab
-                            navController.currentBackStackEntry
-                                ?.savedStateHandle
-                                ?.set("navigate_to_custom", true)
+                            // Then set the flag on the destination's saved state
+                            navController.getBackStackEntry("play/$id")
+                                .savedStateHandle
+                                .set("navigate_to_custom", true)
                         }
                     }
                 )
