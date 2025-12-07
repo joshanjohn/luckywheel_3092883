@@ -34,22 +34,22 @@ import com.griffith.luckywheel.R
 fun AppBar(
     navController: NavHostController,
     title: String = "Lucky Wheel",
-    playerId: String? = null
+    playerId: String? = null // Optional playerId for navigation to settings
 ) {
     val context = LocalContext.current
     val soundEffectService = remember { SoundEffectService(context) }
     
-    // Cleanup sound service on dispose
+    // Clean up sound service when AppBar is destroyed
     DisposableEffect(Unit) {
         onDispose {
             soundEffectService.release()
         }
     }
     
-    val canGoBack = navController.previousBackStackEntry != null
+    val canGoBack = navController.previousBackStackEntry != null // Check if back navigation is available
     val currentScreen = navController.currentBackStackEntryAsState().value?.destination?.route
     
-    // Extract playerId from current route if not provided
+    // Extract playerId from current route if not explicitly provided
     val currentPlayerId = playerId ?: navController.currentBackStackEntry?.arguments?.getString("playerId")
 
     TopAppBar(

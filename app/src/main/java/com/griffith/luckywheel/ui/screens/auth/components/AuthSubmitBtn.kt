@@ -19,6 +19,7 @@ import com.griffith.luckywheel.ui.theme.darkGreenColor
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 
+// Auth Button component
 @Composable
 fun AuthSubmitBtn(
     label: String,
@@ -45,6 +46,7 @@ fun AuthSubmitBtn(
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         contentPadding = PaddingValues(vertical = 20.dp)
     ) {
+        // button text
         Text(
             text = label,
             fontSize = 18.sp,

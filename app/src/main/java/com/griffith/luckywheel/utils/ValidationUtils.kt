@@ -17,3 +17,12 @@ fun validateEmail(email: String): String? {
     if (!emailRegex.matches(email)) return "Invalid email format"
     return null
 }
+
+// Truncates text to maxLength and adds ellipsis (...) if text exceeds the limit
+fun truncateText(text: String, maxLength: Int = 12): String {
+    return if (text.length > maxLength) {
+        text.take(maxLength) + "..."
+    } else {
+        text
+    }
+}

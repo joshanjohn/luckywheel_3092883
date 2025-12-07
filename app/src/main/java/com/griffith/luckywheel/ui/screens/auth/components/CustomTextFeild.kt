@@ -19,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+// customized text field component
 @Composable
 fun CustomTextField(
     value: String,
@@ -46,7 +47,7 @@ fun CustomTextField(
 
         textStyle = LocalTextStyle.current.copy(color = Color.White),
         shape = RoundedCornerShape(16.dp),
-        visualTransformation = if (isPassword && !passwordVisible)
+        visualTransformation = if (isPassword && !passwordVisible) // only for password
             PasswordVisualTransformation()
         else
             VisualTransformation.None,
