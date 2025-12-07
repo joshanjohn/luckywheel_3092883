@@ -8,9 +8,10 @@ import androidx.compose.ui.unit.dp
 import com.griffith.luckywheel.models.data.PlayerRank
 import com.griffith.luckywheel.ui.screens.leaderboard.LeaderboardItem
 
-
+// leaderBoard List View component
 @Composable
 fun LeaderboardListView(entries: List<PlayerRank>) {
+    // scrollable list
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(entries, key = { it.id }) { entry ->
             LeaderboardItem(entry = entry)

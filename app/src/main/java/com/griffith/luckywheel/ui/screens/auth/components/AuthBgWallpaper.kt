@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+
+// for background wallpaper wrapper
 @Composable
 fun AuthBgWallpaper(
     content: @Composable () -> Unit
@@ -25,27 +27,6 @@ fun AuthBgWallpaper(
                 )
             )
     ) {
-
-
-//        Image(
-//            painter = painterResource(id = R.drawable.bg),
-//            contentDescription = "Background Overlay",
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .alpha(0.1f) // Adjust this for blend strength (0.0–1.0)
-//        )
-//
-//        Image(
-//            painter = painterResource(id = R.drawable.bgco),
-//            contentDescription = "Background Overlay",
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .alpha(0.2f) // Adjust this for blend strength (0.0–1.0)
-//        )
-
-
         content()
     }
 }

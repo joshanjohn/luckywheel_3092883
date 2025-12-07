@@ -126,6 +126,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
 
                         Spacer(Modifier.height(32.dp))
 
+                        //email
                         CustomTextField(
                             value = email,
                             onValueChange = { email = it },
@@ -199,6 +200,7 @@ fun ForgotPasswordScreen(navController: NavHostController) {
 
                         Spacer(Modifier.height(24.dp))
 
+                        // instructions
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
