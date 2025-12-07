@@ -93,17 +93,18 @@ fun GoldWheelScreen(
     val hapticService = remember { HapticFeedbackService(context) }
     val soundEffectService = remember { SoundEffectService(context) }
 
-    //  Wheel Items - Now randomized after each spin
+    // Wheel items - randomized after each spin for variety
     var wheelItems by remember { 
         mutableStateOf(
             generateRandomGoldWheelItems(lightGreenColor, Color(0xFF062E12))
         )
     }
 
+    // Player data - synced with Firebase in real-time
     var playerGold by remember { mutableIntStateOf(0) }
     var playerName by remember { mutableStateOf("") }
 
-    // Firebase listener
+    // Listen to Firebase for real-time player data updates
     DisposableEffect(playerId) {
         if (playerId.isNullOrBlank()) onDispose {}
         else {
@@ -112,43 +113,44 @@ fun GoldWheelScreen(
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val player = snapshot.getValue(Player::class.java)
                     player?.let {
-                        playerGold = it.gold
+                        playerGold = it.gold // Update local gold when Firebase changes
                         playerName = it.playerName
                     }
                 }
                 override fun onCancelled(error: DatabaseError) {}
             }
             playerRef.addValueEventListener(listener)
-            onDispose { playerRef.removeEventListener(listener) }
+            onDispose { playerRef.removeEventListener(listener) } // Clean up listener
         }
     }
 
-    //  Spin Logic variables
-    var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
-    var rotationSpeed by remember { mutableFloatStateOf(0f) }
+    // Spin mechanics - controls wheel rotation and physics
+    var currentRotationDegrees by remember { mutableFloatStateOf(0f) } // Current wheel angle (0-360)
+    var rotationSpeed by remember { mutableFloatStateOf(0f) } // Speed decreases over time (friction)
     var showResultDialog by remember { mutableStateOf(false) }
     var lastSpinResult by remember { mutableStateOf<SpinWheelItem?>(null) }
-    val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
-    var sensorEnabled by remember { mutableStateOf(false) }
+    val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } } // True when wheel is moving
+    var sensorEnabled by remember { mutableStateOf(false) } // Controls shake detection
     val coroutineScope = rememberCoroutineScope()
-    var lastSegment by remember { mutableIntStateOf(-1) }
+    var lastSegment by remember { mutableIntStateOf(-1) } // Track segment changes for haptic feedback
 
+    // Called when wheel stops spinning - processes the result
     fun processResult() {
-        val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
+        val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems) // Determine which segment won
         lastSpinResult = resultItem
-        playerGold = updatePlayerGold(playerGold, resultItem)
-        // Update gold in Firebase (fire-and-forget)
+        playerGold = updatePlayerGold(playerGold, resultItem) // Calculate new gold amount
+        // Save updated gold to Firebase (async, don't wait for response)
         playerId?.let { id ->
             coroutineScope.launch {
                 fireBaseService.updatePlayerGold(id, playerGold)
             }
         }
         showResultDialog = true
-        sensorEnabled = false
+        sensorEnabled = false // Disable shake detection
         // Strong vibration when wheel stops
         hapticService.strongVibration()
         
-        // Play appropriate sound based on result
+        // Play win or lose sound based on result type
         resultItem?.let { item ->
             when (item.type) {
                 SpinActionType.GAIN_GOLD, SpinActionType.MULTIPLY_GOLD -> {
@@ -165,43 +167,43 @@ fun GoldWheelScreen(
         wheelItems = generateRandomGoldWheelItems(lightGreenColor, Color(0xFF062E12))
     }
 
-    //  Shake Detection
+    // Shake detection - uses phone's accelerometer to spin the wheel
     DisposableEffect(sensorEnabled) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (!sensorEnabled || event == null) return
-                val (x, y, z) = event.values
-                val magnitude = sqrt(x * x + y * y + z * z) - 9.8f
-                if (magnitude > 2f) rotationSpeed += magnitude * 0.5f
+                val (x, y, z) = event.values // Get acceleration in all 3 axes
+                val magnitude = sqrt(x * x + y * y + z * z) - 9.8f // Subtract gravity (9.8 m/s²)
+                if (magnitude > 2f) rotationSpeed += magnitude * 0.5f // Add speed based on shake intensity
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
         sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        onDispose { sensorManager.unregisterListener(listener) }
+        onDispose { sensorManager.unregisterListener(listener) } // Clean up sensor listener
     }
     
-    // Cleanup haptic service on dispose
+    // Clean up services when screen is destroyed
     DisposableEffect(Unit) {
         onDispose { 
-            hapticService.cancel()
-            soundEffectService.release()
+            hapticService.cancel() // Stop any ongoing vibrations
+            soundEffectService.release() // Release audio resources
         }
     }
 
-    // Rotation logic
+    // Animation loop - runs every 16ms (~60 FPS)
     LaunchedEffect(Unit) {
         while (true) {
             if (rotationSpeed > 0f) {
-                currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360
-                rotationSpeed *= 0.99f
-                if (rotationSpeed < 0.1f) {
+                currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360 // Update rotation angle
+                rotationSpeed *= 0.99f // Apply friction - speed decreases by 1% each frame
+                if (rotationSpeed < 0.1f) { // Wheel has stopped
                     rotationSpeed = 0f
-                    processResult()
+                    processResult() // Calculate and show result
                 }
             }
-            delay(16)
+            delay(16) // Wait 16ms for next frame (60 FPS)
         }
     }
 
