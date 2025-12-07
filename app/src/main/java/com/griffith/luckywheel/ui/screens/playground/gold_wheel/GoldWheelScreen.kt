@@ -68,6 +68,7 @@ import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.models.enum.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.logic.generateRandomGoldWheelItems
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.goldColor
@@ -92,17 +93,10 @@ fun GoldWheelScreen(
     val hapticService = remember { HapticFeedbackService(context) }
     val soundEffectService = remember { SoundEffectService(context) }
 
-    //  Wheel Items Default
-    val wheelItems = remember {
-        listOf(
-            SpinWheelItem("+100", lightGreenColor, SpinActionType.GAIN_GOLD, 100, 0.125f),
-            SpinWheelItem("2x GOLD", Color(0xFF062E12), SpinActionType.MULTIPLY_GOLD, 2, 0.125f),
-            SpinWheelItem("-200", lightGreenColor, SpinActionType.LOSE_GOLD, 200, 0.125f),
-            SpinWheelItem("+500", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 500, 0.125f),
-            SpinWheelItem("LOSE ALL", lightGreenColor, SpinActionType.LOSE_GOLD, Int.MAX_VALUE, 0.125f),
-            SpinWheelItem("+250", Color(0xFF062E12), SpinActionType.GAIN_GOLD, 250, 0.125f),
-            SpinWheelItem("-1000", lightGreenColor, SpinActionType.LOSE_GOLD, 1000, 0.125f),
-            SpinWheelItem("3x GOLD", Color(0xFF062E12), SpinActionType.MULTIPLY_GOLD, 3, 0.125f),
+    //  Wheel Items - Now randomized after each spin
+    var wheelItems by remember { 
+        mutableStateOf(
+            generateRandomGoldWheelItems(lightGreenColor, Color(0xFF062E12))
         )
     }
 
@@ -166,6 +160,9 @@ fun GoldWheelScreen(
                 else -> {}
             }
         }
+        
+        // Generate new random wheel items for the next spin
+        wheelItems = generateRandomGoldWheelItems(lightGreenColor, Color(0xFF062E12))
     }
 
     //  Shake Detection
