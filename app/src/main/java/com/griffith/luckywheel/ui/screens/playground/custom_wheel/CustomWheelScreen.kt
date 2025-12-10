@@ -226,7 +226,18 @@ fun CustomWheelScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                // Only allow opening edit sheet when wheel is not spinning
+                                if (!isSpinning) {
+                                    soundEffectService.playClickSound()
+                                    showBottomSheet = true
+                                }
+                            }
+                        )
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 SpinWheel(

@@ -161,13 +161,8 @@ fun EditBottomSheet(
 
             //  Expandable Cards List
             wheelItems.forEachIndexed { index, item ->
-                // Temporary state for editing - only applied when "Save Changes" is clicked
-                var tempLabel by remember(item) { mutableStateOf(item.label) }
-                var tempColor by remember(item) { mutableStateOf(item.color) }
-                var tempPercent by remember(item) { mutableStateOf(item.percent.coerceIn(0f, 1f)) }
-
-                // Generate 5 random vibrant colors for color picker
-                var colorfulSuggestions by remember(item) {
+                // Generate 5 random vibrant colors for color picker - use index as key to prevent regeneration during typing
+                var colorfulSuggestions by remember(index) {
                     mutableStateOf(
                         List(5) {
                             // Generate vibrant colors by maxing out at least one RGB channel
@@ -219,7 +214,7 @@ fun EditBottomSheet(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .clip(CircleShape)
-                                        .background(tempColor)
+                                        .background(item.color)
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 Text(
@@ -233,12 +228,6 @@ fun EditBottomSheet(
                                 // Toggle edit mode for this item
                                 IconButton(onClick = {
                                     expandedIndex = if (expandedIndex == index) null else index
-                                    if (expandedIndex == index) {
-                                        // Reset temp values when opening editor
-                                        tempLabel = item.label
-                                        tempColor = item.color
-                                        tempPercent = item.percent.coerceIn(0f, 1f)
-                                    }
                                 }) {
                                     Icon(
                                         imageVector = if (expandedIndex == index)
@@ -265,19 +254,23 @@ fun EditBottomSheet(
                             Spacer(Modifier.height(8.dp))
 
                             OutlinedTextField(
-                                value = tempLabel,
+                                value = item.label,
                                 onValueChange = { newValue ->
-                                    // Limit input to 20 characters max
+                                    // Limit input to 20 characters max and update immediately
                                     if (newValue.length <= 20) {
-                                        tempLabel = newValue
+                                        val updatedList = wheelItems.mapIndexed { i, wheelItem ->
+                                            if (i == index) wheelItem.copy(label = newValue)
+                                            else wheelItem
+                                        }
+                                        onUpdateItems(updatedList)
                                     }
                                 },
                                 label = { Text("Label (max 20 chars)") },
                                 singleLine = true,
                                 supportingText = {
                                     Text(
-                                        "${tempLabel.length}/20",
-                                        color = if (tempLabel.length > 12) Color(0xFFFFD700) else Color.Gray
+                                        "${item.label.length}/20",
+                                        color = if (item.label.length > 12) Color(0xFFFFD700) else Color.Gray
                                     )
                                 },
                                 colors = TextFieldDefaults.colors(
@@ -313,11 +306,18 @@ fun EditBottomSheet(
                                                 .clip(CircleShape)
                                                 .background(color)
                                                 .border(
-                                                    if (tempColor == color) 2.dp else 1.dp,
-                                                    if (tempColor == color) Color.White else Color.Gray,
+                                                    if (item.color == color) 2.dp else 1.dp,
+                                                    if (item.color == color) Color.White else Color.Gray,
                                                     CircleShape
                                                 )
-                                                .clickable { tempColor = color }
+                                                .clickable {
+                                                    // Update color immediately
+                                                    val updatedList = wheelItems.mapIndexed { i, wheelItem ->
+                                                        if (i == index) wheelItem.copy(color = color)
+                                                        else wheelItem
+                                                    }
+                                                    onUpdateItems(updatedList)
+                                                }
                                         )
                                     }
                                 }
@@ -344,12 +344,18 @@ fun EditBottomSheet(
                             }
 
                             Spacer(Modifier.height(8.dp))
-                            val percentDisplay = (tempPercent * 100).toInt() // Convert 0-1 to 0-100 for display
+                            val percentDisplay = (item.percent * 100).toInt() // Convert 0-1 to 0-100 for display
                             Text("Set Percentage: $percentDisplay%", color = Color.White)
 
                             Slider(
-                                value = tempPercent,
-                                onValueChange = { tempPercent = it.coerceIn(0f, 1f) },
+                                value = item.percent,
+                                onValueChange = { newPercent ->
+                                    // Update percentage immediately and rebalance other items
+                                    val updatedList = rebalanceItemPercentagesAfterChange(
+                                        wheelItems, index, newPercent.coerceIn(0f, 1f)
+                                    )
+                                    onUpdateItems(normalizePercentagesToOne(updatedList))
+                                },
                                 valueRange = 0f..1f,
                                 steps = 99, // 100 discrete steps (0%, 1%, 2%, ... 100%)
                                 colors = SliderDefaults.colors(
@@ -357,29 +363,6 @@ fun EditBottomSheet(
                                     activeTrackColor = lightGreenColor
                                 )
                             )
-
-                            Spacer(Modifier.height(12.dp))
-
-                            // Apply changes to this item
-                            Button(
-                                onClick = {
-                                    // Rebalance percentages and update label/color for this item
-                                    val updatedList = rebalanceItemPercentagesAfterChange(
-                                        wheelItems, index, tempPercent
-                                    ).mapIndexed { i, wheelItem ->
-                                        if (i == index)
-                                            wheelItem.copy(label = tempLabel, color = tempColor)
-                                        else wheelItem
-                                    }
-
-                                    onUpdateItems(normalizePercentagesToOne(updatedList))
-                                    expandedIndex = null // Close editor
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = darkerGreenColor)
-                            ) {
-                                Text("Save Changes", color = Color.White)
-                            }
                         }
                     }
                 }
