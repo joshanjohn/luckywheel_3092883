@@ -12,6 +12,7 @@ import com.griffith.luckywheel.ui.screens.loadgames.LoadGamesScreen
 import com.griffith.luckywheel.ui.screens.playground.PlaygroundScreen
 import com.griffith.luckywheel.ui.screens.profile.ProfileScreen
 import com.griffith.luckywheel.ui.screens.settings.SettingsScreen
+import com.griffith.luckywheel.ui.screens.tutorial.TutorialScreen
 
 // Main navigation router for the app - defines all screen routes
 @Composable
@@ -52,6 +53,11 @@ fun AppRoute(startDestination: String = "login") {
         composable("leaderboard?playerId={playerId}") { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
             LeaderboardScreen(navController, playerId)
+        }
+        
+        // Tutorial screen - how to play guide
+        composable("tutorial") {
+            TutorialScreen(navController)
         }
     }
 }
