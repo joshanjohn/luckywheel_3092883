@@ -202,6 +202,21 @@ fun SettingsScreen(
                     }
                 )
                 
+                // How to Play Card
+                GameModeButton(
+                    title = "HOW TO PLAY",
+                    description = "Learn how to use the app",
+                    icon = R.drawable.icon_how_to_play,
+                    borderColor = Color(0xFF49A84D),
+                    gradientColors = listOf(Color(0xFF07361D), Color(0xFF0BA136), Color(0xFF07361D)),
+                    onClick = {
+                        soundEffectService.playBubbleClickSound()
+                        navController.navigate("tutorial") {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+                
                 // Music Controls Card
                 Card(
                     modifier = Modifier
