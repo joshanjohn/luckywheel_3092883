@@ -28,7 +28,10 @@ import com.griffith.luckywheel.utils.formatNumberCompact
 
 // Podium display for top 3 players with circular badge design
 @Composable
-fun PodiumDisplay(topPlayers: List<PlayerRank>) {
+fun PodiumDisplay(
+    topPlayers: List<PlayerRank>,
+    scale: Float = 1f // Scale factor for dynamic sizing (0.4 to 1.0)
+) {
     if (topPlayers.isEmpty()) return
 
     // Arrange as: 2nd, 1st, 3rd (classic podium layout)
@@ -39,7 +42,7 @@ fun PodiumDisplay(topPlayers: List<PlayerRank>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = (16 * scale).dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Top: 1st place (center, largest)
@@ -47,12 +50,13 @@ fun PodiumDisplay(topPlayers: List<PlayerRank>) {
             PodiumPlayerBadge(
                 player = player,
                 rank = 1,
-                size = 120.dp,
-                animationDelay = 0
+                size = (120 * scale).dp,
+                animationDelay = 0,
+                scale = scale
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height((24 * scale).dp))
 
         // Bottom row: 2nd and 3rd (side by side)
         Row(
@@ -65,8 +69,9 @@ fun PodiumDisplay(topPlayers: List<PlayerRank>) {
                 PodiumPlayerBadge(
                     player = player,
                     rank = 2,
-                    size = 100.dp,
-                    animationDelay = 100
+                    size = (100 * scale).dp,
+                    animationDelay = 100,
+                    scale = scale
                 )
             }
 
@@ -75,8 +80,9 @@ fun PodiumDisplay(topPlayers: List<PlayerRank>) {
                 PodiumPlayerBadge(
                     player = player,
                     rank = 3,
-                    size = 90.dp,
-                    animationDelay = 200
+                    size = (90 * scale).dp,
+                    animationDelay = 200,
+                    scale = scale
                 )
             }
         }
@@ -88,7 +94,8 @@ private fun PodiumPlayerBadge(
     player: PlayerRank,
     rank: Int,
     size: Dp,
-    animationDelay: Int
+    animationDelay: Int,
+    scale: Float = 1f
 ) {
     // Entrance animation
     var visible by remember { mutableStateOf(false) }
@@ -97,7 +104,7 @@ private fun PodiumPlayerBadge(
         visible = true
     }
 
-    val scale by animateFloatAsState(
+    val animScale by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -129,8 +136,8 @@ private fun PodiumPlayerBadge(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .scale(scale)
-            .width(size + 40.dp)
+            .scale(animScale)
+            .width(size + (40 * scale).dp)
     ) {
         Box(
             contentAlignment = Alignment.Center
@@ -138,7 +145,7 @@ private fun PodiumPlayerBadge(
             // Glow effect behind avatar
             Box(
                 modifier = Modifier
-                    .size(size + 16.dp)
+                    .size(size + (16 * scale).dp)
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
@@ -180,8 +187,8 @@ private fun PodiumPlayerBadge(
                     painter = painterResource(R.drawable.icon_rank),
                     contentDescription = "Crown",
                     modifier = Modifier
-                        .size(36.dp)
-                        .offset(y = -(size / 2 + 8.dp))
+                        .size((36 * scale).dp)
+                        .offset(y = -(size / 2 + (8 * scale).dp))
                 )
             }
 
@@ -190,24 +197,24 @@ private fun PodiumPlayerBadge(
                 painter = painterResource(medalIcon),
                 contentDescription = "Medal",
                 modifier = Modifier
-                    .size(if (rank == 1) 64.dp else 52.dp)
+                    .size(if (rank == 1) (64 * scale).dp else (52 * scale).dp)
                     .align(Alignment.BottomEnd)
-                    .offset(x = 8.dp, y = 8.dp)
+                    .offset(x = (8 * scale).dp, y = (8 * scale).dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height((12 * scale).dp))
 
         // Player name
         Text(
             text = player.name,
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = if (rank == 1) 18.sp else 16.sp,
+            fontSize = if (rank == 1) (18 * scale).sp else (16 * scale).sp,
             maxLines = 1
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height((4 * scale).dp))
 
         // Score with coin icon
         Row(
@@ -217,14 +224,14 @@ private fun PodiumPlayerBadge(
             Image(
                 painter = painterResource(R.drawable.icon_gold_coin),
                 contentDescription = "Gold",
-                modifier = Modifier.size(if (rank == 1) 20.dp else 18.dp)
+                modifier = Modifier.size(if (rank == 1) (20 * scale).dp else (18 * scale).dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width((4 * scale).dp))
             Text(
                 text = formatNumberCompact(player.score),
                 color = goldColor,
                 fontWeight = FontWeight.Bold,
-                fontSize = if (rank == 1) 18.sp else 16.sp
+                fontSize = if (rank == 1) (18 * scale).sp else (16 * scale).sp
             )
         }
     }

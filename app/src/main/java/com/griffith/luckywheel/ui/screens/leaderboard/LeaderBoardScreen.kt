@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.PlayerRank
@@ -27,7 +29,6 @@ import com.griffith.luckywheel.ui.theme.bronzeColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.silverColor
 import com.griffith.luckywheel.utils.formatNumberCompact
-import java.util.Locale
 
 
 
@@ -46,7 +47,7 @@ fun LeaderboardScreen(
     LaunchedEffect(Unit) {
         firebaseService.getPlayerRanking(
             onPlayersUpdated = { players ->
-                // Map Player objects to PlayerRankModel with rank positions
+                // Map Player objects to PlayerRank with rank positions
                 leaderboardList = players.mapIndexed { index, player ->
                     PlayerRank(
                         id = index,
