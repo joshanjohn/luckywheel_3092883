@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.constants.TutorialConstants
@@ -44,7 +46,7 @@ fun TutorialScreen(
     
     // Debug logging
     LaunchedEffect(playerId) {
-        android.util.Log.d("TutorialScreen", "TutorialScreen loaded with playerId: $playerId")
+        Log.d("TutorialScreen", "TutorialScreen loaded with playerId: $playerId")
     }
 
     Scaffold(
