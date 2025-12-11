@@ -114,7 +114,10 @@ fun TutorialScreen(
             // Get Started Button (only on last page)
             if (pagerState.currentPage == 4) {
                 Button(
-                    onClick = { navController.popBackStack() },
+                    onClick = { 
+                        soundEffectService.playWinSound()
+                        navController.popBackStack() 
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = lightGreenColor
                     ),
