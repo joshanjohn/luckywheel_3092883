@@ -9,11 +9,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.constants.TutorialConstants
+import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.screens.AppBar
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import com.griffith.luckywheel.ui.theme.goldColor
@@ -29,16 +33,27 @@ import kotlinx.coroutines.launch
 
 // Tutorial screen with carousel-style instructions
 @Composable
-fun TutorialScreen(navController: NavHostController) {
-    val pagerState = rememberPagerState(pageCount = { 5 })
+fun TutorialScreen(
+    navController: NavHostController,
+    playerId: String? = null
+) {
+    val context = LocalContext.current
+    val soundEffectService = remember { SoundEffectService(context) }
+    val pagerState = rememberPagerState(pageCount = { TutorialConstants.TOTAL_PAGES })
     val coroutineScope = rememberCoroutineScope()
+    
+    // Debug logging
+    LaunchedEffect(playerId) {
+        android.util.Log.d("TutorialScreen", "TutorialScreen loaded with playerId: $playerId")
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             AppBar(
                 navController = navController,
-                title = "How to Play"
+                title = TutorialConstants.SCREEN_TITLE,
+                playerId = playerId
             )
         },
         modifier = Modifier
@@ -79,7 +94,7 @@ fun TutorialScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                repeat(5) { index ->
+                repeat(TutorialConstants.TOTAL_PAGES) { index ->
                     Box(
                         modifier = Modifier
                             .size(if (pagerState.currentPage == index) 12.dp else 8.dp)
@@ -107,7 +122,7 @@ fun TutorialScreen(navController: NavHostController) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Get Started",
+                        text = TutorialConstants.BUTTON_GET_STARTED,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -127,6 +142,7 @@ fun TutorialScreen(navController: NavHostController) {
             if (pagerState.currentPage > 0) {
                 IconButton(
                     onClick = {
+                        soundEffectService.playProgressSound()
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
@@ -147,7 +163,7 @@ fun TutorialScreen(navController: NavHostController) {
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.icon_back),
-                        contentDescription = "Previous",
+                        contentDescription = TutorialConstants.BUTTON_PREVIOUS,
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)
                     )
@@ -158,6 +174,7 @@ fun TutorialScreen(navController: NavHostController) {
             if (pagerState.currentPage < 4) {
                 IconButton(
                     onClick = {
+                        soundEffectService.playProgressSound()
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                         }
@@ -178,7 +195,7 @@ fun TutorialScreen(navController: NavHostController) {
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.icon_next),
-                        contentDescription = "Next",
+                        contentDescription = TutorialConstants.BUTTON_NEXT,
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)
                     )
@@ -193,28 +210,28 @@ private fun TutorialPage(page: Int) {
     val (icon, title, description) = when (page) {
         0 -> Triple(
             R.drawable.icon_rank,
-            "Welcome to Lucky Wheel!",
-            "Spin the wheel to win gold coins, compete on the leaderboard, and create your own custom wheels. Let's learn how to play!"
+            TutorialConstants.Page0.TITLE,
+            TutorialConstants.Page0.DESCRIPTION
         )
         1 -> Triple(
             R.drawable.icon_gold_coin,
-            "Gold Wheel",
-            "Tap and hold the spin button, then shake your phone to spin the wheel! Win gold coins based on where the wheel stops. The more you play, the more you earn!"
+            TutorialConstants.Page1.TITLE,
+            TutorialConstants.Page1.DESCRIPTION
         )
         2 -> Triple(
             R.drawable.icon_custom_game,
-            "Custom Wheel",
-            "Create your own wheel with custom items! Tap the wheel or Edit button to add items, change colors, and adjust percentages. Save your wheels and load them anytime!"
+            TutorialConstants.Page2.TITLE,
+            TutorialConstants.Page2.DESCRIPTION
         )
         3 -> Triple(
             R.drawable.icon_rank,
-            "Leaderboard",
-            "Compete with players worldwide! Earn gold coins to climb the rankings. The top 3 players get special badges. Check your rank and see how you compare!"
+            TutorialConstants.Page3.TITLE,
+            TutorialConstants.Page3.DESCRIPTION
         )
         4 -> Triple(
             R.drawable.icon_profile,
-            "Profile & Settings",
-            "Manage your account, adjust music and sound effects volume, and access all game modes from the settings screen. You're all set to play!"
+            TutorialConstants.Page4.TITLE,
+            TutorialConstants.Page4.DESCRIPTION
         )
         else -> Triple(R.drawable.icon_rank, "", "")
     }
