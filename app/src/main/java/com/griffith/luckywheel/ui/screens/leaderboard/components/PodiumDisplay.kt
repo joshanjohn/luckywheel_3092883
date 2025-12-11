@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.PlayerRank
 import com.griffith.luckywheel.ui.theme.goldColor
@@ -92,7 +93,7 @@ private fun PodiumPlayerBadge(
     // Entrance animation
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(animationDelay.toLong())
+        delay(animationDelay.toLong())
         visible = true
     }
 
