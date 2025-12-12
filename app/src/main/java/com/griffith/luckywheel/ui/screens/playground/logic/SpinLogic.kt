@@ -43,24 +43,24 @@ fun generateRandomGoldWheelItems(lightGreenColor: Color, darkGreenColor: Color):
     // Define possible values for each action type
     val gainValues = listOf(50, 100, 150, 200, 250, 300, 400, 500, 750, 1000)
     val loseValues = listOf(50, 100, 150, 200, 300, 500, 750, 1000)
-    val multiplyValues = listOf(2, 3, 4, 5)
+    val multiplyValues = listOf(2, 4) // Regular multipliers (removed 3x and 5x)
+    val rareMultiplier = 10 // Rare jackpot multiplier
     
     // Create list of action types with guaranteed minimum distribution
     val actionTypes = mutableListOf<SpinActionType>()
     
-    // Ensure at least 2 of each type for balanced gameplay
-    actionTypes.add(SpinActionType.GAIN_GOLD)
+    // Ensure at least 1 gain, 2 losses, 1 multiply for more challenging gameplay
     actionTypes.add(SpinActionType.GAIN_GOLD)
     actionTypes.add(SpinActionType.LOSE_GOLD)
     actionTypes.add(SpinActionType.LOSE_GOLD)
     actionTypes.add(SpinActionType.MULTIPLY_GOLD)
     
-    // Add 3 more random actions to reach 8 total items
-    repeat(3) {
-        when (Random.nextInt(3)) {
-            0 -> actionTypes.add(SpinActionType.GAIN_GOLD)
-            1 -> actionTypes.add(SpinActionType.LOSE_GOLD)
-            2 -> actionTypes.add(SpinActionType.MULTIPLY_GOLD)
+    // Add 4 more with weighted randomness (50% gain, 40% lose, 10% multiply - multipliers are rare!)
+    repeat(4) {
+        when (Random.nextInt(100)) {
+            in 0..49 -> actionTypes.add(SpinActionType.GAIN_GOLD)
+            in 50..89 -> actionTypes.add(SpinActionType.LOSE_GOLD)
+            else -> actionTypes.add(SpinActionType.MULTIPLY_GOLD) // Only 10% chance
         }
     }
     
@@ -86,7 +86,12 @@ fun generateRandomGoldWheelItems(lightGreenColor: Color, darkGreenColor: Color):
                 }
             }
             SpinActionType.MULTIPLY_GOLD -> {
-                val value = multiplyValues.random() // Pick random multiplier (2x-5x)
+                // 1% chance for rare 10x multiplier, otherwise 2x or 4x
+                val value = if (Random.nextFloat() < 0.01f) {
+                    rareMultiplier // 10x - extremely rare jackpot!
+                } else {
+                    multiplyValues.random() // 2x or 4x
+                }
                 items.add(SpinWheelItem("${value}x GOLD", color, SpinActionType.MULTIPLY_GOLD, value, 0.125f))
             }
             else -> {}
@@ -95,3 +100,4 @@ fun generateRandomGoldWheelItems(lightGreenColor: Color, darkGreenColor: Color):
     
     return items // Each item has equal size: 1/8 = 0.125 = 12.5% of wheel
 }
+
