@@ -24,7 +24,7 @@ class BackgroundMusicService private constructor(private val context: Context) {
     
     private var mediaPlayer: MediaPlayer? = null
     private val dataStoreService = DataStoreService(context)
-    private var currentVolume: Float = 0.5f
+    private var currentVolume: Float = 0.50f
     private var isMuted: Boolean = false
     
     init {

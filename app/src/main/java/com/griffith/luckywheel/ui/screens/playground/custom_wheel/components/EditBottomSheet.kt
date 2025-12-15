@@ -66,7 +66,7 @@ fun EditBottomSheet(
         }
     }
 
-    // Redistributes percentages when one item changes - keeps total at 100%
+    // Redistribution of percentages when one item changes and keeps total at 100%
     fun rebalanceItemPercentagesAfterChange(
         items: List<SpinWheelItem>,
         updatedIndex: Int, // Which item was changed
@@ -161,11 +161,11 @@ fun EditBottomSheet(
 
             //  Expandable Cards List
             wheelItems.forEachIndexed { index, item ->
-                // Generate 5 random vibrant colors for color picker - use index as key to prevent regeneration during typing
+                // Generate 5 random vibrant colors for color picker, use index as key to prevent regeneration during typing
                 var colorfulSuggestions by remember(index) {
                     mutableStateOf(
                         List(5) {
-                            // Generate vibrant colors by maxing out at least one RGB channel
+                            // Generate vibrant colors
                             val channels = listOf(
                                 Random.nextInt(50, 201), // Mid-range
                                 Random.nextInt(50, 201), // Mid-range

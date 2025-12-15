@@ -190,6 +190,7 @@ fun TutorialScreen(navController: NavHostController) {
 
 @Composable
 private fun TutorialPage(page: Int) {
+    // carousel indication
     val (icon, title, description) = when (page) {
         0 -> Triple(
             R.drawable.icon_rank,

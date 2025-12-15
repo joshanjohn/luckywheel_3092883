@@ -143,7 +143,7 @@ fun SettingsScreen(
                         soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
                             navController.navigate("play/$id") {
-                                launchSingleTop = true
+                                launchSingleTop = true // avoid the screen being re-created on top of stack
                             }
                         }
                     }

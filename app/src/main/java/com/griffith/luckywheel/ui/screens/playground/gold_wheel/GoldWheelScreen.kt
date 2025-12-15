@@ -197,7 +197,7 @@ fun GoldWheelScreen(
         while (true) {
             if (rotationSpeed > 0f) {
                 currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360 // Update rotation angle
-                rotationSpeed *= 0.99f // Apply friction - speed decreases by 1% each frame
+                rotationSpeed *= 0.99f // Appling friction speed decreases by almost 1% each frame
                 if (rotationSpeed < 0.1f) { // Wheel has stopped
                     rotationSpeed = 0f
                     processResult() // Calculate and show result

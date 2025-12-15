@@ -82,6 +82,7 @@ fun GameModeButton(
                             .border(1.dp, borderColor.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
+                        // icon
                         Image(
                             painter = painterResource(icon),
                             contentDescription = title,
@@ -92,6 +93,7 @@ fun GameModeButton(
                     Spacer(Modifier.width(16.dp))
 
                     Column {
+                        // title
                         Text(
                             text = title,
                             fontSize = 22.sp,
@@ -100,6 +102,7 @@ fun GameModeButton(
                             fontFamily = BubbleFontFamily
                         )
                         Spacer(Modifier.height(4.dp))
+                        // description
                         Text(
                             text = description,
                             fontSize = 14.sp,
