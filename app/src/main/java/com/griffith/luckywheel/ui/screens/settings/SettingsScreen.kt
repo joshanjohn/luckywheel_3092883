@@ -46,7 +46,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import android.content.Intent
+import android.net.Uri
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
 import com.griffith.luckywheel.services.BackgroundMusicService
@@ -214,6 +217,20 @@ fun SettingsScreen(
                         navController.navigate("tutorial") {
                             launchSingleTop = true
                         }
+                    }
+                )
+                
+                // Privacy Policy Card
+                GameModeButton(
+                    title = "PRIVACY POLICY",
+                    description = "View app privacy policies",
+                    icon = R.drawable.icon_profile,
+                    borderColor = Color(0xFF2196F3),
+                    gradientColors = listOf(Color(0xFF0D47A1), Color(0xFF1976D2), Color(0xFF0D47A1)),
+                    onClick = {
+                        soundEffectService.playBubbleClickSound()
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.privacypolicies.com/live/be6e6547-82a4-43fd-bd06-c7b669b4c117"))
+                        context.startActivity(intent)
                     }
                 )
                 
