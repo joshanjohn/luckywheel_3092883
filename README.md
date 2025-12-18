@@ -46,6 +46,6 @@ fashion. For some elements, it has a golden yellow colour.
 
  ## Project Development 
  - Milestone 1 - https://github.com/joshanjohn/luckywheel_3092883/blob/main/docs/Joshan_John_3092883_milestone1.pdf
- - Milestone 2 - in progress
+ - Milestone 2 - https://github.com/joshanjohn/luckywheel_3092883/blob/milestone-3/docs/milestone%202/Joshan_John_3092883_milestone2.pdf
  - Milestone 3 - in progress
 
