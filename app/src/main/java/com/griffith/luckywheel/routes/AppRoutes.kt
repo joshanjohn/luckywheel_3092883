@@ -56,8 +56,9 @@ fun AppRoute(startDestination: String = "login") {
         }
         
         // Tutorial screen - how to play guide
-        composable("tutorial") {
-            TutorialScreen(navController)
+        composable("tutorial?playerId={playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            TutorialScreen(navController, playerId)
         }
     }
 }

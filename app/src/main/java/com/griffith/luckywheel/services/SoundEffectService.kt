@@ -16,6 +16,7 @@ class SoundEffectService(private val context: Context) {
     private var clickPlayer: MediaPlayer? = null
     private var bubbleClickPlayer: MediaPlayer? = null
     private var addItemPlayer: MediaPlayer? = null
+    private var progressPlayer: MediaPlayer? = null
     private val dataStoreService = DataStoreService(context)
     private var currentVolume: Float = 0.7f
     private var isMuted: Boolean = false
@@ -125,6 +126,25 @@ class SoundEffectService(private val context: Context) {
             } else {
                 Log.w("SoundEffectService", "add_item_single_click not found in raw resources")
             }
+            
+            // Load progress sound
+            val progressResourceId = context.resources.getIdentifier("progress_sound", "raw", context.packageName)
+            if (progressResourceId != 0) {
+                progressPlayer = MediaPlayer().apply {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .build()
+                    )
+                    setDataSource(context, android.net.Uri.parse("android.resource://${context.packageName}/$progressResourceId"))
+                    prepare()
+                    setVolume(if (isMuted) 0f else currentVolume, if (isMuted) 0f else currentVolume)
+                }
+                Log.d("SoundEffectService", "Progress sound loaded successfully")
+            } else {
+                Log.w("SoundEffectService", "progress_sound not found in raw resources")
+            }
         } catch (e: Exception) {
             Log.e("SoundEffectService", "Failed to initialize sound effects", e)
         }
@@ -210,6 +230,22 @@ class SoundEffectService(private val context: Context) {
         }
     }
     
+    // Play progress sound effect (for tutorial navigation)
+    fun playProgressSound() {
+        try {
+            progressPlayer?.let { player ->
+                if (player.isPlaying) {
+                    player.seekTo(0)
+                } else {
+                    player.start()
+                }
+                Log.d("SoundEffectService", "Playing progress sound")
+            }
+        } catch (e: Exception) {
+            Log.e("SoundEffectService", "Failed to play progress sound", e)
+        }
+    }
+    
     // Set sound effects volume (0.0 to 1.0)
     suspend fun setVolume(volume: Float) {
         currentVolume = volume.coerceIn(0f, 1f)
@@ -239,6 +275,7 @@ class SoundEffectService(private val context: Context) {
         clickPlayer?.setVolume(effectiveVolume, effectiveVolume)
         bubbleClickPlayer?.setVolume(effectiveVolume, effectiveVolume)
         addItemPlayer?.setVolume(effectiveVolume, effectiveVolume)
+        progressPlayer?.setVolume(effectiveVolume, effectiveVolume)
     }
     
     // Release all resources
@@ -254,6 +291,8 @@ class SoundEffectService(private val context: Context) {
             bubbleClickPlayer = null
             addItemPlayer?.release()
             addItemPlayer = null
+            progressPlayer?.release()
+            progressPlayer = null
             Log.d("SoundEffectService", "Sound effects released")
         } catch (e: Exception) {
             Log.e("SoundEffectService", "Failed to release resources", e)

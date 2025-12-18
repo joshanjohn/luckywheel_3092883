@@ -46,11 +46,21 @@ fun AppBar(
         }
     }
     
+    
     val canGoBack = navController.previousBackStackEntry != null // Check if back navigation is available
     val currentScreen = navController.currentBackStackEntryAsState().value?.destination?.route
     
     // Extract playerId from current route if not explicitly provided
-    val currentPlayerId = playerId ?: navController.currentBackStackEntry?.arguments?.getString("playerId")
+    // Try both path parameter and query parameter
+    val currentPlayerId = playerId 
+        ?: navController.currentBackStackEntry?.arguments?.getString("playerId")
+        ?: run {
+            // For debugging
+            android.util.Log.d("AppBar", "Current screen: $currentScreen")
+            android.util.Log.d("AppBar", "Provided playerId: $playerId")
+            android.util.Log.d("AppBar", "Arguments playerId: ${navController.currentBackStackEntry?.arguments?.getString("playerId")}")
+            null
+        }
 
     TopAppBar(
         title = {
@@ -93,10 +103,13 @@ fun AppBar(
                 IconButton(
                     onClick = { 
                         soundEffectService.playBubbleClickSound()
+                        android.util.Log.d("AppBar", "Settings button clicked, playerId: $currentPlayerId")
                         currentPlayerId?.let { id ->
                             navController.navigate("settings/$id") {
                                 launchSingleTop = true
                             }
+                        } ?: run {
+                            android.util.Log.e("AppBar", "Cannot navigate to settings: playerId is null")
                         }
                     }
                 ) {

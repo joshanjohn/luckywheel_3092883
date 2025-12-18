@@ -214,8 +214,10 @@ fun SettingsScreen(
                     gradientColors = listOf(Color(0xFF07361D), Color(0xFF0BA136), Color(0xFF07361D)),
                     onClick = {
                         soundEffectService.playBubbleClickSound()
-                        navController.navigate("tutorial") {
-                            launchSingleTop = true
+                        playerId?.let { id ->
+                            navController.navigate("tutorial?playerId=$id") {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 )
