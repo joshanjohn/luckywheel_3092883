@@ -8,7 +8,8 @@ pointer on a random choice (arch) on the spinning wheel. The player can earn or 
 spinning the lucky wheel. The app shows Real-<me data ranking for players with high gold
 count.
 
-<img width="387" height="531" alt="image" src="https://github.com/user-attachments/assets/62cf3f12-37bf-41a1-aa62-4ce18c9684d1" />
+<img width="772" height="521" alt="image" src="https://github.com/user-attachments/assets/bcb9c07a-d910-4a48-8838-1015d82faa78" />
+
 
 
 ## Project Architecture
