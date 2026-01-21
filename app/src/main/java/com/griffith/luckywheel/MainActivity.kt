@@ -17,7 +17,7 @@ import com.griffith.luckywheel.routes.AppRoute
 import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
-import com.griffith.luckywheel.services.LocationService
+
 import com.griffith.luckywheel.ui.theme.LuckyWheelTheme
 import kotlinx.coroutines.launch
 
@@ -59,14 +59,7 @@ class MainActivity : ComponentActivity() {
                                 playerResult.onSuccess { player ->
                                     dataStoreService.clear()
                                     dataStoreService.savePlayer(player)
-                                    
-                                    coroutineScope.launch {
-                                        val locationService = LocationService(this@MainActivity)
-                                        val location = locationService.getLocationOrDefault()
-                                        firebaseService.updatePlayerLocation(
-                                            userId, location.first, location.second, location.third
-                                        )
-                                    }
+
                                     initialRoute = "home/$userId"
                                 }.onFailure {
                                     val cachedPlayer = dataStoreService.getPlayer()

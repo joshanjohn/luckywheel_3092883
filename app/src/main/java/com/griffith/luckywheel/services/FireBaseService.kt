@@ -27,9 +27,7 @@ class FireBaseService {
     suspend fun checkAndCreatePlayerIfNeeded(
         userId: String,
         displayName: String,
-        city: String = "",
-        country: String = "",
-        countryCode: String = ""
+        city: String = ""
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -42,11 +40,7 @@ class FireBaseService {
                             val newPlayer = Player(
                                 playerId = userId,
                                 playerName = displayName,
-                                gold = 0,
-                                city = city,
-                                country = country,
-                                countryCode = countryCode,
-                                lastLocationUpdate = System.currentTimeMillis()
+                                gold = 0
                             )
                             database.child("players").child(userId).setValue(newPlayer)
                                 .addOnCompleteListener { dbTask ->
@@ -122,36 +116,6 @@ class FireBaseService {
         }
     }
 
-    // Update player location 
-    suspend fun updatePlayerLocation(
-        playerId: String,
-        city: String,
-        country: String,
-        countryCode: String
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            suspendCancellableCoroutine { continuation ->
-                val updates = mapOf(
-                    "city" to city,
-                    "country" to country,
-                    "countryCode" to countryCode,
-                    "lastLocationUpdate" to System.currentTimeMillis()
-                )
-                database.child("players").child(playerId).updateChildren(updates)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            continuation.resume(Result.success(Unit))
-                        } else {
-                            continuation.resume(
-                                Result.failure(task.exception ?: Exception("Failed to update location"))
-                            )
-                        }
-                    }
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
     // Update player info 
     suspend fun updatePlayerInfo(playerId: String, updatedPlayer: Player): Result<Unit> = withContext(Dispatchers.IO) {

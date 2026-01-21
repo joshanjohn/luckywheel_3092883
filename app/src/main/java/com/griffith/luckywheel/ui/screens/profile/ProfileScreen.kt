@@ -259,31 +259,6 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                                 fontFamily = BubbleFontFamily
                             )
 
-                            Spacer(Modifier.height(8.dp))
-
-                            // Location display
-                            player?.let { currentPlayer ->
-                                if (currentPlayer.city.isNotEmpty() && currentPlayer.country.isNotEmpty()) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.LocationOn,
-                                            contentDescription = "Location",
-                                            tint = Color.White.copy(alpha = 0.7f),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                        Text(
-                                            text = "${currentPlayer.city}, ${currentPlayer.country}",
-                                            fontSize = 14.sp,
-                                            color = Color.White.copy(alpha = 0.7f)
-                                        )
-                                    }
-                                    Spacer(Modifier.height(8.dp))
-                                }
-                            }
 
                             Text(
                                 text = "Gold: ${player?.gold ?: 0}",
