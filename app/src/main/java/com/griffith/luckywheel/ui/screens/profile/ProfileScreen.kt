@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -259,6 +260,30 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                             )
 
                             Spacer(Modifier.height(8.dp))
+
+                            // Location display
+                            player?.let { currentPlayer ->
+                                if (currentPlayer.city.isNotEmpty() && currentPlayer.country.isNotEmpty()) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = "Location",
+                                            tint = Color.White.copy(alpha = 0.7f),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(
+                                            text = "${currentPlayer.city}, ${currentPlayer.country}",
+                                            fontSize = 14.sp,
+                                            color = Color.White.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                    Spacer(Modifier.height(8.dp))
+                                }
+                            }
 
                             Text(
                                 text = "Gold: ${player?.gold ?: 0}",

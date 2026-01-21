@@ -53,12 +53,7 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
         label = "gold_color_animation"
     )
     
-    // Interpolate between gold color and white for flash effect
-    val animatedColor = Color(
-        red = (0xFF + (0xFF - 0xFF) * colorAnimation) / 255f,
-        green = (0xD7 + (0xFF - 0xD7) * colorAnimation) / 255f,
-        blue = (0x00 + (0xFF - 0x00) * colorAnimation) / 255f
-    )
+    val animatedColor = if (triggerAnimation) com.griffith.luckywheel.ui.theme.neonLime else com.griffith.luckywheel.ui.theme.arcadeGold
     
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -68,11 +63,12 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
             painterResource(R.drawable.icon_gold_coin_icon),
             contentDescription = "gold count icon"
         )
-        Spacer(Modifier.width(5.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             text = String.format(Locale.getDefault(), "%,d", playerGold),
             style = TextStyle(
-                fontSize = 24.sp,
+                fontSize = 22.sp,
+                fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = animatedColor
             )

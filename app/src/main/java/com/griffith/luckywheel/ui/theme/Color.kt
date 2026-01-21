@@ -3,11 +3,17 @@ package com.griffith.luckywheel.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val goldColor = Color(0xFFFFA500)
+val arcadeGold = Color(0xFFFFD700)
 
 val lightGreenColor = Color(0xFF20B652)
 val darkGreenColor = Color(0xFF0BA136)
 val darkerGreenColor = Color(0xFF092609)
 val extraDarkerGreenColor = Color(0x85071507)
+
+val magicGreen = Color(0xFF2ECC71)
+val neonLime = Color(0xFFAFFF00)
+val deepForest = Color(0xFF0B3D0B)
+val magicPurple = Color(0xFF8E44AD)
 
 val lightRedColor = Color(0xFFD50505)
 

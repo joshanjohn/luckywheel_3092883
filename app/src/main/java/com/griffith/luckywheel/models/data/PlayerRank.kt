@@ -10,5 +10,8 @@ data class PlayerRank(
     val name: String,
     val score: Int,
     val rank: Int,
-    val playerIcon: ImageVector = Icons.Default.Person
+    val playerIcon: ImageVector = Icons.Default.Person,
+    val city: String = "",
+    val country: String = "",
+    val countryCode: String = "" // ISO country code for flag emoji
 )

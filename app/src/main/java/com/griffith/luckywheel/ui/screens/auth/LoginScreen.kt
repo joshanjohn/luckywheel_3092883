@@ -56,7 +56,7 @@ fun LoginScreen(navController: NavHostController) {
             isLoading = false
             if (success && userId != null) {
                 Toast.makeText(context, message ?: "Google sign in successful", Toast.LENGTH_SHORT).show()
-                navController.navigate("play/$userId") {
+                navController.navigate("home/$userId") {
                     popUpTo("login") { inclusive = true }
                 }
             } else {
@@ -94,7 +94,7 @@ fun LoginScreen(navController: NavHostController) {
         authService.loginWithEmailPassword(email, password) { success, message, userId ->
             isLoading = false
             if (success && userId != null) {
-                navController.navigate("play/$userId") {
+                navController.navigate("home/$userId") {
                     popUpTo("login") { inclusive = true }
                 }
             } else {
@@ -133,7 +133,7 @@ fun LoginScreen(navController: NavHostController) {
                             }
                             withStyle(
                                 style = SpanStyle(
-                                    color = goldColor,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
@@ -205,7 +205,7 @@ fun LoginScreen(navController: NavHostController) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.weight(1f),
                             color = Color.White.copy(alpha = 0.3f)
                         )
@@ -215,7 +215,7 @@ fun LoginScreen(navController: NavHostController) {
                             fontSize = 14.sp,
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.weight(1f),
                             color = Color.White.copy(alpha = 0.3f)
                         )
@@ -283,7 +283,7 @@ fun LoginScreen(navController: NavHostController) {
                             .background(Color.Black.copy(alpha = 0.4f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = goldColor)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

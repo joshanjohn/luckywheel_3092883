@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 class AuthenticationService(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val firebaseService = FireBaseService()
+    private val locationService = LocationService(context)
     
     private fun getGoogleSignInClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -78,6 +79,15 @@ class AuthenticationService(private val context: Context) {
                             
                             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                                 result.onSuccess { message ->
+                                    // Fetch location in background after successful sign-in (non-blocking)
+                                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                        try {
+                                            val (city, country, countryCode) = locationService.getLocationOrDefault()
+                                            firebaseService.updatePlayerLocation(userId, city, country, countryCode)
+                                        } catch (e: Exception) {
+                                            // Silently fail - location is optional
+                                        }
+                                    }
                                     onResult(true, message, userId)
                                 }.onFailure { exception ->
                                     onResult(false, exception.message, userId)
@@ -116,15 +126,30 @@ class AuthenticationService(private val context: Context) {
                         
                         auth.currentUser?.updateProfile(profileUpdates)?.addOnCompleteListener {
                             // Create player in database
-                            val player = Player(playerId = userId, playerName = playerName, gold = 0)
-                            firebaseService.database.child("players").child(userId).setValue(player)
-                                .addOnCompleteListener { dbTask ->
-                                    if (dbTask.isSuccessful) {
-                                        onResult(true, "Registration successful", userId)
-                                    } else {
-                                        onResult(false, dbTask.exception?.message, userId)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val player = Player(
+                                    playerId = userId,
+                                    playerName = playerName,
+                                    gold = 0
+                                )
+                                firebaseService.database.child("players").child(userId).setValue(player)
+                                    .addOnCompleteListener { dbTask ->
+                                        if (dbTask.isSuccessful) {
+                                            // Fetch location in background (non-blocking)
+                                            CoroutineScope(Dispatchers.IO).launch {
+                                                try {
+                                                    val (city, country, countryCode) = locationService.getLocationOrDefault()
+                                                    firebaseService.updatePlayerLocation(userId, city, country, countryCode)
+                                                } catch (e: Exception) {
+                                                    // Silently fail - location is optional
+                                                }
+                                            }
+                                            onResult(true, "Registration successful", userId)
+                                        } else {
+                                            onResult(false, dbTask.exception?.message, userId)
+                                        }
                                     }
-                                }
+                            }
                         }
                     } else {
                         onResult(false, "Failed to get user ID", null)

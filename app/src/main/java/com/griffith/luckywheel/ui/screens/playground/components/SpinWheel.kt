@@ -65,127 +65,148 @@ fun SpinWheel(
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val centerX = size.width / 2 // Horizontal center of canvas
-        val centerY = size.height / 2 // Vertical center of canvas
+        val centerX = size.width / 2
+        val centerY = size.height / 2
         val center = Offset(centerX, centerY)
-        val radius = (size.minDimension / 2) * 0.9f // Wheel radius (90% of available space)
+        val radius = (size.minDimension / 2) * 0.9f
 
-        // Text sizes proportional to wheel size
-        val sliceTextSize = radius * 0.11f // Labels on wheel segments
-        val centerTextSize = radius * 0.08f // "Lucky WHEEL" text in center
-
-        // Outer glow effect - radial gradient for depth
+        // Outer Magical Glow
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(Color(0xFF055C09), Color(0xFF4CAF50)),
+                colors = listOf(com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.4f), Color.Transparent),
                 center = center,
-                radius = radius * 1.1f
+                radius = radius * 1.2f
             ),
-            radius = radius * 1.1f,
-            center = center,
-            alpha = 0.3f // Semi-transparent for glow effect
+            radius = radius * 1.2f,
+            center = center
         )
 
-        // Outer border ring - solid stroke around wheel
+        // Neon Border Outer
         drawCircle(
-            color = Color(0xFF23B62A),
-            radius = radius + 8f,
+            color = com.griffith.luckywheel.ui.theme.magicGreen,
+            radius = radius + 10f,
             center = center,
-            style = Stroke(width = 10f)
+            style = Stroke(width = 12f)
         )
 
-        // Draw wheel segments - rotated by current rotation angle
+        // Neon Glow Inner
+        drawCircle(
+            color = com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.6f),
+            radius = radius + 6f,
+            center = center,
+            style = Stroke(width = 4f)
+        )
+
         rotate(rotationDegrees, pivot = center) {
-            var startAngle = 0f // Track where each segment starts
+            var startAngle = 0f
 
-            items.forEach { item ->
-                val sweepAngle = item.percent * 360f // Convert percentage to degrees
+            items.forEachIndexed { index, item ->
+                val sweepAngle = item.percent * 360f
 
-                // Draw colored segment arc
+                // Segment Arc
                 drawArc(
                     color = item.color,
                     startAngle = startAngle,
                     sweepAngle = sweepAngle,
-                    useCenter = true, // Fill from center (pie slice)
+                    useCenter = true,
                     size = Size(radius * 2, radius * 2),
                     topLeft = Offset(centerX - radius, centerY - radius)
                 )
 
-                // Draw text label on segment
-                drawIntoCanvas { canvas ->
-                    val textAngleDegrees = startAngle + sweepAngle / 2f // Center of segment
-                    val textAngleRadians = Math.toRadians(textAngleDegrees.toDouble())
-                    val textDistance = radius * 0.65f // 65% from center to edge
+                // Neon Segment Divider
+                val dividerAngle = Math.toRadians(startAngle.toDouble())
+                val endX = centerX + radius * cos(dividerAngle).toFloat()
+                val endY = centerY + radius * sin(dividerAngle).toFloat()
+                drawLine(
+                    color = Color.White.copy(alpha = 0.3f),
+                    start = center,
+                    end = Offset(endX, endY),
+                    strokeWidth = 2f
+                )
 
-                    // Calculate text position using polar coordinates: x = r*cos(θ), y = r*sin(θ)
+                drawIntoCanvas { canvas ->
+                    val textAngleDegrees = startAngle + sweepAngle / 2f
+                    val textAngleRadians = Math.toRadians(textAngleDegrees.toDouble())
+                    val textDistance = radius * 0.7f
+
                     val textX = centerX + (textDistance * cos(textAngleRadians)).toFloat()
                     val textY = centerY + (textDistance * sin(textAngleRadians)).toFloat()
 
-                    // Choose text color based on background darkness
                     val textColor = if (item.color.isColorDark()) {
-                        android.graphics.Color.WHITE // Light text on dark background
+                        android.graphics.Color.WHITE
                     } else {
-                        android.graphics.Color.BLACK // Dark text on light background
+                        android.graphics.Color.BLACK
                     }
 
                     val textPaint = Paint().apply {
                         color = textColor
-                        textSize = sliceTextSize
-                        textAlign = Paint.Align.CENTER // Center text horizontally
-                        isAntiAlias = true // Smooth text edges
-                        isFakeBoldText = true // Make text bold
+                        textSize = radius * 0.12f
+                        textAlign = Paint.Align.CENTER
+                        isAntiAlias = true
+                        typeface = android.graphics.Typeface.DEFAULT_BOLD
                     }
 
-                    // Truncate long text with ellipsis (max 12 characters)
-                    val displayText = truncateText(item.label, maxLength = 12)
+                    val displayText = truncateText(item.label, maxLength = 10)
                     val textBounds = Rect()
                     textPaint.getTextBounds(displayText, 0, displayText.length, textBounds)
                     val textHeight = textBounds.height()
 
-                    // Draw text centered on calculated position
+                    // Rotate text to follow segment
+                    canvas.save()
+                    canvas.nativeCanvas.rotate(textAngleDegrees + 90f, textX, textY)
                     canvas.nativeCanvas.drawText(
                         displayText,
                         textX,
-                        textY + textHeight / 2f, // Adjust for vertical centering
+                        textY + textHeight / 2f,
                         textPaint
                     )
+                    canvas.restore()
                 }
 
-                startAngle += sweepAngle // Move to next segment
+                startAngle += sweepAngle
             }
         }
 
-        // Center hub - dark circle in middle
+        // Center hub with multiple layers for depth
         drawCircle(
-            color = Color(0xFF1C273A),
-            radius = radius * 0.12f,
+            color = com.griffith.luckywheel.ui.theme.deepForest,
+            radius = radius * 0.32f,
             center = center
         )
-
-        // Center circle - larger green circle
+        
         drawCircle(
-            color = Color(0xFF02610C),
+            brush = Brush.radialGradient(
+                colors = listOf(com.griffith.luckywheel.ui.theme.magicGreen, com.griffith.luckywheel.ui.theme.deepForest),
+                center = center,
+                radius = radius * 0.3f
+            ),
             radius = radius * 0.3f,
+            center = center,
+            style = Stroke(width = 4f)
+        )
+
+        // Center branding background
+        drawCircle(
+            color = Color.Black.copy(alpha = 0.5f),
+            radius = radius * 0.28f,
             center = center
         )
 
-        // Center text - "Lucky WHEEL" branding
         val centerText = buildAnnotatedString {
             withStyle(
                 style = TextStyle(
-                    fontSize = 18.sp,
-                    color = Color(0xFFFFD700), // Gold color
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = BubbleFontFamily,
+                    fontSize = 20.sp,
+                    color = com.griffith.luckywheel.ui.theme.arcadeGold,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = com.griffith.luckywheel.ui.theme.RetroFontFamily,
                     textAlign = TextAlign.Center
                 ).toSpanStyle()
             ) {
-                append("Lucky\nWHEEL")
+                append("SPIN")
             }
         }
 
         val textLayoutResult = textMeasurer.measure(centerText)
-        // Draw text centered in the wheel
         drawText(
             textMeasurer = textMeasurer,
             text = centerText,
@@ -195,15 +216,23 @@ fun SpinWheel(
             )
         )
 
-        // Pointer triangle at top - shows which segment is selected
+        // Magical neon pointer
         val pointerPath = Path().apply {
-            val pointerWidth = radius * 0.25f // Base width of triangle
-            val pointerHeight = radius * 0.18f // Height of triangle
-            moveTo(centerX - pointerWidth / 2f, 0f) // Left corner at top
-            lineTo(centerX, pointerHeight) // Point down to center
-            lineTo(centerX + pointerWidth / 2f, 0f) // Right corner at top
-            close() // Complete triangle
+            val pointerWidth = radius * 0.2f
+            val pointerHeight = radius * 0.22f
+            moveTo(centerX - pointerWidth / 2f, 0f)
+            lineTo(centerX, pointerHeight)
+            lineTo(centerX + pointerWidth / 2f, 0f)
+            close()
         }
-        drawPath(pointerPath, color = Color(0xFF05F50F)) // Bright green pointer
+        
+        // Pointer shadow/glow
+        drawPath(
+            path = pointerPath,
+            color = com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.5f),
+            style = Stroke(width = 8f)
+        )
+        
+        drawPath(pointerPath, color = Color.White)
     }
 }

@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,7 +55,10 @@ fun LeaderboardScreen(
                         id = index,
                         name = player.playerName,
                         score = player.gold,
-                        rank = index + 1
+                        rank = index + 1,
+                        city = player.city,
+                        country = player.country,
+                        countryCode = player.countryCode
                     )
                 }
             },
@@ -225,6 +230,24 @@ fun LeaderboardItem(entry: PlayerRank) {
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )
+                    }
+                    // Location display with country code
+                    if (entry.city.isNotEmpty() && entry.countryCode.isNotEmpty() && entry.countryCode != "XX") {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Location",
+                                tint = Color.White.copy(alpha = 0.5f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = "${entry.city}, ${entry.countryCode}",
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
 

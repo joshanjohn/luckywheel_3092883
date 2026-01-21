@@ -96,8 +96,8 @@ fun RegisterScreen(navController: NavHostController) {
         authService.registerWithEmailPassword(name, email, password) { success, message, userId ->
             isLoading = false
             if (success && userId != null) {
-                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-                navController.navigate("play/$userId") {
+                // Navigate to home screen on successful registration
+                navController.navigate("home/$userId") {
                     popUpTo("register") { inclusive = true }
                 }
             } else {
@@ -137,7 +137,7 @@ fun RegisterScreen(navController: NavHostController) {
                             }
                             withStyle(
                                 style = SpanStyle(
-                                    color = goldColor,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
@@ -219,7 +219,7 @@ fun RegisterScreen(navController: NavHostController) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.weight(1f),
                             color = Color.White.copy(alpha = 0.3f)
                         )
@@ -229,7 +229,7 @@ fun RegisterScreen(navController: NavHostController) {
                             fontSize = 14.sp,
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.weight(1f),
                             color = Color.White.copy(alpha = 0.3f)
                         )
@@ -297,7 +297,7 @@ fun RegisterScreen(navController: NavHostController) {
                             .background(Color.Black.copy(alpha = 0.4f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = goldColor)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

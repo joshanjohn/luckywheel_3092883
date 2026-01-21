@@ -70,9 +70,9 @@ fun AppBar(
             ) {
                 Text(
                     title,
-                    fontSize = 24.sp,
-                    fontFamily = BubbleFontFamily,
-                    color = Color(0xFFFFD700),
+                    fontSize = 20.sp,
+                    fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                    color = com.griffith.luckywheel.ui.theme.arcadeGold,
                 )
             }
         },

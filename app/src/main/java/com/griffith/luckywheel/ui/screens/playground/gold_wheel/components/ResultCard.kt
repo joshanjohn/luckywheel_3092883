@@ -121,13 +121,13 @@ private fun rememberResultTheme(wheelResult: SpinWheelItem): ResultThemeData {
                 buttonText = "SPIN AGAIN"
             )
             SpinActionType.LOSE_GOLD -> ResultThemeData(
-                primaryColor = lightRedColor,
+                primaryColor = Color.Red,
                 title = "OH NO!",
                 emoji = "💔",
                 buttonText = "TRY AGAIN"
             )
             else -> ResultThemeData(
-                primaryColor = lightGreenColor,
+                primaryColor = com.griffith.luckywheel.ui.theme.neonLime,
                 title = "NICE SPIN!",
                 emoji = "🎉",
                 buttonText = "SPIN AGAIN"

@@ -52,7 +52,6 @@ import android.content.Intent
 import android.net.Uri
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.services.AuthenticationService
-import com.griffith.luckywheel.services.BackgroundMusicService
 import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.ui.screens.AppBar
@@ -72,7 +71,6 @@ fun SettingsScreen(
     val authService = remember { AuthenticationService(context) }
     val coroutineScope = rememberCoroutineScope()
 
-    val musicService = remember { BackgroundMusicService.getInstance(context) }
     val soundEffectService = remember { SoundEffectService(context) }
     
     // Music state
@@ -145,8 +143,8 @@ fun SettingsScreen(
                     onClick = {
                         soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
-                            navController.navigate("play/$id") {
-                                launchSingleTop = true // avoid the screen being re-created on top of stack
+                            navController.navigate("goldwheel/$id") {
+                                launchSingleTop = true 
                             }
                         }
                     }
@@ -161,14 +159,9 @@ fun SettingsScreen(
                     onClick = {
                         soundEffectService.playBubbleClickSound()
                         playerId?.let { id ->
-                            // First navigate to the play screen
-                            navController.navigate("play/$id") {
+                            navController.navigate("custompi/$id") {
                                 launchSingleTop = true
                             }
-                            // Then set the flag on the destination's saved state
-                            navController.getBackStackEntry("play/$id")
-                                .savedStateHandle
-                                .set("navigate_to_custom", true)
                         }
                     }
                 )
@@ -270,7 +263,7 @@ fun SettingsScreen(
                                 onClick = {
                                     soundEffectService.playClickSound()
                                     coroutineScope.launch {
-                                        musicService.setMuted(!musicMuted)
+                                        dataStoreService.saveMusicMuted(!musicMuted)
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(
@@ -302,7 +295,7 @@ fun SettingsScreen(
                                 },
                                 onValueChangeFinished = {
                                     coroutineScope.launch {
-                                        musicService.setVolume(volumeSlider)
+                                        dataStoreService.saveMusicVolume(volumeSlider)
                                     }
                                 },
                                 enabled = !musicMuted,

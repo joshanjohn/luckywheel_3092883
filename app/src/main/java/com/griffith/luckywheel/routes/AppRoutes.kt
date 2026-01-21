@@ -9,7 +9,6 @@ import com.griffith.luckywheel.ui.screens.auth.LoginScreen
 import com.griffith.luckywheel.ui.screens.auth.RegisterScreen
 import com.griffith.luckywheel.ui.screens.leaderboard.LeaderboardScreen
 import com.griffith.luckywheel.ui.screens.loadgames.LoadGamesScreen
-import com.griffith.luckywheel.ui.screens.playground.PlaygroundScreen
 import com.griffith.luckywheel.ui.screens.profile.ProfileScreen
 import com.griffith.luckywheel.ui.screens.settings.SettingsScreen
 import com.griffith.luckywheel.ui.screens.tutorial.TutorialScreen
@@ -20,10 +19,21 @@ fun AppRoute(startDestination: String = "login") {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = startDestination) {
-        // Playground screen - contains gold wheel and custom wheel tabs
-        composable("play/{playerId}") { backStackEntry ->
+        // New Home Screen - the central hub
+        composable("home/{playerId}") { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
-            PlaygroundScreen(navController, playerId)
+            com.griffith.luckywheel.ui.screens.home.HomeScreen(navController, playerId)
+        }
+
+        // Direct Game Screens
+        composable("goldwheel/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            com.griffith.luckywheel.ui.screens.playground.gold_wheel.GoldWheelScreen(navController, playerId)
+        }
+
+        composable("custompi/{playerId}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            com.griffith.luckywheel.ui.screens.playground.custom_wheel.CustomWheelScreen(navController, playerId)
         }
 
         // Load saved custom wheel games
