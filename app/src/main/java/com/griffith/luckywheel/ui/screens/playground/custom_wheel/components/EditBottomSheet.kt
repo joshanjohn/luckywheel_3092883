@@ -22,12 +22,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Brush
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.SoundEffectService
 import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.theme.darkerGreenColor
+import com.griffith.luckywheel.ui.theme.magicGreen
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import com.griffith.luckywheel.utils.truncateText
@@ -113,7 +116,8 @@ fun EditBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color(0xFF022C14)
+        containerColor = Color(0xFF01150B),
+        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.3f)) }
     ) {
         Column(
             Modifier
@@ -130,30 +134,43 @@ fun EditBottomSheet(
                 Text(
                     "Edit Wheel Items",
                     color = Color.White,
+                    fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
 
-                Button(
-                    colors = ButtonDefaults.buttonColors(containerColor = darkerGreenColor),
+                Surface(
                     onClick = { 
                         soundEffectService.playClickSound()
                         showSaveDialog = true 
                     },
-                    enabled = wheelItems.isNotEmpty() && playerId != null
+                    enabled = wheelItems.isNotEmpty() && playerId != null,
+                    color = magicGreen.copy(alpha = 0.8f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.border(
+                        1.dp, 
+                        Color.White.copy(alpha = 0.3f), 
+                        RoundedCornerShape(12.dp)
+                    )
                 ) {
                     Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Save", color = Color.White, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Save", 
+                            color = Color.White, 
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Icon(
                             painter = painterResource(R.drawable.icons_save_game),
                             contentDescription = "Save Game",
-                            modifier = Modifier.size(18.dp),
-                            tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.Gray
+                            modifier = Modifier.size(16.dp),
+                            tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.White.copy(alpha = 0.3f)
                         )
                     }
-
                 }
             }
 
@@ -199,8 +216,13 @@ fun EditBottomSheet(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF07361D)),
+                        .padding(vertical = 6.dp)
+                        .border(
+                            0.5.dp, 
+                            Color.White.copy(alpha = 0.1f), 
+                            RoundedCornerShape(12.dp)
+                        ),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF07361D).copy(alpha = 0.5f)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(Modifier.padding(12.dp)) {
@@ -369,39 +391,51 @@ fun EditBottomSheet(
             }
 
             // Add new item to wheel (max 6 items)
-            Button(
+            Surface(
                 onClick = {
-                    soundEffectService.playAddItemSound()
-                    // Calculate equal percentage for all items including the new one
-                    val totalItems = wheelItems.size + 1
-                    val equalPercent = 1f / totalItems
-                    
-                    val newItem = SpinWheelItem(
-                        label = "New Item ${wheelItems.size + 1}",
-                        color = Color(
-                            red = Random.nextInt(0, 255),
-                            green = Random.nextInt(0, 255),
-                            blue = Random.nextInt(0, 255)
-                        ),
-                        type = SpinActionType.CUSTOM,
-                        value = 0,
-                        percent = equalPercent
-                    )
-                    // Set all items to equal percentage
-                    val addedList = (wheelItems.map { it.copy(percent = equalPercent) } + newItem)
-                    onUpdateItems(addedList)
+                    if (wheelItems.size < 6) {
+                        soundEffectService.playAddItemSound()
+                        // Calculate equal percentage for all items including the new one
+                        val totalItems = wheelItems.size + 1
+                        val equalPercent = 1f / totalItems
+                        
+                        val newItem = SpinWheelItem(
+                            label = "New Item ${wheelItems.size + 1}",
+                            color = Color(
+                                red = Random.nextInt(0, 255),
+                                green = Random.nextInt(0, 255),
+                                blue = Random.nextInt(0, 255)
+                            ),
+                            type = SpinActionType.CUSTOM,
+                            value = 0,
+                            percent = equalPercent
+                        )
+                        // Set all items to equal percentage
+                        val addedList = (wheelItems.map { it.copy(percent = equalPercent) } + newItem)
+                        onUpdateItems(addedList)
+                    }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (wheelItems.size >= 6) Color.Gray else Color.White
-                ),
-                shape = RoundedCornerShape(8.dp),
-                enabled = wheelItems.size < 6 // Limit to 6 items for readability
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 24.dp)
+                    .height(56.dp)
+                    .border(
+                        1.dp,
+                        if (wheelItems.size >= 6) Color.Gray.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.3f),
+                        RoundedCornerShape(16.dp)
+                    ),
+                color = if (wheelItems.size >= 6) Color.Gray.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(16.dp),
+                enabled = wheelItems.size < 6
             ) {
-                Text(
-                    text = if (wheelItems.size >= 6) "Maximum only 6 Items Only" else "Add Item",
-                    color = if (wheelItems.size >= 6) Color.White else darkerGreenColor
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = if (wheelItems.size >= 6) "Maximum 6 Items Reached" else "Add New Segment",
+                        color = if (wheelItems.size >= 6) Color.Gray else Color.White,
+                        fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
     }

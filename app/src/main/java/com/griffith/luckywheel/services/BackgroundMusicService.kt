@@ -8,6 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
@@ -27,9 +29,12 @@ class BackgroundMusicService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var dataStoreService: DataStoreService
+    private lateinit var audioManager: AudioManager
+    private var audioFocusRequest: AudioFocusRequest? = null
     
     private var currentVolume: Float = 0.5f
     private var isMuted: Boolean = false
+    private var shouldBePlaying: Boolean = false // Track if we should be playing
 
     companion object {
         private const val CHANNEL_ID = "MusicServiceChannel"
@@ -44,6 +49,7 @@ class BackgroundMusicService : Service() {
     override fun onCreate() {
         super.onCreate()
         dataStoreService = DataStoreService(this)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         createNotificationChannel()
         loadPreferencesAndInitialize()
     }
@@ -105,21 +111,31 @@ class BackgroundMusicService : Service() {
 
     private fun play() {
         if (mediaPlayer == null) initializePlayer()
-        mediaPlayer?.let {
-            if (!it.isPlaying) {
-                it.start()
-                Log.d(TAG, "Music playing")
+        
+        // Request audio focus before playing
+        val result = requestAudioFocus()
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            shouldBePlaying = true
+            mediaPlayer?.let {
+                if (!it.isPlaying) {
+                    it.start()
+                    Log.d(TAG, "Music playing")
+                }
             }
+        } else {
+            Log.w(TAG, "Audio focus not granted")
         }
     }
 
     private fun pause() {
+        shouldBePlaying = false
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.pause()
                 Log.d(TAG, "Music paused")
             }
         }
+        // Don't abandon audio focus here - we might resume soon
     }
 
     private fun updateVolume() {
@@ -157,8 +173,71 @@ class BackgroundMusicService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    private fun requestAudioFocus(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_GAME)
+                        .build()
+                )
+                .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                .build()
+            audioFocusRequest = focusRequest
+            audioManager.requestAudioFocus(focusRequest)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
+        }
+    }
+
+    private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                // Resume playback if we should be playing
+                if (shouldBePlaying) {
+                    mediaPlayer?.start()
+                    updateVolume()
+                    Log.d(TAG, "Audio focus gained, resuming")
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                // Lost focus for an unbounded amount of time: stop playback
+                pause()
+                abandonAudioFocus()
+                Log.d(TAG, "Audio focus lost")
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                // Lost focus for a short time: pause playback
+                mediaPlayer?.pause()
+                Log.d(TAG, "Audio focus lost transient")
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                // Lost focus but can duck (lower volume)
+                mediaPlayer?.setVolume(currentVolume * 0.2f, currentVolume * 0.2f)
+                Log.d(TAG, "Audio focus duck")
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        shouldBePlaying = false
+        abandonAudioFocus()
         mediaPlayer?.release()
         mediaPlayer = null
         serviceScope.launch {

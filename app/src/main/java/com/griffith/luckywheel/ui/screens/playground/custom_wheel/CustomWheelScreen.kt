@@ -16,11 +16,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,7 +38,7 @@ import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.models.data.toSpinWheelItems
 import com.griffith.luckywheel.services.HapticFeedbackService
 import com.griffith.luckywheel.services.SoundEffectService
-import com.griffith.luckywheel.ui.components.effects.FireSparkleEffect
+
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.EditBottomSheet
@@ -190,41 +193,76 @@ fun CustomWheelScreen(
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Button(
-                        onClick = { 
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Modern Edit Wheel Button
+                    Surface(
+                        onClick = {
                             soundEffectService.playClickSound()
-                            showBottomSheet = true 
+                            showBottomSheet = true
                         },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = magicGreen),
-                        modifier = Modifier.border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        shape = RoundedCornerShape(16.dp),
+                        color = magicGreen.copy(alpha = 0.9f),
+                        modifier = Modifier
+                            .height(48.dp)
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
                     ) {
-                        Text("Edit Wheel", color = Color.White, fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "Edit Wheel",
+                                color = Color.White,
+                                fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
-    
-                    Spacer(Modifier.width(8.dp))
 
-                    Button(
+                    // Modern Load Button
+                    Surface(
                         onClick = {
                             soundEffectService.playClickSound()
                             navController.navigate("loadgames/$playerId") {
                                 launchSingleTop = true
                             }
                         },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = com.griffith.luckywheel.ui.theme.deepForest),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        modifier = Modifier.border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        shape = RoundedCornerShape(16.dp),
+                        color = com.griffith.luckywheel.ui.theme.deepForest.copy(alpha = 0.8f),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
                     ) {
-                        Icon(
-                            Icons.Default.List,
-                            contentDescription = "Load Games",
-                            modifier = Modifier.size(20.dp),
-                            tint = Color.White
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Load", color = Color.White, fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily)
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.List,
+                                contentDescription = "Load Games",
+                                tint = arcadeGold,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -266,12 +304,8 @@ fun CustomWheelScreen(
                     }
                 )
 
-                // Fire sparks while spinning
-                FireSparkleEffect(
-                    isSpinning = isSpinning,
-                    origin = Offset(constraints.maxWidth / 2f, constraints.maxHeight / 2f)
-                )
             }
+
 
             AnimatedText(
                 text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake your phone!",

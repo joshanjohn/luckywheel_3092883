@@ -36,7 +36,7 @@ import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.HapticFeedbackService
 import com.griffith.luckywheel.services.SoundEffectService
-import com.griffith.luckywheel.ui.components.effects.FireSparkleEffect
+
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
@@ -246,12 +246,8 @@ fun GoldWheelScreen(
                     }
                 )
 
-                // Fire sparks while spinning
-                FireSparkleEffect(
-                    isSpinning = isSpinning,
-                    origin = Offset(constraints.maxWidth / 2f, constraints.maxHeight / 2f)
-                )
             }
+
 
             AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
 

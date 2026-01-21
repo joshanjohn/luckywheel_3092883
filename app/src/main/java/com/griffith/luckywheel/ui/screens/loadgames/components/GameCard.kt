@@ -1,9 +1,11 @@
 package com.griffith.luckywheel.ui.screens.loadgames.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.models.data.SavedGame
 import com.griffith.luckywheel.models.data.toSpinWheelItems
+import com.griffith.luckywheel.ui.theme.darkerGreenColor
 import com.griffith.luckywheel.ui.theme.goldColor
 import com.griffith.luckywheel.ui.theme.lightGreenColor
 import java.text.SimpleDateFormat
@@ -44,12 +47,19 @@ fun GameCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp),
+            .height(150.dp)
+            .border(
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                ),
+                RoundedCornerShape(16.dp)
+            ),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF07361D)
+            containerColor = Color(0xFF07361D).copy(alpha = 0.9f)
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
             modifier = Modifier
@@ -66,9 +76,10 @@ fun GameCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = game.gameName,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = goldColor,
+                        fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -133,22 +144,48 @@ fun GameCard(
                     }
                 }
 
-                // Load Button
-                Button(
+                // Load Button - Premium Arcade Style
+                Surface(
                     onClick = onLoad,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = lightGreenColor
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    color = com.griffith.luckywheel.ui.theme.magicGreen,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .height(44.dp)
+                        .border(
+                            width = 2.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.6f),
+                                    Color.White.copy(alpha = 0.2f),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape = RoundedCornerShape(14.dp)
+                        ),
+                    shadowElevation = 4.dp
                 ) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = "Load",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text("Load", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = "Load",
+                            tint = darkerGreenColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "LOAD", 
+                            color = darkerGreenColor,
+                            fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

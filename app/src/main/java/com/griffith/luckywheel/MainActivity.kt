@@ -108,10 +108,27 @@ class MainActivity : ComponentActivity() {
         stopService(intent)
     }
 
+    override fun onPause() {
+        super.onPause()
+        // Pause music when app goes to background
+        val intent = Intent(this, BackgroundMusicService::class.java).apply {
+            action = BackgroundMusicService.ACTION_PAUSE
+        }
+        startService(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Resume music when app returns to foreground
+        val intent = Intent(this, BackgroundMusicService::class.java).apply {
+            action = BackgroundMusicService.ACTION_PLAY
+        }
+        startService(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        // We usually don't want to stop the background music if the app is still "alive" in certain states, 
-        // but for a game, stopping it on onDestroy is reasonable if we want it to cease when the task is cleared.
+        // Stop music service when activity is destroyed
         stopMusicService()
     }
 }

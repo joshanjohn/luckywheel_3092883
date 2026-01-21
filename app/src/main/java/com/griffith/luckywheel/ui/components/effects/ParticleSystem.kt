@@ -51,63 +51,6 @@ fun ParticleExplosion(
     }
 }
 
-@Composable
-fun FireSparkleEffect(
-    isSpinning: Boolean,
-    origin: Offset
-) {
-    if (!isSpinning) return
-
-    val particles = remember { mutableStateListOf<SparkParticle>() }
-    val infiniteTransition = rememberInfiniteTransition(label = "fire_sparks")
-    val time by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing)),
-        label = "time"
-    )
-
-    LaunchedEffect(time) {
-        // Emit new particles periodically
-        repeat(5) {
-            particles.add(SparkParticle(origin))
-        }
-        // Remove dead particles
-        if (particles.size > 100) {
-            particles.removeRange(0, 20)
-        }
-    }
-
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        particles.forEach { particle ->
-            particle.update()
-            drawCircle(
-                color = particle.color.copy(alpha = particle.alpha),
-                radius = particle.size,
-                center = particle.pos
-            )
-        }
-    }
-}
-
-private class SparkParticle(val origin: Offset) {
-    var pos by mutableStateOf(origin)
-    val vx = (Random.nextFloat() - 0.5f) * 15f
-    val vy = (Random.nextFloat() - 0.8f) * 20f
-    var alpha by mutableFloatStateOf(1f)
-    val size = Random.nextFloat() * 4f + 2f
-    val color = when (Random.nextInt(3)) {
-        0 -> Color(0xFFFF5722) // Deep Orange
-        1 -> Color(0xFFFFC107) // Amber
-        else -> Color(0xFFFFEB3B) // Yellow
-    }
-
-    fun update() {
-        pos = Offset(pos.x + vx, pos.y + vy)
-        alpha = (alpha - 0.02f).coerceAtLeast(0f)
-    }
-}
-
 private class ShootingStarParticle(val origin: Offset) {
     val vx = (Random.nextFloat() - 0.5f) * 1000f
     val vy = (Random.nextFloat() - 1f) * 1200f
