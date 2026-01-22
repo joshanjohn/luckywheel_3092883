@@ -126,17 +126,16 @@ fun LoadGamesScreen(
                             GameCard(
                                 game = game,
                                 onLoad = {
-                                    // Navigate to PlayGround with the loaded game
-                                    navController.navigate("play/$playerId") {
-                                        popUpTo("loadgames/{playerId}") { inclusive = true }
+                                    // Navigate to CustomWheelScreen first
+                                    navController.navigate("custompi/$playerId") {
+                                        popUpTo("loadgames/$playerId") { inclusive = true }
                                     }
-                                    // Set the loaded game and flag to show custom wheel
+                                    
+                                    // Set the loaded game on the newly created back stack entry
+                                    // This ensures the data is available when CustomWheelScreen loads
                                     navController.currentBackStackEntry
                                         ?.savedStateHandle
                                         ?.set("loaded_game", game)
-                                    navController.currentBackStackEntry
-                                        ?.savedStateHandle
-                                        ?.set("navigate_to_custom", true)
                                 },
                                 onDelete = { gameToDelete ->
                                     coroutineScope.launch {
