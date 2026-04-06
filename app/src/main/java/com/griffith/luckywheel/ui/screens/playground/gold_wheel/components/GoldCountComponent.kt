@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,6 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
+import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.neonLime
 import java.util.Locale
 
 @Composable
@@ -53,7 +57,7 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
         label = "gold_color_animation"
     )
     
-    val animatedColor = if (triggerAnimation) com.griffith.luckywheel.ui.theme.neonLime else com.griffith.luckywheel.ui.theme.arcadeGold
+    val animatedColor = if (triggerAnimation) neonLime else arcadeGold
     
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -61,14 +65,15 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
     ) {
         Image(
             painterResource(R.drawable.icon_gold_coin_icon),
-            contentDescription = "gold count icon"
+            contentDescription = "gold count icon",
+            modifier = Modifier.size(28.dp)
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = String.format(Locale.getDefault(), "%,d", playerGold),
             style = TextStyle(
                 fontSize = 22.sp,
-                fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+                fontFamily = ArcadeFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = animatedColor
             )

@@ -49,7 +49,7 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 10.dp, start = 20.dp, end = 20.dp, bottom = 30.dp),
+            .padding(top = 8.dp, start = 20.dp, end = 20.dp, bottom = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(

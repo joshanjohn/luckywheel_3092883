@@ -4,9 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.griffith.luckywheel.ui.screens.auth.ForgotPasswordScreen
-import com.griffith.luckywheel.ui.screens.auth.LoginScreen
-import com.griffith.luckywheel.ui.screens.auth.RegisterScreen
 import com.griffith.luckywheel.ui.screens.leaderboard.LeaderboardScreen
 import com.griffith.luckywheel.ui.screens.loadgames.LoadGamesScreen
 import com.griffith.luckywheel.ui.screens.profile.ProfileScreen
@@ -43,9 +40,11 @@ fun AppRoute(startDestination: String = "login") {
         }
 
         // Authentication screens - no playerId needed
-        composable("register") { RegisterScreen(navController) }
-        composable("login") { LoginScreen(navController) }
-        composable("forgotpassword") { ForgotPasswordScreen(navController) }
+        // TODO: Implement authentication screens (RegisterScreen, LoginScreen, ForgotPasswordScreen)
+        // Authentication is currently handled through Firebase in MainActivity.kt
+        // composable("register") { RegisterScreen(navController) }
+        // composable("login") { LoginScreen(navController) }
+        // composable("forgotpassword") { ForgotPasswordScreen(navController) }
         
         // Settings screen - requires playerId for navigation to game screens
         composable("settings/{playerId}") { backStackEntry ->

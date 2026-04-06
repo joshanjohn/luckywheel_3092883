@@ -73,6 +73,10 @@ class BackgroundMusicService : Service() {
     }
 
     private fun initializePlayer() {
+        if (mediaPlayer != null) {
+            Log.d(TAG, "Player already initialized, skipping")
+            return
+        }
         try {
             val resourceId = resources.getIdentifier("bgmusic", "raw", packageName)
             if (resourceId != 0) {
@@ -110,8 +114,15 @@ class BackgroundMusicService : Service() {
     }
 
     private fun play() {
-        if (mediaPlayer == null) initializePlayer()
+        if (mediaPlayer == null) {
+            initializePlayer()
+        }
         
+        // Ensure service is running in foreground even when ACTION_PLAY is called directly
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(NOTIFICATION_ID, createNotification())
+        }
+
         // Request audio focus before playing
         val result = requestAudioFocus()
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -135,7 +146,9 @@ class BackgroundMusicService : Service() {
                 Log.d(TAG, "Music paused")
             }
         }
-        // Don't abandon audio focus here - we might resume soon
+        // If we are pausing, we can stop the foreground state to save resources,
+        // but it's often safer to keep the notification if we expect to resume shortly.
+        // For now, we'll keep the service alive in the foreground.
     }
 
     private fun updateVolume() {

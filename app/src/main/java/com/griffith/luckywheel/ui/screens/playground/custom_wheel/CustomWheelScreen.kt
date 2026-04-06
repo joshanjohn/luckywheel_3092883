@@ -11,18 +11,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import com.adamglin.phosphoricons.PhosphorIcons
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,7 +46,9 @@ import com.griffith.luckywheel.ui.screens.playground.custom_wheel.components.Edi
 import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
 import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.deepForest
 import com.griffith.luckywheel.ui.theme.magicGreen
 import com.griffith.luckywheel.ui.theme.neonLime
 import kotlinx.coroutines.delay
@@ -155,7 +158,7 @@ fun CustomWheelScreen(
         containerColor = Color.Transparent,
         floatingActionButton = {
             MagicalGameFAB(
-                iconId = R.drawable.icon_trophy,
+                icon = PhosphorIcons.Regular.Trophy,
                 label = "GOLD ARCADE",
                 onClick = { 
                     navController.navigate("goldwheel/$playerId") {
@@ -165,77 +168,101 @@ fun CustomWheelScreen(
             )
         }
     ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        // Header Section - Pinned to Top
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Polished Home Button
-                IconButton(
-                    onClick = { navController.navigate("home/$playerId") },
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Home,
-                        contentDescription = "Home",
-                        tint = arcadeGold,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    IconButton(
+                        onClick = { navController.navigate("home/$playerId") },
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = arcadeGold,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = { 
+                            soundEffectService.playClickSound()
+                            navController.navigate("settings/$playerId") 
+                        },
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = PhosphorIcons.Regular.Gear,
+                            contentDescription = "Settings",
+                            tint = arcadeGold,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Modern Edit Wheel Button
                     Surface(
                         onClick = {
                             soundEffectService.playClickSound()
                             showBottomSheet = true
                         },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(12.dp),
                         color = magicGreen.copy(alpha = 0.9f),
                         modifier = Modifier
-                            .height(48.dp)
+                            .height(40.dp)
                             .border(
                                 width = 1.dp,
                                 brush = Brush.verticalGradient(
-                                    listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
+                                    listOf(Color.White.copy(alpha = 0.4f), Color.Transparent)
                                 ),
-                                shape = RoundedCornerShape(16.dp)
+                                shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 20.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(6.dp))
                             Text(
-                                "Edit Wheel",
+                                "Edit",
                                 color = Color.White,
-                                fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
-                                fontSize = 14.sp
+                                fontFamily = ArcadeFontFamily,
+                                fontSize = 12.sp
                             )
                         }
                     }
 
-                    // Modern Load Button
                     Surface(
                         onClick = {
                             soundEffectService.playClickSound()
@@ -243,24 +270,24 @@ fun CustomWheelScreen(
                                 launchSingleTop = true
                             }
                         },
-                        shape = RoundedCornerShape(16.dp),
-                        color = com.griffith.luckywheel.ui.theme.deepForest.copy(alpha = 0.8f),
+                        shape = RoundedCornerShape(12.dp),
+                        color = deepForest.copy(alpha = 0.8f),
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(40.dp)
                             .border(
                                 width = 1.dp,
                                 brush = Brush.verticalGradient(
                                     listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
                                 ),
-                                shape = RoundedCornerShape(16.dp)
+                                shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                Icons.AutoMirrored.Filled.List,
+                                imageVector = PhosphorIcons.Regular.FolderOpen,
                                 contentDescription = "Load Games",
                                 tint = arcadeGold,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -272,15 +299,24 @@ fun CustomWheelScreen(
                     text = "Playing: $currentGameName",
                     color = arcadeGold,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    fontFamily = ArcadeFontFamily,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
+        }
 
-            BoxWithConstraints(
+        // Wheel Section - Perfectly Centered
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.9f)
+                .aspectRatio(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
@@ -303,13 +339,21 @@ fun CustomWheelScreen(
                         }
                     }
                 )
-
             }
+        }
 
-
+        // Controls Section - Pinned to Bottom Center
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             AnimatedText(
-                text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake your phone!",
+                text = if (rotationSpeed > 0f) "Spinning..." else "Hold & Shake to spin!",
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             var isButtonEnabled by remember { mutableStateOf(true) }
             LaunchedEffect(rotationSpeed) {
@@ -321,9 +365,7 @@ fun CustomWheelScreen(
             com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.SpinButton(
                 isEnabled = isButtonEnabled,
                 isSpinning = isSpinning,
-                onSpinStart = { 
-                    sensorEnabled = true 
-                },
+                onSpinStart = { sensorEnabled = true },
                 onSpinEnd = {
                     sensorEnabled = false
                     if (rotationSpeed > 0f) {
@@ -332,6 +374,7 @@ fun CustomWheelScreen(
                 }
             )
         }
+    }
 
         if (showResultDialog) {
             chosenItem?.let { item ->
@@ -363,7 +406,7 @@ fun CustomWheelScreen(
 
 // Reusing the same FAB style for consistency
 @Composable
-fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
+fun MagicalGameFAB(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition(label = "fab_pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -392,10 +435,12 @@ fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
                 containerColor = Color.Black,
                 contentColor = neonLime,
                 shape = CircleShape,
-                modifier = Modifier.border(2.dp, neonLime.copy(alpha = 0.5f), CircleShape)
+                modifier = Modifier
+                    .size(64.dp)
+                    .border(2.dp, neonLime.copy(alpha = 0.5f), CircleShape)
             ) {
                 Icon(
-                    painter = painterResource(id = iconId),
+                    imageVector = icon,
                     contentDescription = label,
                     modifier = Modifier.size(28.dp)
                 )
@@ -405,7 +450,7 @@ fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
         Text(
             text = label,
             fontSize = 10.sp,
-            fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+            fontFamily = ArcadeFontFamily,
             color = neonLime,
             modifier = Modifier.padding(top = 4.dp)
         )

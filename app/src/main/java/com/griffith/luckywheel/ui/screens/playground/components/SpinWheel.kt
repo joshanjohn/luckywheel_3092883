@@ -26,6 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
+import com.griffith.luckywheel.ui.theme.RetroFontFamily
+import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.deepForest
+import com.griffith.luckywheel.ui.theme.magicGreen
+import com.griffith.luckywheel.ui.theme.neonLime
 import com.griffith.luckywheel.utils.isColorDark
 import com.griffith.luckywheel.utils.truncateText
 import kotlin.math.cos
@@ -68,22 +73,22 @@ fun SpinWheel(
         val centerX = size.width / 2
         val centerY = size.height / 2
         val center = Offset(centerX, centerY)
-        val radius = (size.minDimension / 2) * 0.9f
+        val radius = (size.minDimension / 2) * 0.9f // Restored to a prominent size 0.82f
 
-        // Outer Magical Glow
+        // Outer Magical Glow - Fits within bounds
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.4f), Color.Transparent),
+                colors = listOf(neonLime.copy(alpha = 0.4f), Color.Transparent),
                 center = center,
-                radius = radius * 1.2f
+                radius = radius * 1.25f
             ),
-            radius = radius * 1.2f,
+            radius = radius * 1.25f,
             center = center
         )
 
         // Neon Border Outer
         drawCircle(
-            color = com.griffith.luckywheel.ui.theme.magicGreen,
+            color = magicGreen,
             radius = radius + 10f,
             center = center,
             style = Stroke(width = 12f)
@@ -91,7 +96,7 @@ fun SpinWheel(
 
         // Neon Glow Inner
         drawCircle(
-            color = com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.6f),
+            color = neonLime.copy(alpha = 0.6f),
             radius = radius + 6f,
             center = center,
             style = Stroke(width = 4f)
@@ -169,14 +174,14 @@ fun SpinWheel(
 
         // Center hub with multiple layers for depth
         drawCircle(
-            color = com.griffith.luckywheel.ui.theme.deepForest,
+            color = deepForest,
             radius = radius * 0.32f,
             center = center
         )
         
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(com.griffith.luckywheel.ui.theme.magicGreen, com.griffith.luckywheel.ui.theme.deepForest),
+                colors = listOf(magicGreen, deepForest),
                 center = center,
                 radius = radius * 0.3f
             ),
@@ -196,9 +201,9 @@ fun SpinWheel(
             withStyle(
                 style = TextStyle(
                     fontSize = 20.sp,
-                    color = com.griffith.luckywheel.ui.theme.arcadeGold,
+                    color = arcadeGold,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = com.griffith.luckywheel.ui.theme.RetroFontFamily,
+                    fontFamily = RetroFontFamily,
                     textAlign = TextAlign.Center
                 ).toSpanStyle()
             ) {
@@ -229,7 +234,7 @@ fun SpinWheel(
         // Pointer shadow/glow
         drawPath(
             path = pointerPath,
-            color = com.griffith.luckywheel.ui.theme.neonLime.copy(alpha = 0.5f),
+            color = neonLime.copy(alpha = 0.5f),
             style = Stroke(width = 8f)
         )
         

@@ -104,6 +104,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx:20.3.1")
     implementation("com.google.firebase:firebase-analytics")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+    implementation("com.adamglin:phosphor-icon:1.0.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

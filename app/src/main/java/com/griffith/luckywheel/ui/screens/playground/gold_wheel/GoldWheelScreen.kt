@@ -11,8 +11,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
@@ -27,6 +29,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.adamglin.phosphoricons.PhosphorIcons
+import com.adamglin.phosphoricons.regular.Gamecontroller
+import com.adamglin.phosphoricons.regular.Gear
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -42,10 +47,14 @@ import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
 import com.griffith.luckywheel.models.enum.SpinActionType
+import com.griffith.luckywheel.ui.screens.playground.custom_wheel.MagicalGameFAB
+import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.SpinButton
 import com.griffith.luckywheel.ui.screens.playground.logic.generateRandomGoldWheelItems
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
 import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.deepForest
 import com.griffith.luckywheel.ui.theme.magicGreen
 import com.griffith.luckywheel.ui.theme.neonLime
 import kotlinx.coroutines.delay
@@ -65,7 +74,7 @@ fun GoldWheelScreen(
 
     var wheelItems by remember { 
         mutableStateOf(
-            generateRandomGoldWheelItems(magicGreen, com.griffith.luckywheel.ui.theme.deepForest)
+            generateRandomGoldWheelItems(magicGreen, deepForest)
         )
     }
 
@@ -127,7 +136,7 @@ fun GoldWheelScreen(
             }
         }
         
-        wheelItems = generateRandomGoldWheelItems(magicGreen, com.griffith.luckywheel.ui.theme.deepForest)
+        wheelItems = generateRandomGoldWheelItems(magicGreen, deepForest)
     }
 
     DisposableEffect(sensorEnabled) {
@@ -172,7 +181,7 @@ fun GoldWheelScreen(
         containerColor = Color.Transparent,
         floatingActionButton = {
             MagicalGameFAB(
-                iconId = R.drawable.icon_game_control,
+                icon = PhosphorIcons.Regular.Gamecontroller,
                 label = "CUSTOM WHEEL",
                 onClick = { 
                     navController.navigate("custompi/$playerId") {
@@ -182,32 +191,58 @@ fun GoldWheelScreen(
             )
         }
     ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        // Header Section - Pinned to Top
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Polished Home Button
-                IconButton(
-                    onClick = { navController.navigate("home/$playerId") },
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Home,
-                        contentDescription = "Home",
-                        tint = arcadeGold,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    IconButton(
+                        onClick = { navController.navigate("home/$playerId") },
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = arcadeGold,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = { 
+                            soundEffectService.playClickSound()
+                            navController.navigate("settings/$playerId") 
+                        },
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = PhosphorIcons.Regular.Gear,
+                            contentDescription = "Settings",
+                            tint = arcadeGold,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
                 
                 GoldCountComponent(playerName, playerGold)
@@ -226,30 +261,45 @@ fun GoldWheelScreen(
                     Image(
                         painterResource(R.drawable.icon_trophy),
                         contentDescription = "leaderboard icon",
-                        modifier = Modifier.size(32.dp).padding(4.dp)
+                        modifier = Modifier.size(28.dp).padding(4.dp)
                     )
                 }
             }
+        }
 
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                SpinWheel(
-                    items = wheelItems, 
-                    rotationDegrees = currentRotationDegrees,
-                    onSegmentChange = { segment ->
-                        if (isSpinning && rotationSpeed > 1f && segment != lastSegment) {
-                            lastSegment = segment
-                            hapticService.tick()
-                        }
+        // Wheel Section - Perfectly Centered
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.9f)
+                .aspectRatio(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            SpinWheel(
+                items = wheelItems, 
+                rotationDegrees = currentRotationDegrees,
+                onSegmentChange = { segment ->
+                    if (isSpinning && rotationSpeed > 1f && segment != lastSegment) {
+                        lastSegment = segment
+                        hapticService.tick()
                     }
-                )
+                }
+            )
+        }
 
-            }
+        // Controls Section - Pinned to Bottom Center
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AnimatedText(
+                text = if (isSpinning) "Spinning..." else "Hold & Shake to spin!",
+                baseColor = Color.White
+            )
 
-
-            AnimatedText(text = if (isSpinning) "Spinning..." else "Hold & Shake \nyour phone to spin!")
+            Spacer(modifier = Modifier.height(12.dp))
 
             var isButtonEnabled by remember { mutableStateOf(true) }
             LaunchedEffect(rotationSpeed) {
@@ -258,12 +308,10 @@ fun GoldWheelScreen(
                 }
             }
 
-            com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.SpinButton(
+            SpinButton(
                 isEnabled = isButtonEnabled,
                 isSpinning = isSpinning,
-                onSpinStart = { 
-                    sensorEnabled = true 
-                },
+                onSpinStart = { sensorEnabled = true },
                 onSpinEnd = {
                     sensorEnabled = false
                     if (rotationSpeed > 0f) {
@@ -272,6 +320,7 @@ fun GoldWheelScreen(
                 }
             )
         }
+    }
 
         if (showResultDialog) {
             lastSpinResult?.let { result ->
@@ -293,7 +342,7 @@ fun GoldWheelScreen(
 }
 
 @Composable
-fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
+fun MagicalGameFAB(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition(label = "fab_pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -323,10 +372,12 @@ fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
                 containerColor = Color.Black,
                 contentColor = neonLime,
                 shape = CircleShape,
-                modifier = Modifier.border(2.dp, neonLime.copy(alpha = 0.5f), CircleShape)
+                modifier = Modifier
+                    .size(64.dp)
+                    .border(2.dp, neonLime.copy(alpha = 0.5f), CircleShape)
             ) {
                 Icon(
-                    painter = painterResource(id = iconId),
+                    imageVector = icon,
                     contentDescription = label,
                     modifier = Modifier.size(28.dp)
                 )
@@ -336,7 +387,7 @@ fun MagicalGameFAB(iconId: Int, label: String, onClick: () -> Unit) {
         Text(
             text = label,
             fontSize = 10.sp,
-            fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
+            fontFamily = ArcadeFontFamily,
             color = neonLime,
             modifier = Modifier.padding(top = 4.dp)
         )
