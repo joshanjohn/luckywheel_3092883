@@ -63,9 +63,9 @@ fun TutorialScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF033E14),
-                        Color(0xFF01150B),
-                        Color(0xFF01150B)
+                        com.griffith.luckywheel.ui.theme.surfaceDark,
+                        Color(0xFF060A18),
+                        com.griffith.luckywheel.ui.theme.surfaceDark
                     )
                 )
             )
@@ -119,7 +119,7 @@ fun TutorialScreen(
                         navController.popBackStack() 
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = lightGreenColor
+                        containerColor = com.griffith.luckywheel.ui.theme.primaryNeon
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,7 +128,7 @@ fun TutorialScreen(
                 ) {
                     Text(
                         text = TutorialConstants.BUTTON_GET_STARTED,
-                        color = Color.White,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         fontFamily = BubbleFontFamily
@@ -159,8 +159,8 @@ fun TutorialScreen(
                         .background(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    goldColor.copy(alpha = 0.9f),
-                                    goldColor.copy(alpha = 0.7f)
+                                    com.griffith.luckywheel.ui.theme.primaryNeon.copy(alpha = 0.9f),
+                                    com.griffith.luckywheel.ui.theme.primaryNeon.copy(alpha = 0.7f)
                                 )
                             ),
                             shape = CircleShape
@@ -169,7 +169,7 @@ fun TutorialScreen(
                     Icon(
                         painter = painterResource(R.drawable.icon_back),
                         contentDescription = TutorialConstants.BUTTON_PREVIOUS,
-                        tint = Color.White,
+                        tint = Color.Black,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -191,8 +191,8 @@ fun TutorialScreen(
                         .background(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    goldColor.copy(alpha = 0.9f),
-                                    goldColor.copy(alpha = 0.7f)
+                                    com.griffith.luckywheel.ui.theme.primaryNeon.copy(alpha = 0.9f),
+                                    com.griffith.luckywheel.ui.theme.primaryNeon.copy(alpha = 0.7f)
                                 )
                             ),
                             shape = CircleShape
@@ -201,7 +201,7 @@ fun TutorialScreen(
                     Icon(
                         painter = painterResource(R.drawable.icon_next),
                         contentDescription = TutorialConstants.BUTTON_NEXT,
-                        tint = Color.White,
+                        tint = Color.Black,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -247,7 +247,7 @@ private fun TutorialPage(page: Int) {
             .fillMaxSize()
             .padding(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF0B3A24).copy(alpha = 0.8f)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceCard
         ),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)

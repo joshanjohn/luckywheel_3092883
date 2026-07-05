@@ -23,497 +23,471 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Brush
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.SpinWheelItem
+import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.SoundEffectService
-import com.griffith.luckywheel.models.enum.SpinActionType
-import com.griffith.luckywheel.ui.theme.darkerGreenColor
-import com.griffith.luckywheel.ui.theme.magicGreen
-import com.griffith.luckywheel.ui.theme.goldColor
-import com.griffith.luckywheel.ui.theme.lightGreenColor
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
+import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.primaryNeon
+import com.griffith.luckywheel.ui.theme.winGreen
+import com.griffith.luckywheel.ui.theme.surfaceDark
+import com.griffith.luckywheel.ui.theme.surfaceElevated
 import com.griffith.luckywheel.utils.truncateText
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-
-// Bottom sheet for editing custom wheel items - add, remove, and customize segments
+/**
+ * A bottom sheet for managing custom wheel segments.
+ * Users can add, remove, and customize labels, colors, and probabilities.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBottomSheet(
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
-    wheelItems: List<SpinWheelItem>, // Current wheel configuration
-    onUpdateItems: (List<SpinWheelItem>) -> Unit, // Callback when items change
+    wheelItems: List<SpinWheelItem>,
+    onUpdateItems: (List<SpinWheelItem>) -> Unit,
     playerId: String?,
-    currentGameId: String? = null, // If editing existing game
+    currentGameId: String? = null,
     currentGameName: String? = null,
-    onGameSaved: (String, String) -> Unit = { _, _ -> } // Callback with gameId and gameName
+    onGameSaved: (String, String) -> Unit = { _, _ -> }
 ) {
-    if (!showBottomSheet) return // Don't render if not visible
+    if (!showBottomSheet) return
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
-    var expandedIndex by remember { mutableStateOf<Int?>(null) } // Track which item is being edited
+    var expandedIndex by remember { mutableStateOf<Int?>(null) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var gameName by remember(currentGameName) { mutableStateOf(currentGameName ?: "") }
+    
     val context = LocalContext.current
     val firebaseService = remember { FireBaseService() }
     val soundEffectService = remember { SoundEffectService(context) }
-    
-    // Clean up sound service when sheet is closed
+
     DisposableEffect(Unit) {
-        onDispose {
-            soundEffectService.release()
-        }
-    }
-
-    // Redistribution of percentages when one item changes and keeps total at 100%
-    fun rebalanceItemPercentagesAfterChange(
-        items: List<SpinWheelItem>,
-        updatedIndex: Int, // Which item was changed
-        newPercent: Float // New percentage for that item
-    ): List<SpinWheelItem> {
-        val clampedPercent = newPercent.coerceIn(0f, 1f) // Ensure 0-100%
-        if (items.isEmpty()) return items
-        if (items.size == 1) return listOf(items[0].copy(percent = 1f)) // Single item gets 100%
-
-        val remainingPercent = (1f - clampedPercent).coerceAtLeast(0f) // What's left for other items
-        val otherItems = items.filterIndexed { i, _ -> i != updatedIndex }
-        val totalOtherPercent = otherItems.sumOf { it.percent.toDouble() }.toFloat()
-
-        return if (totalOtherPercent <= 0f) {
-            // If other items have no percentage, distribute equally
-            val equalShare = remainingPercent / otherItems.size
-            items.mapIndexed { i, item ->
-                if (i == updatedIndex) item.copy(percent = clampedPercent)
-                else item.copy(percent = equalShare)
-            }
-        } else {
-            // Redistribute remaining percentage proportionally based on current ratios
-            items.mapIndexed { i, item ->
-                if (i == updatedIndex) item.copy(percent = clampedPercent)
-                else item.copy(percent = (item.percent / totalOtherPercent) * remainingPercent)
-            }
-        }
-    }
-
-    // Ensures all percentages add up to exactly 100% (1.0)
-    fun normalizePercentagesToOne(items: List<SpinWheelItem>): List<SpinWheelItem> {
-        if (items.isEmpty()) return items
-        val total = items.sumOf { it.percent.toDouble() }.toFloat()
-        return if (total <= 0f) {
-            // If total is 0, distribute equally
-            val equal = 1f / items.size.coerceAtLeast(1)
-            items.map { it.copy(percent = equal) }
-        } else {
-            // Scale all percentages proportionally to sum to 1.0
-            items.map { it.copy(percent = it.percent / total) }
-        }
+        onDispose { soundEffectService.release() }
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color(0xFF01150B),
+        containerColor = surfaceElevated,
         dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.3f)) }
     ) {
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(bottom = 32.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header with Save Button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Edit Wheel Items",
-                    color = Color.White,
-                    fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Surface(
-                    onClick = { 
-                        soundEffectService.playClickSound()
-                        showSaveDialog = true 
-                    },
-                    enabled = wheelItems.isNotEmpty() && playerId != null,
-                    color = magicGreen.copy(alpha = 0.8f),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.border(
-                        1.dp, 
-                        Color.White.copy(alpha = 0.3f), 
-                        RoundedCornerShape(12.dp)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Save", 
-                            color = Color.White, 
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Icon(
-                            painter = painterResource(R.drawable.icons_save_game),
-                            contentDescription = "Save Game",
-                            modifier = Modifier.size(16.dp),
-                            tint = if (wheelItems.isNotEmpty() && playerId != null) goldColor else Color.White.copy(alpha = 0.3f)
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            //  Expandable Cards List
-            wheelItems.forEachIndexed { index, item ->
-                // Generate 5 random vibrant colors for color picker, use index as key to prevent regeneration during typing
-                var colorfulSuggestions by remember(index) {
-                    mutableStateOf(
-                        List(5) {
-                            // Generate vibrant colors
-                            val channels = listOf(
-                                Random.nextInt(50, 201), // Mid-range
-                                Random.nextInt(50, 201), // Mid-range
-                                255 // Always have one channel at max for vibrancy
-                            ).shuffled() // Randomize which channel is maxed
-                            Color(
-                                red = channels[0],
-                                green = channels[1],
-                                blue = channels[2]
-                            )
-                        }
-                    )
-                }
-
-                // Regenerate color palette with new random colors
-                fun regenerateColors() {
-                    colorfulSuggestions = List(5) {
-                        val channels = listOf(
-                            Random.nextInt(50, 201),
-                            Random.nextInt(50, 201),
-                            255
-                        ).shuffled()
-                        Color(
-                            red = channels[0],
-                            green = channels[1],
-                            blue = channels[2]
-                        )
-                    }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-                        .border(
-                            0.5.dp, 
-                            Color.White.copy(alpha = 0.1f), 
-                            RoundedCornerShape(12.dp)
-                        ),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF07361D).copy(alpha = 0.5f)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(Modifier.padding(12.dp)) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(item.color)
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Text(
-                                    text = truncateText(item.label, maxLength = 12),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-
-                            Row {
-                                // Toggle edit mode for this item
-                                IconButton(onClick = {
-                                    expandedIndex = if (expandedIndex == index) null else index
-                                }) {
-                                    Icon(
-                                        imageVector = if (expandedIndex == index)
-                                            Icons.Default.Clear else Icons.Default.Edit,
-                                        contentDescription = "Edit",
-                                        tint = goldColor
-                                    )
-                                }
-
-                                // Remove this item from wheel
-                                TextButton(onClick = {
-                                    val updatedItems =
-                                        wheelItems.toMutableList().apply { removeAt(index) }
-                                    onUpdateItems(normalizePercentagesToOne(updatedItems)) // Rebalance after removal
-                                    expandedIndex = null
-                                }) {
-                                    Text("Remove", color = Color.Red)
-                                }
-                            }
-                        }
-
-                        // Expanded editor section - only visible when item is being edited
-                        if (expandedIndex == index) {
-                            Spacer(Modifier.height(8.dp))
-
-                            OutlinedTextField(
-                                value = item.label,
-                                onValueChange = { newValue ->
-                                    // Limit input to 20 characters max and update immediately
-                                    if (newValue.length <= 20) {
-                                        val updatedList = wheelItems.mapIndexed { i, wheelItem ->
-                                            if (i == index) wheelItem.copy(label = newValue)
-                                            else wheelItem
-                                        }
-                                        onUpdateItems(updatedList)
-                                    }
-                                },
-                                label = { Text("Label (max 20 chars)") },
-                                singleLine = true,
-                                supportingText = {
-                                    Text(
-                                        "${item.label.length}/20",
-                                        color = if (item.label.length > 12) Color(0xFFFFD700) else Color.Gray
-                                    )
-                                },
-                                colors = TextFieldDefaults.colors(
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,
-                                    focusedContainerColor = Color(0xFF0B3A24),
-                                    unfocusedContainerColor = Color(0xFF0B3A24),
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(Modifier.height(12.dp))
-                            Text("Pick Color", color = Color.White)
-
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Color palette circles
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    colorfulSuggestions.forEach { color ->
-                                        Box(
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .clip(CircleShape)
-                                                .background(color)
-                                                .border(
-                                                    if (item.color == color) 2.dp else 1.dp,
-                                                    if (item.color == color) Color.White else Color.Gray,
-                                                    CircleShape
-                                                )
-                                                .clickable {
-                                                    // Update color immediately
-                                                    val updatedList = wheelItems.mapIndexed { i, wheelItem ->
-                                                        if (i == index) wheelItem.copy(color = color)
-                                                        else wheelItem
-                                                    }
-                                                    onUpdateItems(updatedList)
-                                                }
-                                        )
-                                    }
-                                }
-                                
-                                // Random/Shuffle button
-                                IconButton(
-                                    onClick = {
-                                        soundEffectService.playClickSound()
-                                        regenerateColors()
-                                    },
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFF0B3A24))
-                                        .border(1.dp, goldColor, CircleShape)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.icon_refresh),
-                                        contentDescription = "Shuffle Colors",
-                                        tint = goldColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(Modifier.height(8.dp))
-                            val percentDisplay = (item.percent * 100).toInt() // Convert 0-1 to 0-100 for display
-                            Text("Set Percentage: $percentDisplay%", color = Color.White)
-
-                            Slider(
-                                value = item.percent,
-                                onValueChange = { newPercent ->
-                                    // Update percentage immediately and rebalance other items
-                                    val updatedList = rebalanceItemPercentagesAfterChange(
-                                        wheelItems, index, newPercent.coerceIn(0f, 1f)
-                                    )
-                                    onUpdateItems(normalizePercentagesToOne(updatedList))
-                                },
-                                valueRange = 0f..1f,
-                                steps = 99, // 100 discrete steps (0%, 1%, 2%, ... 100%)
-                                colors = SliderDefaults.colors(
-                                    thumbColor = goldColor,
-                                    activeTrackColor = lightGreenColor
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Add new item to wheel (max 6 items)
-            Surface(
-                onClick = {
-                    if (wheelItems.size < 6) {
-                        soundEffectService.playAddItemSound()
-                        // Calculate equal percentage for all items including the new one
-                        val totalItems = wheelItems.size + 1
-                        val equalPercent = 1f / totalItems
-                        
-                        val newItem = SpinWheelItem(
-                            label = "New Item ${wheelItems.size + 1}",
-                            color = Color(
-                                red = Random.nextInt(0, 255),
-                                green = Random.nextInt(0, 255),
-                                blue = Random.nextInt(0, 255)
-                            ),
-                            type = SpinActionType.CUSTOM,
-                            value = 0,
-                            percent = equalPercent
-                        )
-                        // Set all items to equal percentage
-                        val addedList = (wheelItems.map { it.copy(percent = equalPercent) } + newItem)
-                        onUpdateItems(addedList)
-                    }
+            Header(
+                onSaveClick = {
+                    soundEffectService.playClickSound()
+                    showSaveDialog = true
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp, bottom = 24.dp)
-                    .height(56.dp)
-                    .border(
-                        1.dp,
-                        if (wheelItems.size >= 6) Color.Gray.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.3f),
-                        RoundedCornerShape(16.dp)
-                    ),
-                color = if (wheelItems.size >= 6) Color.Gray.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(16.dp),
-                enabled = wheelItems.size < 6
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = if (wheelItems.size >= 6) "Maximum 6 Items Reached" else "Add New Segment",
-                        color = if (wheelItems.size >= 6) Color.Gray else Color.White,
-                        fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
-                        fontSize = 14.sp
+                isSaveEnabled = wheelItems.isNotEmpty() && playerId != null
+            )
+
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                wheelItems.forEachIndexed { index, item ->
+                    ItemEditor(
+                        index = index,
+                        item = item,
+                        isExpanded = expandedIndex == index,
+                        onToggleExpand = {
+                            expandedIndex = if (expandedIndex == index) null else index
+                        },
+                        onRemove = {
+                            val updated = wheelItems.toMutableList().apply { removeAt(index) }
+                            onUpdateItems(normalizePercentages(updated))
+                            if (expandedIndex == index) expandedIndex = null
+                        },
+                        onItemUpdate = { updatedItem ->
+                            val updatedList = wheelItems.mapIndexed { i, old ->
+                                if (i == index) updatedItem else old
+                            }
+                            onUpdateItems(updatedList)
+                        },
+                        onPercentUpdate = { newPercent ->
+                            val updatedList = rebalancePercentages(wheelItems, index, newPercent)
+                            onUpdateItems(normalizePercentages(updatedList))
+                        },
+                        soundEffectService = soundEffectService
                     )
+                }
+
+                if (wheelItems.size < 6) {
+                    AddSegmentButton(
+                        onClick = {
+                            soundEffectService.playAddItemSound()
+                            val nextCount = wheelItems.size + 1
+                            val share = 1f / nextCount
+                            val newItem = SpinWheelItem(
+                                label = "Item $nextCount",
+                                color = generateVibrantColor(),
+                                type = SpinActionType.CUSTOM,
+                                value = 0,
+                                percent = share
+                            )
+                            val newList = wheelItems.map { it.copy(percent = share) } + newItem
+                            onUpdateItems(newList)
+                        }
+                    )
+                } else {
+                    MaxItemsNote()
                 }
             }
         }
     }
 
-    // Save Game Dialog
     if (showSaveDialog) {
-        AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
-            title = { Text(if (currentGameId != null) "Update Game" else "Save Game", color = Color.White) },
-            text = {
-                Column {
-                    Text("Enter a name for this game:", color = Color.White)
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = gameName,
-                        onValueChange = { gameName = it },
-                        label = { Text("Game Name") },
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF0B3A24),
-                            unfocusedContainerColor = Color(0xFF0B3A24),
-                        )
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        soundEffectService.playClickSound()
-                        if (gameName.isBlank()) {
-                            Toast.makeText(context, "Please enter a game name", Toast.LENGTH_SHORT).show()
-                            return@TextButton
-                        }
-
-                        playerId?.let { pid ->
-                            coroutineScope.launch {
-                                // Save or update game in Firebase
-                                val result = firebaseService.saveCustomGame(
-                                    playerId = pid,
-                                    gameName = gameName.trim(),
-                                    wheelItems = wheelItems,
-                                    gameId = currentGameId // If null, creates new game; otherwise updates existing
-                                )
-                                
-                                result.onSuccess { gameId ->
-                                    Toast.makeText(
-                                        context,
-                                        if (currentGameId != null) "Game updated!" else "Game saved!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    onGameSaved(gameId, gameName.trim())
-                                    showSaveDialog = false
-                                    onDismiss()
-                                }.onFailure { exception ->
-                                    Toast.makeText(
-                                        context,
-                                        "Failed to save game: ${exception.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
+        SaveGameDialog(
+            initialName = gameName,
+            isUpdate = currentGameId != null,
+            onDismiss = { showSaveDialog = false },
+            onSave = { name ->
+                playerId?.let { pid ->
+                    coroutineScope.launch {
+                        firebaseService.saveCustomGame(
+                            playerId = pid,
+                            gameName = name,
+                            wheelItems = wheelItems,
+                            gameId = currentGameId
+                        ).onSuccess { id ->
+                            Toast.makeText(context, "Game saved!", Toast.LENGTH_SHORT).show()
+                            onGameSaved(id, name)
+                            showSaveDialog = false
+                            onDismiss()
+                        }.onFailure { 
+                            Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
-                ) {
-                    Text(if (currentGameId != null) "Update" else "Save", color = lightGreenColor)
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { 
-                    soundEffectService.playClickSound()
-                    showSaveDialog = false 
-                }) {
-                    Text("Cancel", color = Color.White)
-                }
-            },
-            containerColor = Color(0xFF01150B)
+            }
         )
     }
+}
+
+@Composable
+private fun Header(onSaveClick: () -> Unit, isSaveEnabled: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Edit Wheel Items",
+            color = Color.White,
+            fontFamily = ArcadeFontFamily,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Button(
+            onClick = onSaveClick,
+            enabled = isSaveEnabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = primaryNeon.copy(alpha = 0.8f),
+                disabledContainerColor = primaryNeon.copy(alpha = 0.2f)
+            ),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Save", color = Color.White, fontSize = 14.sp)
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(R.drawable.icons_save_game),
+                    contentDescription = null,
+                    tint = arcadeGold,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemEditor(
+    index: Int,
+    item: SpinWheelItem,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
+    onRemove: () -> Unit,
+    onItemUpdate: (SpinWheelItem) -> Unit,
+    onPercentUpdate: (Float) -> Unit,
+    soundEffectService: SoundEffectService
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(containerColor = surfaceDark.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(item.color))
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = truncateText(item.label, 15),
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onToggleExpand) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.Clear else Icons.Default.Edit,
+                            contentDescription = null,
+                            tint = arcadeGold,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    TextButton(onClick = onRemove) {
+                        Text("Remove", color = Color.Red.copy(alpha = 0.7f), fontSize = 12.sp)
+                    }
+                }
+            }
+
+            if (isExpanded) {
+                ItemControls(
+                    item = item,
+                    onItemUpdate = onItemUpdate,
+                    onPercentUpdate = onPercentUpdate,
+                    soundEffectService = soundEffectService
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemControls(
+    item: SpinWheelItem,
+    onItemUpdate: (SpinWheelItem) -> Unit,
+    onPercentUpdate: (Float) -> Unit,
+    soundEffectService: SoundEffectService
+) {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
+        OutlinedTextField(
+            value = item.label,
+            onValueChange = { if (it.length <= 20) onItemUpdate(item.copy(label = it)) },
+            label = { Text("Label") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedContainerColor = Color(0xFF0B3A24),
+                unfocusedContainerColor = Color(0xFF0B3A24)
+            )
+        )
+
+        Spacer(Modifier.height(16.dp))
+        
+        ColorPicker(
+            selectedColor = item.color,
+            onColorSelect = { onItemUpdate(item.copy(color = it)) },
+            onShuffle = { soundEffectService.playClickSound() }
+        )
+
+        Spacer(Modifier.height(16.dp))
+        
+        Text(
+            text = "Probability: ${(item.percent * 100).toInt()}%",
+            color = Color.White,
+            fontSize = 12.sp
+        )
+        Slider(
+            value = item.percent,
+            onValueChange = onPercentUpdate,
+            colors = SliderDefaults.colors(
+                thumbColor = arcadeGold,
+                activeTrackColor = primaryNeon
+            )
+        )
+    }
+}
+
+@Composable
+private fun ColorPicker(
+    selectedColor: Color,
+    onColorSelect: (Color) -> Unit,
+    onShuffle: () -> Unit
+) {
+    var colors by remember { mutableStateOf(List(5) { generateVibrantColor() }) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            colors.forEach { color ->
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .border(
+                            width = if (selectedColor == color) 2.dp else 0.dp,
+                            color = Color.White,
+                            shape = CircleShape
+                        )
+                        .clickable { onColorSelect(color) }
+                )
+            }
+        }
+        
+        IconButton(
+            onClick = {
+                colors = List(5) { generateVibrantColor() }
+                onShuffle()
+            },
+            modifier = Modifier
+                .background(surfaceDark, CircleShape)
+                .size(36.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.icon_refresh),
+                contentDescription = null,
+                tint = arcadeGold,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddSegmentButton(onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
+            .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+        border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
+    ) {
+        Text("Add New Segment", fontFamily = ArcadeFontFamily, fontSize = 14.sp)
+    }
+}
+
+@Composable
+private fun MaxItemsNote() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "Maximum 6 items reached",
+            color = Color.Gray,
+            fontSize = 12.sp,
+            fontFamily = ArcadeFontFamily
+        )
+    }
+}
+
+@Composable
+private fun SaveGameDialog(
+    initialName: String,
+    isUpdate: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (isUpdate) "Update Game" else "Save Game", color = Color.White) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Game Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = surfaceDark,
+                    unfocusedContainerColor = surfaceDark
+                )
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (name.isNotBlank()) onSave(name.trim()) }
+            ) {
+                Text(if (isUpdate) "Update" else "Save", color = winGreen)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color.White)
+            }
+        },
+        containerColor = surfaceElevated
+    )
+}
+
+/**
+ * Normalizes item percentages so they sum up to 1.0.
+ */
+private fun normalizePercentages(items: List<SpinWheelItem>): List<SpinWheelItem> {
+    if (items.isEmpty()) return items
+    val sum = items.sumOf { it.percent.toDouble() }.toFloat()
+    return if (sum <= 0f) {
+        val share = 1f / items.size
+        items.map { it.copy(percent = share) }
+    } else {
+        items.map { it.copy(percent = it.percent / sum) }
+    }
+}
+
+/**
+ * Rebalances percentages when one item is changed, maintaining a sum of 1.0.
+ */
+private fun rebalancePercentages(
+    items: List<SpinWheelItem>,
+    targetIndex: Int,
+    newPercent: Float
+): List<SpinWheelItem> {
+    if (items.size <= 1) return items.map { it.copy(percent = 1f) }
+    
+    val clampedNewPercent = newPercent.coerceIn(0.01f, 0.99f)
+    val remaining = 1f - clampedNewPercent
+    val otherItemsSum = items
+        .filterIndexed { index, _ -> index != targetIndex }
+        .sumOf { it.percent.toDouble() }
+        .toFloat()
+    
+    return items.mapIndexed { index, item ->
+        if (index == targetIndex) {
+            item.copy(percent = clampedNewPercent)
+        } else {
+            val share = if (otherItemsSum > 0f) item.percent / otherItemsSum else 1f / (items.size - 1)
+            item.copy(percent = share * remaining)
+        }
+    }
+}
+
+private fun generateVibrantColor(): Color {
+    val channels = listOf(Random.nextInt(100, 255), Random.nextInt(50, 200), 255).shuffled()
+    return Color(red = channels[0], green = channels[1], blue = channels[2])
 }

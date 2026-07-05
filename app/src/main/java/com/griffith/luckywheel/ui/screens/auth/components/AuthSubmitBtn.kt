@@ -12,14 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.darkGreenColor
-import com.griffith.luckywheel.ui.theme.darkerGreenColor
-import com.griffith.luckywheel.ui.theme.lightGreenColor
+import com.griffith.luckywheel.ui.theme.primaryNeon
+import com.griffith.luckywheel.ui.theme.accentMagenta
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
 
-// Auth Button component
+/**
+ * Custom submission button used in Authentication screens.
+ * Styled with a cyan/magenta gradient and arcade typography.
+ */
 @Composable
 fun AuthSubmitBtn(
     label: String,
@@ -31,26 +35,27 @@ fun AuthSubmitBtn(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.linearGradient(
+                brush = Brush.horizontalGradient(
                     colors = listOf(
-                        lightGreenColor,
-                        darkerGreenColor,
-                        lightGreenColor
+                        primaryNeon,
+                        accentMagenta,
+                        primaryNeon
                     )
                 ),
                 shape = RoundedCornerShape(50.dp)
             ),
         shape = RoundedCornerShape(50.dp),
         enabled = enabled,
-        border = BorderStroke(1.5.dp, darkGreenColor),
+        border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.3f)),
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        contentPadding = PaddingValues(vertical = 20.dp)
+        contentPadding = PaddingValues(vertical = 14.dp)
     ) {
-        // button text
         Text(
             text = label,
-            fontSize = 18.sp,
-            color = Color.White,
+            fontSize = 16.sp,
+            fontFamily = ArcadeFontFamily,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )

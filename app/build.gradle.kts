@@ -7,11 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
-
 }
 
 android {
-
     val localProperties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
@@ -19,28 +17,15 @@ android {
     }
 
     namespace = "com.griffith.luckywheel"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     lint {
-        // Turns off checks for the issue IDs you specify.
-        disable += "TypographyFractions" + "TypographyQuotes"
-        // Turns on checks for the issue IDs you specify. These checks are in
-        // addition to the default lint checks.
-        enable += "RtlHardcoded" + "RtlCompat" + "RtlEnabled"
-        // To enable checks for only a subset of issue IDs and ignore all others,
-        // list the issue IDs with the 'check' property instead. This property overrides
-        // any issue IDs you enable or disable using the properties above.
-        checkOnly += "NewApi" + "InlinedApi"
-        // If set to true, turns off analysis progress reporting by lint.
+        disable += listOf("TypographyFractions", "TypographyQuotes")
+        enable += listOf("RtlHardcoded", "RtlCompat", "RtlEnabled")
+        checkOnly += listOf("NewApi", "InlinedApi")
         quiet = true
-        // If set to true (default), stops the build if errors are found.
         abortOnError = false
-        // If set to true, lint only reports errors.
         ignoreWarnings = true
-        // If set to true, lint also checks all dependencies as part of its analysis.
-        // Recommended for projects consisting of an app with library dependencies.
         checkDependencies = true
     }
 
@@ -59,8 +44,6 @@ android {
             "\"${localProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""}\""
         )
     }
-
-
 
     buildTypes {
         release {
@@ -84,7 +67,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-
     }
 }
 
@@ -105,14 +87,20 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
     implementation("com.adamglin:phosphor-icon:1.0.0")
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.animation)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

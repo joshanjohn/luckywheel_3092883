@@ -11,26 +11,24 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.adamglin.phosphoricons.PhosphorIcons
-import com.adamglin.phosphoricons.regular.Gamecontroller
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.GameController
 import com.adamglin.phosphoricons.regular.Gear
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -38,28 +36,31 @@ import com.google.firebase.database.ValueEventListener
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.models.data.Player
 import com.griffith.luckywheel.models.data.SpinWheelItem
+import com.griffith.luckywheel.models.enum.SpinActionType
+import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 import com.griffith.luckywheel.services.HapticFeedbackService
 import com.griffith.luckywheel.services.SoundEffectService
-
 import com.griffith.luckywheel.ui.screens.playground.components.AnimatedText
 import com.griffith.luckywheel.ui.screens.playground.components.SpinWheel
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.GoldCountComponent
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.ResultCard
-import com.griffith.luckywheel.models.enum.SpinActionType
-import com.griffith.luckywheel.ui.screens.playground.custom_wheel.MagicalGameFAB
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.SpinButton
 import com.griffith.luckywheel.ui.screens.playground.logic.generateRandomGoldWheelItems
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
-import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
-import com.griffith.luckywheel.ui.theme.arcadeGold
-import com.griffith.luckywheel.ui.theme.deepForest
-import com.griffith.luckywheel.ui.theme.magicGreen
-import com.griffith.luckywheel.ui.theme.neonLime
+import com.griffith.luckywheel.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
+import kotlin.random.Random
+
+// Physics Constants
+private const val FRICTION = 0.99f
+private const val MIN_SPEED = 0.1f
+private const val SHAKE_SENSITIVITY = 2.0f
+private const val GRAVITY = 9.8f
+private const val PHYSICS_STEP_MS = 16L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,20 +68,31 @@ fun GoldWheelScreen(
     navController: NavHostController,
     playerId: String?
 ) {
-    val context = navController.context
+    val context = LocalContext.current
     val fireBaseService = remember { FireBaseService() }
     val hapticService = remember { HapticFeedbackService(context) }
     val soundEffectService = remember { SoundEffectService(context) }
+    val dataStoreService = remember { DataStoreService(context) }
+    val coroutineScope = rememberCoroutineScope()
 
-    var wheelItems by remember { 
-        mutableStateOf(
-            generateRandomGoldWheelItems(magicGreen, deepForest)
-        )
-    }
+    // --- Spin mode preference ---
+    val sensorSpinEnabled by dataStoreService.getSensorSpinEnabled().collectAsState(initial = true)
 
+    // --- State ---
+    var wheelItems by remember { mutableStateOf(generateRandomGoldWheelItems(primaryNeon, surfaceDark)) }
     var playerGold by remember { mutableIntStateOf(0) }
     var playerName by remember { mutableStateOf("") }
+    var rotationDegrees by remember { mutableFloatStateOf(0f) }
+    var rotationSpeed by remember { mutableFloatStateOf(0f) }
+    var sensorActive by remember { mutableStateOf(false) }
+    var showResult by remember { mutableStateOf(false) }
+    var lastResult by remember { mutableStateOf<SpinWheelItem?>(null) }
+    var lastSegmentIndex by remember { mutableIntStateOf(-1) }
+    var showExplosion by remember { mutableStateOf(false) }
 
+    val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
+
+    // --- Firebase Sync ---
     DisposableEffect(playerId) {
         if (playerId.isNullOrBlank()) onDispose {}
         else {
@@ -100,63 +112,57 @@ fun GoldWheelScreen(
         }
     }
 
-    var currentRotationDegrees by remember { mutableFloatStateOf(0f) }
-    var rotationSpeed by remember { mutableFloatStateOf(0f) }
-    var showResultDialog by remember { mutableStateOf(false) }
-    var lastSpinResult by remember { mutableStateOf<SpinWheelItem?>(null) }
-    val isSpinning by remember { derivedStateOf { rotationSpeed > 0 } }
-    var sensorEnabled by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    var lastSegment by remember { mutableIntStateOf(-1) }
-    var showExplosion by remember { mutableStateOf(false) }
-
-    fun processResult() {
-        val resultItem = getResultFromAngle(currentRotationDegrees, wheelItems)
-        lastSpinResult = resultItem
-        playerGold = updatePlayerGold(playerGold, resultItem)
+    // --- Logic ---
+    fun onSpinComplete() {
+        val result = getResultFromAngle(rotationDegrees, wheelItems)
+        lastResult = result
+        playerGold = updatePlayerGold(playerGold, result)
+        
         playerId?.let { id ->
-            coroutineScope.launch {
-                fireBaseService.updatePlayerGold(id, playerGold)
-            }
+            coroutineScope.launch { fireBaseService.updatePlayerGold(id, playerGold) }
         }
-        showResultDialog = true
-        sensorEnabled = false
+        
+        showResult = true
+        sensorActive = false
         hapticService.strongVibration()
         
-        resultItem?.let { item ->
+        result?.let { item ->
             when (item.type) {
                 SpinActionType.GAIN_GOLD, SpinActionType.MULTIPLY_GOLD -> {
                     soundEffectService.playWinSound()
                     showExplosion = true
                 }
-                SpinActionType.LOSE_GOLD -> {
-                    soundEffectService.playLoseSound()
-                }
+                SpinActionType.LOSE_GOLD -> soundEffectService.playLoseSound()
                 else -> {}
             }
         }
         
-        wheelItems = generateRandomGoldWheelItems(magicGreen, deepForest)
+        // Refresh items for next spin
+        wheelItems = generateRandomGoldWheelItems(primaryNeon, surfaceDark)
     }
 
-    DisposableEffect(sensorEnabled) {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        val listener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent?) {
-                if (!sensorEnabled || event == null) return
-                val (x, y, z) = event.values
-                val magnitude = sqrt(x * x + y * y + z * z) - 9.8f
-                if (magnitude > 2f) rotationSpeed += magnitude * 0.5f
+    // --- Sensors & Physics (only active in shake mode) ---
+    DisposableEffect(sensorActive, sensorSpinEnabled) {
+        if (!sensorSpinEnabled) { onDispose {} }
+        else {
+            val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent?) {
+                    if (!sensorActive || event == null) return
+                    val (x, y, z) = event.values
+                    val magnitude = sqrt(x * x + y * y + z * z) - GRAVITY
+                    if (magnitude > SHAKE_SENSITIVITY) rotationSpeed += magnitude * 0.5f
+                }
+                override fun onAccuracyChanged(s: Sensor?, a: Int) {}
             }
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+            manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+            onDispose { manager.unregisterListener(listener) }
         }
-        sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        onDispose { sensorManager.unregisterListener(listener) }
     }
-    
+
     DisposableEffect(Unit) {
-        onDispose { 
+        onDispose {
             hapticService.cancel()
             soundEffectService.release()
         }
@@ -165,170 +171,86 @@ fun GoldWheelScreen(
     LaunchedEffect(Unit) {
         while (true) {
             if (rotationSpeed > 0f) {
-                currentRotationDegrees = (currentRotationDegrees + rotationSpeed) % 360
-                rotationSpeed *= 0.99f
-                if (rotationSpeed < 0.1f) {
+                rotationDegrees = (rotationDegrees + rotationSpeed) % 360f
+                rotationSpeed *= FRICTION
+                if (rotationSpeed < MIN_SPEED) {
                     rotationSpeed = 0f
-                    processResult()
+                    onSpinComplete()
                 }
             }
-            delay(16)
+            delay(PHYSICS_STEP_MS)
         }
     }
 
+    // --- UI Layout ---
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color.Transparent,
         floatingActionButton = {
             MagicalGameFAB(
-                icon = PhosphorIcons.Regular.Gamecontroller,
+                icon = PhosphorIcons.Regular.GameController,
                 label = "CUSTOM WHEEL",
-                onClick = { 
+                onClick = {
                     navController.navigate("custompi/$playerId") {
                         popUpTo("home/$playerId") { inclusive = false }
                     }
                 }
             )
         }
-    ) { innerPadding ->
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-    ) {
-        // Header Section - Pinned to Top
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            
+            HeaderArea(
+                navController = navController,
+                playerId = playerId,
+                playerName = playerName,
+                playerGold = playerGold,
+                onSettings = {
+                    soundEffectService.playClickSound()
+                    navController.navigate("settings/$playerId")
+                },
+                onLeaderboard = {
+                    soundEffectService.playBubbleClickSound()
+                    navController.navigate("leaderboard?playerId=$playerId") { launchSingleTop = true }
+                }
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth(0.9f)
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = { navController.navigate("home/$playerId") },
-                        modifier = Modifier
-                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                    ) {
-                        Icon(
-                            Icons.Default.Home,
-                            contentDescription = "Home",
-                            tint = arcadeGold,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    
-                    IconButton(
-                        onClick = { 
-                            soundEffectService.playClickSound()
-                            navController.navigate("settings/$playerId") 
-                        },
-                        modifier = Modifier
-                            .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = PhosphorIcons.Regular.Gear,
-                            contentDescription = "Settings",
-                            tint = arcadeGold,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-                
-                GoldCountComponent(playerName, playerGold)
-
-                IconButton(
-                    onClick = { 
-                        soundEffectService.playBubbleClickSound()
-                        navController.navigate("leaderboard?playerId=$playerId") {
-                            launchSingleTop = true
+                SpinWheel(
+                    items = wheelItems,
+                    rotationDegrees = rotationDegrees,
+                    onSegmentChange = { segment ->
+                        if (isSpinning && rotationSpeed > 1.2f && segment != lastSegmentIndex) {
+                            lastSegmentIndex = segment
+                            hapticService.tick()
                         }
-                    },
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.1f), CircleShape)
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                ) {
-                    Image(
-                        painterResource(R.drawable.icon_trophy),
-                        contentDescription = "leaderboard icon",
-                        modifier = Modifier.size(28.dp).padding(4.dp)
-                    )
-                }
-            }
-        }
-
-        // Wheel Section - Perfectly Centered
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth(0.9f)
-                .aspectRatio(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            SpinWheel(
-                items = wheelItems, 
-                rotationDegrees = currentRotationDegrees,
-                onSegmentChange = { segment ->
-                    if (isSpinning && rotationSpeed > 1f && segment != lastSegment) {
-                        lastSegment = segment
-                        hapticService.tick()
                     }
-                }
-            )
-        }
-
-        // Controls Section - Pinned to Bottom Center
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AnimatedText(
-                text = if (isSpinning) "Spinning..." else "Hold & Shake to spin!",
-                baseColor = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            var isButtonEnabled by remember { mutableStateOf(true) }
-            LaunchedEffect(rotationSpeed) {
-                if (rotationSpeed == 0f) {
-                    isButtonEnabled = true
-                }
+                )
             }
 
-            SpinButton(
-                isEnabled = isButtonEnabled,
+            BottomArea(
+                modifier = Modifier.align(Alignment.BottomCenter),
                 isSpinning = isSpinning,
-                onSpinStart = { sensorEnabled = true },
-                onSpinEnd = {
-                    sensorEnabled = false
-                    if (rotationSpeed > 0f) {
-                        isButtonEnabled = false
-                    }
-                }
+                sensorSpinEnabled = sensorSpinEnabled,
+                onSpinStart = { sensorActive = true },
+                onSpinEnd = { sensorActive = false },
+                onTapSpin = { rotationSpeed = Random.nextFloat() * 17f + 18f }
             )
         }
-    }
 
-        if (showResultDialog) {
-            lastSpinResult?.let { result ->
+        if (showResult) {
+            lastResult?.let { result ->
                 ResultCard(
                     wheelResult = result,
                     onDismiss = {
-                        showResultDialog = false
-                        sensorEnabled = false
+                        showResult = false
+                        sensorActive = false
                     }
                 )
             }
@@ -342,9 +264,105 @@ fun GoldWheelScreen(
 }
 
 @Composable
-fun MagicalGameFAB(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
-    val infiniteTransition = rememberInfiniteTransition(label = "fab_pulse")
-    val scale by infiniteTransition.animateFloat(
+private fun HeaderArea(
+    navController: NavHostController,
+    playerId: String?,
+    playerName: String,
+    playerGold: Int,
+    onSettings: () -> Unit,
+    onLeaderboard: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CircleNavButton(Icons.Default.Home) { navController.navigate("home/$playerId") }
+            CircleNavButton(PhosphorIcons.Regular.Gear, onSettings)
+        }
+
+        GoldCountComponent(playerName, playerGold)
+
+        IconButton(
+            onClick = onLeaderboard,
+            modifier = Modifier
+                .size(42.dp)
+                .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+        ) {
+            Image(
+                painterResource(R.drawable.icon_trophy),
+                null,
+                modifier = Modifier.size(26.dp).padding(4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun BottomArea(
+    modifier: Modifier,
+    isSpinning: Boolean,
+    sensorSpinEnabled: Boolean,
+    onSpinStart: () -> Unit,
+    onSpinEnd: () -> Unit,
+    onTapSpin: () -> Unit
+) {
+    Column(
+        modifier = modifier.padding(bottom = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val hintText = when {
+            isSpinning -> "Spinning..."
+            sensorSpinEnabled -> "Hold & Shake to spin!  📳"
+            else -> "Tap the button to spin!  👆"
+        }
+        AnimatedText(text = hintText, baseColor = Color.White)
+
+        Spacer(Modifier.height(16.dp))
+
+        var btnActive by remember { mutableStateOf(true) }
+        LaunchedEffect(isSpinning) { if (!isSpinning) btnActive = true }
+
+        SpinButton(
+            isEnabled = btnActive,
+            isSpinning = isSpinning,
+            sensorMode = sensorSpinEnabled,
+            onSpinStart = onSpinStart,
+            onSpinEnd = {
+                onSpinEnd()
+                if (isSpinning) btnActive = false
+            },
+            onTapSpin = {
+                if (!isSpinning) {
+                    btnActive = false
+                    onTapSpin()
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun CircleNavButton(icon: ImageVector, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(42.dp)
+            .background(Color.White.copy(alpha = 0.1f), CircleShape)
+            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+    ) {
+        Icon(icon, null, tint = arcadeGold, modifier = Modifier.size(24.dp))
+    }
+}
+
+@Composable
+fun MagicalGameFAB(icon: ImageVector, label: String, onClick: () -> Unit) {
+    val transition = rememberInfiniteTransition(label = "pulse")
+    val scale by transition.animateFloat(
         initialValue = 1f,
         targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
@@ -356,31 +374,23 @@ fun MagicalGameFAB(icon: androidx.compose.ui.graphics.vector.ImageVector, label:
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(contentAlignment = Alignment.Center) {
-            // Glow behind FAB
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .background(neonLime.copy(alpha = 0.2f), CircleShape)
+                    .size(68.dp)
+                    .graphicsLayer { scaleX = scale; scaleY = scale }
+                    .background(primaryNeon.copy(alpha = 0.2f), CircleShape)
             )
             
             FloatingActionButton(
                 onClick = onClick,
                 containerColor = Color.Black,
-                contentColor = neonLime,
+                contentColor = primaryNeon,
                 shape = CircleShape,
                 modifier = Modifier
                     .size(64.dp)
-                    .border(2.dp, neonLime.copy(alpha = 0.5f), CircleShape)
+                    .border(2.dp, primaryNeon.copy(alpha = 0.5f), CircleShape)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    modifier = Modifier.size(28.dp)
-                )
+                Icon(icon, label, modifier = Modifier.size(28.dp))
             }
         }
         
@@ -388,7 +398,7 @@ fun MagicalGameFAB(icon: androidx.compose.ui.graphics.vector.ImageVector, label:
             text = label,
             fontSize = 10.sp,
             fontFamily = ArcadeFontFamily,
-            color = neonLime,
+            color = primaryNeon,
             modifier = Modifier.padding(top = 4.dp)
         )
     }

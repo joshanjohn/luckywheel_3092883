@@ -28,6 +28,7 @@ class DataStoreService(private val context: Context) {
     private val MUSIC_MUTED = booleanPreferencesKey("music_muted")
     private val SOUND_EFFECTS_VOLUME = floatPreferencesKey("sound_effects_volume")
     private val SOUND_EFFECTS_MUTED = booleanPreferencesKey("sound_effects_muted")
+    private val SENSOR_SPIN_ENABLED = booleanPreferencesKey("sensor_spin_enabled")
     }
 
     // Save (or replace) player data - runs on IO thread
@@ -112,5 +113,17 @@ class DataStoreService(private val context: Context) {
     // Get sound effects muted state
     fun getSoundEffectsMuted() = dataStore.data.map { prefs ->
         prefs[SOUND_EFFECTS_MUTED] ?: false
+    }
+
+    // Save sensor spin enabled state (true = shake to spin, false = tap to spin)
+    suspend fun saveSensorSpinEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
+        dataStore.edit { prefs ->
+            prefs[SENSOR_SPIN_ENABLED] = enabled
+        }
+    }
+
+    // Get sensor spin enabled state (defaults to true - shake mode on)
+    fun getSensorSpinEnabled() = dataStore.data.map { prefs ->
+        prefs[SENSOR_SPIN_ENABLED] ?: true
     }
 }

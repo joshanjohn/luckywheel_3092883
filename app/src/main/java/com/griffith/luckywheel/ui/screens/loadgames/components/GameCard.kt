@@ -56,7 +56,7 @@ fun GameCard(
                 RoundedCornerShape(16.dp)
             ),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF07361D).copy(alpha = 0.9f)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceCard
         ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -147,7 +147,7 @@ fun GameCard(
                 // Load Button - Premium Arcade Style
                 Surface(
                     onClick = onLoad,
-                    color = com.griffith.luckywheel.ui.theme.magicGreen,
+                    color = com.griffith.luckywheel.ui.theme.primaryNeon,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .height(44.dp)
@@ -174,13 +174,13 @@ fun GameCard(
                         Icon(
                             Icons.Default.PlayArrow,
                             contentDescription = "Load",
-                            tint = darkerGreenColor,
+                            tint = Color.Black,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = "LOAD", 
-                            color = darkerGreenColor,
+                            color = Color.Black,
                             fontFamily = com.griffith.luckywheel.ui.theme.ArcadeFontFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
@@ -217,7 +217,7 @@ fun GameCard(
                     Text("Cancel", color = Color.White)
                 }
             },
-            containerColor = Color(0xFF01150B)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceElevated
         )
     }
 
@@ -241,8 +241,8 @@ fun GameCard(
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color(0xFF0B3A24),
-                            unfocusedContainerColor = Color(0xFF0B3A24),
+                            focusedContainerColor = com.griffith.luckywheel.ui.theme.surfaceDark,
+                            unfocusedContainerColor = com.griffith.luckywheel.ui.theme.surfaceDark,
                         )
                     )
                 }
@@ -256,7 +256,7 @@ fun GameCard(
                         }
                     }
                 ) {
-                    Text("Rename", color = lightGreenColor)
+                    Text("Rename", color = com.griffith.luckywheel.ui.theme.winGreen)
                 }
             },
             dismissButton = {
@@ -269,7 +269,7 @@ fun GameCard(
                     Text("Cancel", color = Color.White)
                 }
             },
-            containerColor = Color(0xFF01150B)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceElevated
         )
     }
 }

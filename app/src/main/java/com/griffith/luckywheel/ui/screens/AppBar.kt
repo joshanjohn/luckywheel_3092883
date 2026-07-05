@@ -64,7 +64,6 @@ fun AppBar(
 
     TopAppBar(
         title = {
-
             Box(
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -85,20 +84,18 @@ fun AppBar(
                         navController.popBackStack() 
                     }) {
                     Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowLeft, // your back arrow drawable
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = com.griffith.luckywheel.ui.theme.primaryNeon
                     )
                 }
             } else {
-                // Empty placeholder to satisfy type
                 Box(
                     modifier = Modifier.width(30.dp),
                 )
             }
         },
         actions = {
-
             if ((currentScreen != "settings/{playerId}")) {
                 IconButton(
                     onClick = { 
@@ -114,19 +111,16 @@ fun AppBar(
                     }
                 ) {
                     Image(
-                        modifier = Modifier.size(100.dp),
+                        modifier = Modifier.size(36.dp), // Resized from 100.dp to fit correctly
                         painter = painterResource(R.drawable.icon_game_control),
                         contentDescription = "Settings button",
                     )
                 }
             }
-
             Spacer(
                 modifier = Modifier.width(20.dp)
             )
-
         },
-        // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
         )

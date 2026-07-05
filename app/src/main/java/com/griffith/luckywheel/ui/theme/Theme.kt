@@ -7,42 +7,48 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+// ── Light scheme — Neon Casino light variant ─────────────────────────────────
 private val lightScheme = lightColorScheme(
-    primary = magicGreen,
-    onPrimary = Color.White,
-    primaryContainer = neonLime.copy(alpha = 0.2f),
-    onPrimaryContainer = deepForest,
-    secondary = magicPurple,
+    primary = primaryNeon,
+    onPrimary = surfaceDark,
+    primaryContainer = primaryNeon.copy(alpha = 0.15f),
+    onPrimaryContainer = surfaceDark,
+    secondary = accentMagenta,
     onSecondary = Color.White,
-    secondaryContainer = magicPurple.copy(alpha = 0.2f),
-    onSecondaryContainer = magicPurple,
-    tertiary = arcadeGold,
+    secondaryContainer = accentMagenta.copy(alpha = 0.15f),
+    onSecondaryContainer = accentMagenta,
+    tertiary = accentGold,
     onTertiary = Color.Black,
-    tertiaryContainer = arcadeGold.copy(alpha = 0.2f),
-    onTertiaryContainer = arcadeGold,
-    background = Color(0xFF092609), // Deep forest background
-    onBackground = Color(0xFFDEE3E5),
-    surface = Color(0xFF0E1416),
-    onSurface = Color(0xFFDEE3E5),
+    tertiaryContainer = accentGold.copy(alpha = 0.15f),
+    onTertiaryContainer = accentGold,
+    background = surfaceDark,
+    onBackground = textPrimary,
+    surface = surfaceCard,
+    onSurface = textPrimary,
+    surfaceVariant = surfaceElevated,
+    onSurfaceVariant = textSecondary,
 )
 
+// ── Dark scheme — Primary Neon Casino experience ──────────────────────────────
 private val darkScheme = darkColorScheme(
-    primary = neonLime,
-    onPrimary = deepForest,
-    primaryContainer = magicGreen.copy(alpha = 0.2f),
-    onPrimaryContainer = magicGreen,
-    secondary = magicPurple,
+    primary = primaryNeon,
+    onPrimary = surfaceDark,
+    primaryContainer = primaryNeon.copy(alpha = 0.15f),
+    onPrimaryContainer = primaryNeon,
+    secondary = accentMagenta,
     onSecondary = Color.White,
-    secondaryContainer = magicPurple.copy(alpha = 0.2f),
-    onSecondaryContainer = magicPurple,
-    tertiary = arcadeGold,
+    secondaryContainer = accentMagenta.copy(alpha = 0.15f),
+    onSecondaryContainer = accentMagenta,
+    tertiary = accentGold,
     onTertiary = Color.Black,
-    tertiaryContainer = arcadeGold.copy(alpha = 0.2f),
-    onTertiaryContainer = arcadeGold,
-    background = Color(0xFF051505),
-    onBackground = Color(0xFFDEE3E5),
-    surface = Color(0xFF051505),
-    onSurface = Color(0xFFDEE3E5),
+    tertiaryContainer = accentGold.copy(alpha = 0.15f),
+    onTertiaryContainer = accentGold,
+    background = surfaceDark,
+    onBackground = textPrimary,
+    surface = surfaceCard,
+    onSurface = textPrimary,
+    surfaceVariant = surfaceElevated,
+    onSurfaceVariant = textSecondary,
 )
 
 @Composable
@@ -58,5 +64,3 @@ fun LuckyWheelTheme(
         content = content
     )
 }
-
-

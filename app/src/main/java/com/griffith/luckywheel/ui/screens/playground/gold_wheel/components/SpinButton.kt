@@ -11,8 +11,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import com.adamglin.phosphoricons.PhosphorIcons
-import com.adamglin.phosphoricons.regular.Handtap
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.HandTap
+import com.adamglin.phosphoricons.regular.Play
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -24,20 +26,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
-import com.griffith.luckywheel.ui.theme.deepForest
-import com.griffith.luckywheel.ui.theme.magicGreen
-import com.griffith.luckywheel.ui.theme.neonLime
+import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.primaryNeon
+import com.griffith.luckywheel.ui.theme.surfaceDark
 
+/**
+ * Unified spin button with two interaction modes:
+ *  - sensorMode = true  → hold-to-activate shake sensor
+ *  - sensorMode = false → tap to trigger random spin
+ * Styled with pulsing neon cyan or warm casino gold glows.
+ */
 @Composable
 fun SpinButton(
     isEnabled: Boolean,
     isSpinning: Boolean,
+    sensorMode: Boolean = true,
     onSpinStart: () -> Unit,
-    onSpinEnd: () -> Unit
+    onSpinEnd: () -> Unit,
+    onTapSpin: () -> Unit = {}
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
-    // Pulse animation for the glow effect
     val infiniteTransition = rememberInfiniteTransition(label = "spin_pulse")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -49,12 +58,23 @@ fun SpinButton(
         label = "pulse_alpha"
     )
 
-    // Smooth scale animation when pressed
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "button_scale"
     )
+
+    val tapGlow by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "tap_glow"
+    )
+
+    val glowColor = if (sensorMode) primaryNeon else arcadeGold
 
     Box(
         modifier = Modifier
@@ -62,7 +82,6 @@ fun SpinButton(
             .wrapContentHeight(),
         contentAlignment = Alignment.Center
     ) {
-        // Outer glowing ring - Restored to prominent size
         if (isEnabled && !isPressed) {
             Box(
                 modifier = Modifier
@@ -74,7 +93,7 @@ fun SpinButton(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                neonLime.copy(alpha = pulseAlpha),
+                                glowColor.copy(alpha = if (sensorMode) pulseAlpha else tapGlow * 0.6f),
                                 Color.Transparent
                             )
                         ),
@@ -83,9 +102,8 @@ fun SpinButton(
             )
         }
 
-        // Main Button Surface - Restored to 90dp
         Surface(
-            onClick = { }, 
+            onClick = { },
             enabled = isEnabled,
             shape = CircleShape,
             color = Color.Transparent,
@@ -95,8 +113,9 @@ fun SpinButton(
                     scaleX = scale
                     scaleY = scale
                 }
-                .pointerInput(isEnabled) {
-                    if (isEnabled) {
+                .pointerInput(isEnabled, sensorMode) {
+                    if (!isEnabled) return@pointerInput
+                    if (sensorMode) {
                         detectTapGestures(
                             onPress = {
                                 isPressed = true
@@ -104,6 +123,14 @@ fun SpinButton(
                                 tryAwaitRelease()
                                 isPressed = false
                                 onSpinEnd()
+                            }
+                        )
+                    } else {
+                        detectTapGestures(
+                            onTap = {
+                                isPressed = true
+                                onTapSpin()
+                                isPressed = false
                             }
                         )
                     }
@@ -128,14 +155,15 @@ fun SpinButton(
                         Brush.radialGradient(
                             colors = when {
                                 !isEnabled -> listOf(Color(0xFF424242), Color(0xFF212121))
-                                isPressed -> listOf(magicGreen, deepForest)
-                                else -> listOf(neonLime, magicGreen)
+                                isPressed && sensorMode -> listOf(primaryNeon, surfaceDark)
+                                isPressed -> listOf(arcadeGold, Color(0xFF7A4500))
+                                sensorMode -> listOf(primaryNeon, primaryNeon.copy(alpha = 0.6f))
+                                else -> listOf(arcadeGold, Color(0xFF5A3200))
                             }
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                // Internal bezel
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -147,24 +175,26 @@ fun SpinButton(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // Hand Tap Icon for hold-to-spin action
                     Icon(
-                        imageVector = PhosphorIcons.Regular.Handtap,
+                        imageVector = if (sensorMode) PhosphorIcons.Regular.HandTap
+                                      else PhosphorIcons.Regular.Play,
                         contentDescription = null,
-                        tint = if (isEnabled) Color.Black.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.3f),
-                        modifier = Modifier.size(28.dp).graphicsLayer {
-                            // Subtle pulse for the icon
-                            alpha = if (isPressed) 1f else 0.8f
-                        }
+                        tint = if (isEnabled) Color.Black.copy(alpha = 0.7f)
+                               else Color.White.copy(alpha = 0.3f),
+                        modifier = Modifier
+                            .size(28.dp)
+                            .graphicsLayer { alpha = if (isPressed) 1f else 0.8f }
                     )
-                    
+
                     Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
                         text = when {
                             !isEnabled -> "WAIT"
-                            isPressed -> "RELEASE"
-                            else -> "HOLD TO\nSPIN"
+                            isSpinning -> "SPINNING"
+                            sensorMode && isPressed -> "RELEASE"
+                            sensorMode -> "HOLD TO\nSPIN"
+                            else -> "TAP TO\nSPIN"
                         },
                         color = if (isEnabled) Color.Black else Color.White.copy(alpha = 0.5f),
                         fontFamily = ArcadeFontFamily,

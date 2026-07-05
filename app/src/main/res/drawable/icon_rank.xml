@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Leaderboard ranking crown/ribbon vector icon, neon magenta/cyan/gold -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon glow ring -->
+    <path
+        android:fillColor="#2000F0FF"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Neon border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Leaderboard Crown backdrop area -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M256,256 m-190,0 a190,190 0 1,0 380,0 a190,190 0 1,0 -380,0" />
+
+    <!-- Ribbon tails (draping down from behind crown) -->
+    <path
+        android:fillColor="#FF00E5"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="4"
+        android:pathData="M200,280 L160,420 L210,390 L240,420 L230,280 Z" />
+    <path
+        android:fillColor="#FF00E5"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="4"
+        android:pathData="M312,280 L352,420 L302,390 L272,420 L282,280 Z" />
+
+    <!-- Crown body (Arcade pixelated styling) -->
+    <path
+        android:fillColor="#FFB800"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="8"
+        android:pathData="M140,280 L120,160 L180,210 L256,120 L332,210 L392,160 L372,280 Z" />
+
+    <!-- Gems on the crown tips -->
+    <path android:fillColor="#FF00E5" android:pathData="M120,160 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0" />
+    <path android:fillColor="#00FF88" android:pathData="M256,120 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0" />
+    <path android:fillColor="#FF00E5" android:pathData="M392,160 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0" />
+
+    <!-- Center gem in middle of crown -->
+    <path
+        android:fillColor="#00FF88"
+        android:pathData="M256,220 L271,235 L256,250 L241,235 Z" />
+</vector>

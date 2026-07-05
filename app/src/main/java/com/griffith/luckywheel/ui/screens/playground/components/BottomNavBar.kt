@@ -74,7 +74,7 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) extraDarkerGreenColor else Color.Transparent)
+                            .background(if (selected) com.griffith.luckywheel.ui.theme.surfaceDark else Color.Transparent)
                             .clickable {
                                 if (!selected) {
                                     soundEffectService.playBubbleClickSound()
@@ -96,11 +96,11 @@ fun BottomNavBar(navController: NavHostController, items: List<BottomNavItem>) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.label,
-                                tint = if (selected) lightGreenColor else Color.White
+                                tint = if (selected) com.griffith.luckywheel.ui.theme.primaryNeon else Color.White
                             )
                             Text(
                                 text = item.label,
-                                color = if (selected) lightGreenColor else Color.White,
+                                color = if (selected) com.griffith.luckywheel.ui.theme.primaryNeon else Color.White,
                                 fontSize = 12.sp
                             )
                         }

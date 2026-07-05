@@ -5,7 +5,6 @@ import android.graphics.Rect
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,36 +24,37 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import com.griffith.luckywheel.ui.theme.BubbleFontFamily
 import com.griffith.luckywheel.ui.theme.RetroFontFamily
 import com.griffith.luckywheel.ui.theme.arcadeGold
-import com.griffith.luckywheel.ui.theme.deepForest
-import com.griffith.luckywheel.ui.theme.magicGreen
-import com.griffith.luckywheel.ui.theme.neonLime
+import com.griffith.luckywheel.ui.theme.primaryNeon
+import com.griffith.luckywheel.ui.theme.accentMagenta
+import com.griffith.luckywheel.ui.theme.surfaceDark
+import com.griffith.luckywheel.ui.theme.surfaceCard
 import com.griffith.luckywheel.utils.isColorDark
 import com.griffith.luckywheel.utils.truncateText
 import kotlin.math.cos
 import kotlin.math.sin
 
-// Draws the spinning wheel with segments, labels, and pointer
+/**
+ * Renders the circular wheel of fortune with segmented colors, labels,
+ * neon cyan borders, and a pulsing central spin hub.
+ */
 @Composable
 fun SpinWheel(
     items: List<com.griffith.luckywheel.models.data.SpinWheelItem>,
-    rotationDegrees: Float, // Current rotation angle of the wheel
-    onSegmentChange: ((Int) -> Unit)? = null // Callback when pointer moves to new segment
+    rotationDegrees: Float,
+    onSegmentChange: ((Int) -> Unit)? = null
 ) {
     val textMeasurer = rememberTextMeasurer()
     
-    // Calculate which segment the pointer is currently on
     val currentSegment = remember(rotationDegrees) {
-        val normalizedAngle = (rotationDegrees + 90f) % 360f // Align with pointer at top
-        val correctedAngle = (360f - normalizedAngle) % 360f // Reverse for clockwise spin
+        val normalizedAngle = (rotationDegrees + 90f) % 360f
+        val correctedAngle = (360f - normalizedAngle) % 360f
         var cumulativeAngle = 0f
         var segmentIndex = 0
         
-        // Find which segment contains the corrected angle
         for ((index, item) in items.withIndex()) {
-            val sliceAngle = item.percent * 360f // Convert percentage to degrees
+            val sliceAngle = item.percent * 360f
             if (correctedAngle in cumulativeAngle..(cumulativeAngle + sliceAngle)) {
                 segmentIndex = index
                 break
@@ -64,7 +64,6 @@ fun SpinWheel(
         segmentIndex
     }
     
-    // Notify when segment changes (for haptic feedback)
     androidx.compose.runtime.LaunchedEffect(currentSegment) {
         onSegmentChange?.invoke(currentSegment)
     }
@@ -73,12 +72,12 @@ fun SpinWheel(
         val centerX = size.width / 2
         val centerY = size.height / 2
         val center = Offset(centerX, centerY)
-        val radius = (size.minDimension / 2) * 0.9f // Restored to a prominent size 0.82f
+        val radius = (size.minDimension / 2) * 0.9f
 
-        // Outer Magical Glow - Fits within bounds
+        // Outer Neon Cyan Glow - Casino style halo
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(neonLime.copy(alpha = 0.4f), Color.Transparent),
+                colors = listOf(primaryNeon.copy(alpha = 0.35f), Color.Transparent),
                 center = center,
                 radius = radius * 1.25f
             ),
@@ -86,18 +85,18 @@ fun SpinWheel(
             center = center
         )
 
-        // Neon Border Outer
+        // Outer solid neon border
         drawCircle(
-            color = magicGreen,
+            color = primaryNeon,
             radius = radius + 10f,
             center = center,
-            style = Stroke(width = 12f)
+            style = Stroke(width = 10f)
         )
 
-        // Neon Glow Inner
+        // Inner magenta glow ring
         drawCircle(
-            color = neonLime.copy(alpha = 0.6f),
-            radius = radius + 6f,
+            color = accentMagenta.copy(alpha = 0.6f),
+            radius = radius + 5f,
             center = center,
             style = Stroke(width = 4f)
         )
@@ -108,7 +107,7 @@ fun SpinWheel(
             items.forEachIndexed { index, item ->
                 val sweepAngle = item.percent * 360f
 
-                // Segment Arc
+                // Draw segment slice
                 drawArc(
                     color = item.color,
                     startAngle = startAngle,
@@ -118,21 +117,21 @@ fun SpinWheel(
                     topLeft = Offset(centerX - radius, centerY - radius)
                 )
 
-                // Neon Segment Divider
+                // Neon segment divider lines
                 val dividerAngle = Math.toRadians(startAngle.toDouble())
                 val endX = centerX + radius * cos(dividerAngle).toFloat()
                 val endY = centerY + radius * sin(dividerAngle).toFloat()
                 drawLine(
-                    color = Color.White.copy(alpha = 0.3f),
+                    color = Color.White.copy(alpha = 0.2f),
                     start = center,
                     end = Offset(endX, endY),
-                    strokeWidth = 2f
+                    strokeWidth = 2.5f
                 )
 
                 drawIntoCanvas { canvas ->
                     val textAngleDegrees = startAngle + sweepAngle / 2f
                     val textAngleRadians = Math.toRadians(textAngleDegrees.toDouble())
-                    val textDistance = radius * 0.7f
+                    val textDistance = radius * 0.68f
 
                     val textX = centerX + (textDistance * cos(textAngleRadians)).toFloat()
                     val textY = centerY + (textDistance * sin(textAngleRadians)).toFloat()
@@ -145,7 +144,7 @@ fun SpinWheel(
 
                     val textPaint = Paint().apply {
                         color = textColor
-                        textSize = radius * 0.12f
+                        textSize = radius * 0.11f
                         textAlign = Paint.Align.CENTER
                         isAntiAlias = true
                         typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -156,7 +155,6 @@ fun SpinWheel(
                     textPaint.getTextBounds(displayText, 0, displayText.length, textBounds)
                     val textHeight = textBounds.height()
 
-                    // Rotate text to follow segment
                     canvas.save()
                     canvas.nativeCanvas.rotate(textAngleDegrees + 90f, textX, textY)
                     canvas.nativeCanvas.drawText(
@@ -172,16 +170,16 @@ fun SpinWheel(
             }
         }
 
-        // Center hub with multiple layers for depth
+        // Center hub plate
         drawCircle(
-            color = deepForest,
+            color = surfaceDark,
             radius = radius * 0.32f,
             center = center
         )
         
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(magicGreen, deepForest),
+                colors = listOf(primaryNeon, surfaceDark),
                 center = center,
                 radius = radius * 0.3f
             ),
@@ -190,7 +188,7 @@ fun SpinWheel(
             style = Stroke(width = 4f)
         )
 
-        // Center branding background
+        // Center hub background tint
         drawCircle(
             color = Color.Black.copy(alpha = 0.5f),
             radius = radius * 0.28f,
@@ -200,7 +198,7 @@ fun SpinWheel(
         val centerText = buildAnnotatedString {
             withStyle(
                 style = TextStyle(
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = arcadeGold,
                     fontWeight = FontWeight.Bold,
                     fontFamily = RetroFontFamily,
@@ -221,21 +219,20 @@ fun SpinWheel(
             )
         )
 
-        // Magical neon pointer
+        // Central neon cyan indicator arrow pointer pointing downwards from top
         val pointerPath = Path().apply {
-            val pointerWidth = radius * 0.2f
-            val pointerHeight = radius * 0.22f
+            val pointerWidth = radius * 0.18f
+            val pointerHeight = radius * 0.20f
             moveTo(centerX - pointerWidth / 2f, 0f)
             lineTo(centerX, pointerHeight)
             lineTo(centerX + pointerWidth / 2f, 0f)
             close()
         }
         
-        // Pointer shadow/glow
         drawPath(
             path = pointerPath,
-            color = neonLime.copy(alpha = 0.5f),
-            style = Stroke(width = 8f)
+            color = primaryNeon.copy(alpha = 0.5f),
+            style = Stroke(width = 6f)
         )
         
         drawPath(pointerPath, color = Color.White)

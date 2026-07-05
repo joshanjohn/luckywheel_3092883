@@ -7,21 +7,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import com.griffith.luckywheel.ui.theme.magicGreen
-import com.griffith.luckywheel.ui.theme.magicPurple
-import com.griffith.luckywheel.ui.theme.neonLime
+import com.griffith.luckywheel.ui.theme.accentGold
+import com.griffith.luckywheel.ui.theme.accentMagenta
+import com.griffith.luckywheel.ui.theme.primaryNeon
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
+/**
+ * Burst-style particle explosion used when a winning result is shown.
+ * Emits 50 neon-casino coloured particles that fan out and fade over 2 seconds.
+ */
 @Composable
 fun ParticleExplosion(
     isTriggered: Boolean,
     onFinish: () -> Unit,
-    origin: Offset = Offset(500f, 500f) // Center of screen roughly
+    origin: Offset = Offset(500f, 500f)
 ) {
     if (!isTriggered) return
 
-    val particles = remember { List(50) { ShootingStarParticle(origin) } }
+    val particles = remember { List(50) { ExplosionParticle(origin) } }
     val startTime = remember { System.currentTimeMillis() }
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
@@ -35,13 +39,13 @@ fun ParticleExplosion(
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         val elapsed = (currentTime - startTime).toFloat() / 1000f
-        
+
         particles.forEach { particle ->
             val x = particle.origin.x + particle.vx * elapsed
-            val y = particle.origin.y + particle.vy * elapsed + 0.5f * 500f * elapsed * elapsed // gravity
-            
+            val y = particle.origin.y + particle.vy * elapsed + 0.5f * 500f * elapsed * elapsed
+
             val alpha = (1f - elapsed / 2f).coerceIn(0f, 1f)
-            
+
             drawCircle(
                 color = particle.color.copy(alpha = alpha),
                 radius = particle.size * (1f - elapsed / 2f).coerceIn(0.1f, 1f),
@@ -51,13 +55,13 @@ fun ParticleExplosion(
     }
 }
 
-private class ShootingStarParticle(val origin: Offset) {
+private class ExplosionParticle(val origin: Offset) {
     val vx = (Random.nextFloat() - 0.5f) * 1000f
     val vy = (Random.nextFloat() - 1f) * 1200f
     val size = Random.nextFloat() * 8f + 4f
-    val color = when(Random.nextInt(3)) {
-        0 -> magicGreen
-        1 -> neonLime
-        else -> magicPurple
+    val color: Color = when (Random.nextInt(3)) {
+        0 -> primaryNeon
+        1 -> accentGold
+        else -> accentMagenta
     }
 }

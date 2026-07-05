@@ -70,9 +70,9 @@ fun LoadGamesScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF033E14),
-                        Color(0xFF01150B),
-                        Color(0xFF01150B)
+                        com.griffith.luckywheel.ui.theme.surfaceDark,
+                        Color(0xFF060A18),
+                        com.griffith.luckywheel.ui.theme.surfaceDark
                     )
                 )
             ),
@@ -87,7 +87,7 @@ fun LoadGamesScreen(
                 isLoading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF20B652)
+                        color = com.griffith.luckywheel.ui.theme.primaryNeon
                     )
                 }
                 savedGames.isEmpty() -> {

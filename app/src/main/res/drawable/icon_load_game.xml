@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floppy disk vector icon for loading/saved games, neon mint themed -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon mint glow ring -->
+    <path
+        android:fillColor="#2000FF88"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Neon mint border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00FF88"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Main Floppy Disk Shape -->
+    <path
+        android:fillColor="#111827"
+        android:strokeColor="#00FF88"
+        android:strokeWidth="10"
+        android:pathData="M100,100 L350,100 L412,162 L412,412 L100,412 Z" />
+
+    <!-- Top Label Area (Recessed Rectangle) -->
+    <path
+        android:fillColor="#1A2332"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="6"
+        android:pathData="M160,100 L320,100 L320,200 L160,200 Z" />
+
+    <!-- Metal Slider Cover -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M200,120 L250,120 L250,180 L200,180 Z" />
+
+    <!-- Slider Write-Protect Notch window on label -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M210,135 L225,135 L225,165 L210,165 Z" />
+
+    <!-- Bottom Sliding Shutter Label (White sticker area) -->
+    <path
+        android:fillColor="#F0F4FF"
+        android:pathData="M140,260 L372,260 L372,412 L140,412 Z" />
+
+    <!-- Muted neon lines on the label representing hand-written text -->
+    <path
+        android:strokeColor="#FF00E5"
+        android:strokeWidth="6"
+        android:pathData="M170,295 L342,295 M170,335 L342,335 M170,375 L300,375" />
+
+</vector>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Player avatar outline circle, neon cyan/magenta -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Glowing magenta circle outline -->
+    <path
+        android:strokeColor="#FF00E5"
+        android:strokeWidth="4"
+        android:fillColor="#111827"
+        android:pathData="M32,32 m-28,0 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0" />
+
+    <!-- Avatar torso outline -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M18,50 C18,41 23,38 32,38 C41,38 46,41 46,50 Z" />
+
+    <!-- Avatar head outline -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M32,20 C27,20 27,27 27,30 C27,36 29,36 32,36 C35,36 37,36 37,30 C37,27 37,20 32,20 Z" />
+</vector>

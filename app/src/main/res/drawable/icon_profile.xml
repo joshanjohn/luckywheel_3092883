@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile/User avatar vector icon with neon cyan/magenta details -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon glow ring -->
+    <path
+        android:fillColor="#20FF00E5"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Neon border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF00E5"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Avatar head background circle -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M256,256 m-190,0 a190,190 0 1,0 380,0 a190,190 0 1,0 -380,0" />
+
+    <!-- Shoulders / Torso -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M140,410 C140,340 180,310 256,310 C332,310 372,340 372,410 Z" />
+
+    <!-- Neck -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M236,290 L276,290 L276,320 L236,320 Z" />
+
+    <!-- Head / Face -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M256,150 C210,150 210,210 210,240 C210,290 230,290 256,290 C282,290 302,290 302,240 C302,210 302,150 256,150 Z" />
+
+    <!-- Retro hair/visor/shades (cool neon styling) -->
+    <!-- Shades -->
+    <path
+        android:fillColor="#FF00E5"
+        android:pathData="M210,210 L302,210 L292,235 L220,235 Z" />
+
+    <!-- Shades bridge and glare reflection -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M225,215 L245,215 L240,225 L220,225 Z" />
+
+    <!-- Hair (Spiky retro hair) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M206,170 L216,140 L236,160 L256,130 L276,160 L296,140 L306,170 Z" />
+</vector>

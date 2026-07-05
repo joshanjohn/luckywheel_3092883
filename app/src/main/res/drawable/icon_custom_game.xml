@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Custom game/wheel icon: Wheel segment outline with a custom settings gear/wrench -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon purple/magenta glow ring -->
+    <path
+        android:fillColor="#20FF00E5"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Neon magenta border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF00E5"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Wheel Segments Background -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M256,256 m-200,0 a200,200 0 1,0 400,0 a200,200 0 1,0 -400,0" />
+
+    <!-- Segment lines (draw lines separating wheel segments) -->
+    <path
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="8"
+        android:pathData="M256,56 L256,456 M56,256 L456,256 M114.6,114.6 L397.4,397.4 M114.6,397.4 L397.4,114.6" />
+
+    <!-- Inner gear / custom element at center -->
+    <!-- Gear body (Outer parts of gear teeth) -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M256,186 C217.3,186 186,217.3 186,256 C186,294.7 217.3,326 256,326 C294.7,326 326,294.7 326,256 C326,217.3 294.7,186 256,186 Z" />
+
+    <!-- Gear Teeth -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M256,156 L276,156 L281,180 L296,186 L316,171 L330,185 L315,205 L321,220 L345,225 L345,245 L356,256 L345,267 L345,287 L321,292 L315,307 L330,327 L316,341 L296,326 L281,332 L276,356 L256,356 L236,356 L231,332 L216,326 L196,341 L182,327 L197,307 L191,292 L167,287 L167,267 L156,256 L167,245 L167,225 L191,220 L197,205 L182,185 L196,171 L216,186 L231,180 L236,156 Z" />
+
+    <!-- Central pin hole (Hub) -->
+    <path
+        android:fillColor="#111827"
+        android:pathData="M256,226 C239.4,226 226,239.4 226,256 C226,272.6 239.4,286 256,286 C272.6,286 286,272.6 286,256 C286,239.4 272.6,226 256,226 Z" />
+
+    <!-- Pin -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M256,244 C249.4,244 244,249.4 244,256 C244,262.6 249.4,268 256,268 C262.6,268 268,262.6 268,256 C268,249.4 262.6,244 256,244 Z" />
+</vector>

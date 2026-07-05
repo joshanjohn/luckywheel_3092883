@@ -160,9 +160,9 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF033E14),
-                        Color(0xFF01150B),
-                        Color(0xFF01150B)
+                        com.griffith.luckywheel.ui.theme.surfaceDark,
+                        Color(0xFF060A18),
+                        com.griffith.luckywheel.ui.theme.surfaceDark
                     )
                 )
             )
@@ -184,7 +184,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF07361D).copy(alpha = 0.6f)
+                        containerColor = com.griffith.luckywheel.ui.theme.surfaceCard
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -304,14 +304,14 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
-                                        Color(0xFF450303),
-                                        Color(0xFF8B0000),
-                                        Color(0xFF450303)
+                                        com.griffith.luckywheel.ui.theme.surfaceCard,
+                                        Color(0xFF23161C),
+                                        com.griffith.luckywheel.ui.theme.surfaceCard
                                     )
                                 ),
                                 shape = RoundedCornerShape(16.dp)
-                            )
-                            .border(2.dp, Color(0xFFD50505).copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                             )
+                            .border(2.dp, com.griffith.luckywheel.ui.theme.loseRed.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                             .padding(20.dp)
                     ) {
                         Row(
@@ -382,7 +382,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                         deleteAccount()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD50505)
+                        containerColor = com.griffith.luckywheel.ui.theme.loseRed
                     )
                 ) {
                     Text("Delete Forever", fontWeight = FontWeight.Bold, color = Color.White)
@@ -398,7 +398,7 @@ fun ProfileScreen(navController: NavHostController, playerId: String?) {
                     Text("Cancel")
                 }
             },
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceElevated
         )
     }
 }

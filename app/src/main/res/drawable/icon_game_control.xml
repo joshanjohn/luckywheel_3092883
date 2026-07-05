@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Retro arcade joystick / game controller with neon cyan accents -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Controller body -->
+    <path
+        android:fillColor="#1A2332"
+        android:pathData="M80,200 Q70,200 60,220 L40,340 Q30,380 60,400 Q90,420 140,420 L200,420 L220,380 L292,380 L312,420 L372,420 Q422,420 452,400 Q482,380 472,340 L452,220 Q442,200 432,200 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="12"
+        android:pathData="M80,200 Q70,200 60,220 L40,340 Q30,380 60,400 Q90,420 140,420 L200,420 L220,380 L292,380 L312,420 L372,420 Q422,420 452,400 Q482,380 472,340 L452,220 Q442,200 432,200 Z" />
+
+    <!-- D-pad horizontal -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M110,290 L160,290 L160,270 L110,270 Z" />
+    <!-- D-pad vertical -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M127,253 L147,253 L147,307 L127,307 Z" />
+
+    <!-- D-pad center dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M137,280 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+
+    <!-- Start / select buttons -->
+    <path
+        android:fillColor="#FF00E5"
+        android:pathData="M226,300 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0" />
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M256,300 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0" />
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M286,300 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0" />
+
+    <!-- Right face buttons — A/B circle cluster -->
+    <path
+        android:fillColor="#FF00E5"
+        android:pathData="M370,260 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M400,290 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M340,290 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+    <path
+        android:fillColor="#00FF88"
+        android:pathData="M370,320 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+
+    <!-- Left grip highlight -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeAlpha="0.2"
+        android:pathData="M100,230 Q80,260 85,300" />
+
+    <!-- Right grip highlight -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeAlpha="0.2"
+        android:pathData="M412,230 Q432,260 427,300" />
+</vector>

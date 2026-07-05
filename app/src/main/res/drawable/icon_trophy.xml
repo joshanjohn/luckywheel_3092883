@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Trophy cup with neon cyan glow outline and gold fill -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Trophy cup body — gold fill -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M140,60 L372,60 L372,240 Q372,330 256,350 Q140,330 140,240 Z" />
+
+    <!-- Trophy cup body — neon outline -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="12"
+        android:pathData="M140,60 L372,60 L372,240 Q372,330 256,350 Q140,330 140,240 Z" />
+
+    <!-- Left handle -->
+    <path
+        android:fillColor="#CC8800"
+        android:pathData="M100,80 Q60,80 60,150 Q60,210 140,210 L140,190 Q90,190 90,150 Q90,100 100,100 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="8"
+        android:pathData="M100,80 Q60,80 60,150 Q60,210 140,210 L140,190 Q90,190 90,150 Q90,100 100,100 Z" />
+
+    <!-- Right handle -->
+    <path
+        android:fillColor="#CC8800"
+        android:pathData="M412,80 Q452,80 452,150 Q452,210 372,210 L372,190 Q422,190 422,150 Q422,100 412,100 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="8"
+        android:pathData="M412,80 Q452,80 452,150 Q452,210 372,210 L372,190 Q422,190 422,150 Q422,100 412,100 Z" />
+
+    <!-- Pedestal stem -->
+    <path
+        android:fillColor="#CC8800"
+        android:pathData="M220,350 L220,420 L180,420 L180,450 L332,450 L332,420 L292,420 L292,350 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="10"
+        android:pathData="M220,350 L220,420 L180,420 L180,450 L332,450 L332,420 L292,420 L292,350 Z" />
+
+    <!-- Star on trophy face -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M256,130 L268,166 L306,166 L276,188 L288,224 L256,202 L224,224 L236,188 L206,166 L244,166 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFB800"
+        android:strokeWidth="4"
+        android:pathData="M256,130 L268,166 L306,166 L276,188 L288,224 L256,202 L224,224 L236,188 L206,166 L244,166 Z" />
+
+    <!-- Neon glow shimmer lines on cup -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeAlpha="0.3"
+        android:pathData="M175,100 Q175,130 185,160" />
+</vector>

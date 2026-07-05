@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.R
 import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
 import com.griffith.luckywheel.ui.theme.arcadeGold
-import com.griffith.luckywheel.ui.theme.neonLime
+import com.griffith.luckywheel.ui.theme.primaryNeon
 import java.util.Locale
 
 @Composable
@@ -57,14 +57,14 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
         label = "gold_color_animation"
     )
     
-    val animatedColor = if (triggerAnimation) neonLime else arcadeGold
+    val animatedColor = if (triggerAnimation) primaryNeon else arcadeGold
     
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.scale(scale)
     ) {
         Image(
-            painterResource(R.drawable.icon_gold_coin_icon),
+            painterResource(R.drawable.icon_gold_coin),
             contentDescription = "gold count icon",
             modifier = Modifier.size(28.dp)
         )
