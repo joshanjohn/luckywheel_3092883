@@ -37,7 +37,7 @@ fun updatePlayerGold(currentGold: Int, resultItem: SpinWheelItem): Int {
 }
 
 // Generates 8 random wheel items with balanced distribution of actions
-fun generateRandomGoldWheelItems(lightGreenColor: Color, darkGreenColor: Color): List<SpinWheelItem> {
+fun generateRandomGoldWheelItems(primaryColor: Color, secondaryColor: Color): List<SpinWheelItem> {
     val items = mutableListOf<SpinWheelItem>()
     
     // Define possible values for each action type
@@ -69,7 +69,7 @@ fun generateRandomGoldWheelItems(lightGreenColor: Color, darkGreenColor: Color):
     
     // Create wheel items with random values and alternating colors
     actionTypes.forEachIndexed { index, actionType ->
-        val color = if (index % 2 == 0) lightGreenColor else darkGreenColor // Alternate colors for visual appeal
+        val color = if (index % 2 == 0) primaryColor else secondaryColor // Alternate colors for visual appeal
         
         when (actionType) {
             SpinActionType.GAIN_GOLD -> {

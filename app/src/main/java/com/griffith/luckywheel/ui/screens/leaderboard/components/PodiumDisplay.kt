@@ -166,7 +166,7 @@ private fun PodiumPlayerBadge(
                             colors = listOf(
                                 gradientColors[0].copy(alpha = 0.6f),
                                 gradientColors[1].copy(alpha = 0.8f),
-                                Color(0xFF0B3A24)
+                                com.griffith.luckywheel.ui.theme.surfaceDark
                             )
                         ),
                         shape = CircleShape

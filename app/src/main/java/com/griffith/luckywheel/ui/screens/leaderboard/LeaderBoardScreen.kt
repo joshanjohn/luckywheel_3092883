@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -77,9 +79,9 @@ fun LeaderboardScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF033E14),
-                        Color(0xFF01150B),
-                        Color(0xFF01150B)
+                        com.griffith.luckywheel.ui.theme.surfaceDark,
+                        Color(0xFF060A18),
+                        com.griffith.luckywheel.ui.theme.surfaceDark
                     )
                 )
             ),
@@ -104,14 +106,13 @@ fun LeaderboardScreen(
 
 @Composable
 fun LeaderboardItem(entry: PlayerRank) {
-    // Determine if this is a top-tier player (4-10)
     val isTopTier = entry.rank in 4..10
     
     val borderColor = if (isTopTier) {
         Brush.horizontalGradient(
             colors = listOf(
-                Color(0xFF4CAF50).copy(alpha = 0.6f),
-                Color(0xFF8BC34A).copy(alpha = 0.6f)
+                com.griffith.luckywheel.ui.theme.primaryNeon.copy(alpha = 0.6f),
+                com.griffith.luckywheel.ui.theme.accentMagenta.copy(alpha = 0.6f)
             )
         )
     } else {
@@ -129,7 +130,7 @@ fun LeaderboardItem(entry: PlayerRank) {
             .padding(vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF0B3A24).copy(alpha = 0.6f)
+            containerColor = com.griffith.luckywheel.ui.theme.surfaceCard.copy(alpha = 0.6f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isTopTier) 6.dp else 2.dp)
     ) {
@@ -143,7 +144,7 @@ fun LeaderboardItem(entry: PlayerRank) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        Color(0xFF0B3A24),
+                        com.griffith.luckywheel.ui.theme.surfaceCard,
                         shape = RoundedCornerShape(14.dp)
                     )
                     .padding(12.dp),
@@ -167,7 +168,7 @@ fun LeaderboardItem(entry: PlayerRank) {
                 ) {
                     Text(
                         text = "${entry.rank}",
-                        color = if (isTopTier) Color(0xFF4CAF50) else Color.White.copy(alpha = 0.7f),
+                        color = if (isTopTier) com.griffith.luckywheel.ui.theme.primaryNeon else Color.White.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -183,8 +184,8 @@ fun LeaderboardItem(entry: PlayerRank) {
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    Color(0xFF2E7D32),
-                                    Color(0xFF1B5E20)
+                                    com.griffith.luckywheel.ui.theme.surfaceDark,
+                                    Color(0xFF060A18)
                                 )
                             )
                         ),
@@ -221,7 +222,7 @@ fun LeaderboardItem(entry: PlayerRank) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = formatNumberCompact(entry.score),
-                            color = goldColor,
+                            color = com.griffith.luckywheel.ui.theme.arcadeGold,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )

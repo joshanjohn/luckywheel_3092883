@@ -33,37 +33,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.ui.theme.BubbleFontFamily
+import com.griffith.luckywheel.ui.theme.surfaceCard
+import com.griffith.luckywheel.ui.theme.surfaceDark
 
+/**
+ * Custom button card representing a game mode in Settings.
+ * Styled with Neon Casino gradients, glow borders, and icons.
+ */
 @Composable
 fun GameModeButton(
     title: String,
     description: String,
     icon: Int,
-    gradientColors: List<Color> = listOf(Color(0xFF07361D), Color(0xFF033E14), Color(0xFF07361D)),
+    gradientColors: List<Color> = listOf(surfaceCard, surfaceDark, surfaceCard),
     borderColor: Color,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(110.dp)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.horizontalGradient(
-                        colors = gradientColors
-                    ),
+                    brush = Brush.horizontalGradient(colors = gradientColors),
                     shape = RoundedCornerShape(16.dp)
                 )
-                .border(2.dp, borderColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                .border(1.5.dp, borderColor.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
             Row(
@@ -76,36 +80,33 @@ fun GameModeButton(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(64.dp)
+                            .size(56.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF01150B).copy(alpha = 0.6f))
+                            .background(surfaceDark.copy(alpha = 0.6f))
                             .border(1.dp, borderColor.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        // icon
                         Image(
                             painter = painterResource(icon),
                             contentDescription = title,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     }
 
                     Spacer(Modifier.width(16.dp))
 
                     Column {
-                        // title
                         Text(
                             text = title,
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             fontFamily = BubbleFontFamily
                         )
                         Spacer(Modifier.height(4.dp))
-                        // description
                         Text(
                             text = description,
-                            fontSize = 14.sp,
+                            fontSize = 12.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                     }
@@ -114,8 +115,8 @@ fun GameModeButton(
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Play",
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
+                    tint = borderColor,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

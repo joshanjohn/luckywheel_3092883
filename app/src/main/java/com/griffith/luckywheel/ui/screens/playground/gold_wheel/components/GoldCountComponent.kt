@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,6 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.griffith.luckywheel.R
+import com.griffith.luckywheel.ui.theme.ArcadeFontFamily
+import com.griffith.luckywheel.ui.theme.arcadeGold
+import com.griffith.luckywheel.ui.theme.primaryNeon
 import java.util.Locale
 
 @Composable
@@ -53,26 +57,23 @@ fun GoldCountComponent(playerName: String, playerGold: Int) {
         label = "gold_color_animation"
     )
     
-    // Interpolate between gold color and white for flash effect
-    val animatedColor = Color(
-        red = (0xFF + (0xFF - 0xFF) * colorAnimation) / 255f,
-        green = (0xD7 + (0xFF - 0xD7) * colorAnimation) / 255f,
-        blue = (0x00 + (0xFF - 0x00) * colorAnimation) / 255f
-    )
+    val animatedColor = if (triggerAnimation) primaryNeon else arcadeGold
     
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.scale(scale)
     ) {
         Image(
-            painterResource(R.drawable.icon_gold_coin_icon),
-            contentDescription = "gold count icon"
+            painterResource(R.drawable.icon_gold_coin),
+            contentDescription = "gold count icon",
+            modifier = Modifier.size(28.dp)
         )
-        Spacer(Modifier.width(5.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             text = String.format(Locale.getDefault(), "%,d", playerGold),
             style = TextStyle(
-                fontSize = 24.sp,
+                fontSize = 22.sp,
+                fontFamily = ArcadeFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = animatedColor
             )

@@ -7,11 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
-
 }
 
 android {
-
     val localProperties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
@@ -19,28 +17,15 @@ android {
     }
 
     namespace = "com.griffith.luckywheel"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     lint {
-        // Turns off checks for the issue IDs you specify.
-        disable += "TypographyFractions" + "TypographyQuotes"
-        // Turns on checks for the issue IDs you specify. These checks are in
-        // addition to the default lint checks.
-        enable += "RtlHardcoded" + "RtlCompat" + "RtlEnabled"
-        // To enable checks for only a subset of issue IDs and ignore all others,
-        // list the issue IDs with the 'check' property instead. This property overrides
-        // any issue IDs you enable or disable using the properties above.
-        checkOnly += "NewApi" + "InlinedApi"
-        // If set to true, turns off analysis progress reporting by lint.
+        disable += listOf("TypographyFractions", "TypographyQuotes")
+        enable += listOf("RtlHardcoded", "RtlCompat", "RtlEnabled")
+        checkOnly += listOf("NewApi", "InlinedApi")
         quiet = true
-        // If set to true (default), stops the build if errors are found.
         abortOnError = false
-        // If set to true, lint only reports errors.
         ignoreWarnings = true
-        // If set to true, lint also checks all dependencies as part of its analysis.
-        // Recommended for projects consisting of an app with library dependencies.
         checkDependencies = true
     }
 
@@ -48,8 +33,8 @@ android {
         applicationId = "com.griffith.luckywheel"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.0.0"
+        versionCode = 5
+        versionName = "3.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -60,11 +45,47 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            val rootKeystore = rootProject.file("luckywheel.jks")
+            val keystoreProp = localProperties.getProperty("RELEASE_KEYSTORE_PATH")
+            val configuredKeystore = when {
+                keystoreProp != null && file(keystoreProp).exists() -> file(keystoreProp)
+                keystoreProp != null && rootProject.file(keystoreProp).exists() -> rootProject.file(keystoreProp)
+                rootKeystore.exists() -> rootKeystore
+                else -> null
+            }
 
+            if (configuredKeystore != null && configuredKeystore.exists()) {
+                val storePass = localProperties.getProperty("RELEASE_KEYSTORE_PASSWORD")
+                    ?: System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                val keyPass = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+                    ?: System.getenv("RELEASE_KEY_PASSWORD")
+                    ?: storePass
+                val alias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+                    ?: System.getenv("RELEASE_KEY_ALIAS")
+                    ?: "luckywheel"
+
+                storeFile = configuredKeystore
+                storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
+            } else {
+                val debugKeystore = file(System.getProperty("user.home") + "/.android/debug.keystore")
+                if (debugKeystore.exists()) {
+                    storeFile = debugKeystore
+                    storePassword = "android"
+                    keyAlias = "androiddebugkey"
+                    keyPassword = "android"
+                }
+            }
+        }
+    }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -84,7 +105,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-
     }
 }
 
@@ -94,23 +114,29 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("com.google.android.gms:play-services-basement:18.2.0")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
-    implementation("com.google.firebase:firebase-database-ktx:20.3.1")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-analytics")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+    implementation("com.adamglin:phosphor-icon:1.0.0")
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.animation)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- How to play tutorial question mark block vector icon, neon yellow/gold -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon glow ring -->
+    <path
+        android:fillColor="#20FFB800"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Neon border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFB800"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Main square question block background -->
+    <path
+        android:fillColor="#111827"
+        android:strokeColor="#FFB800"
+        android:strokeWidth="10"
+        android:pathData="M140,140 L372,140 L372,372 L140,372 Z" />
+
+    <!-- Four corners rivets (classic arcade block rivets) -->
+    <path android:fillColor="#00F0FF" android:pathData="M165,165 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+    <path android:fillColor="#00F0FF" android:pathData="M347,165 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+    <path android:fillColor="#00F0FF" android:pathData="M165,347 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+    <path android:fillColor="#00F0FF" android:pathData="M347,347 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+
+    <!-- Question Mark path -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M220,210 C220,180 292,180 292,215 C292,240 256,250 256,275 L256,295 L236,295 L236,270 C236,240 272,230 272,215 C272,205 236,200 236,210 Z" />
+
+    <!-- Question Mark Dot -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M246,325 L266,325 L266,345 L246,345 Z" />
+</vector>

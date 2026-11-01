@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Casino chip style gold coin with neon cyan ring and star highlight -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer neon glow ring -->
+    <path
+        android:fillColor="#2000F0FF"
+        android:pathData="M256,256 m-240,0 a240,240 0 1,0 480,0 a240,240 0 1,0 -480,0" />
+
+    <!-- Outer cyan border ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="14"
+        android:pathData="M256,256 m-230,0 a230,230 0 1,0 460,0 a230,230 0 1,0 -460,0" />
+
+    <!-- Gold coin body -->
+    <path
+        android:fillColor="#FFB800"
+        android:pathData="M256,256 m-200,0 a200,200 0 1,0 400,0 a200,200 0 1,0 -400,0" />
+
+    <!-- Inner coin emboss ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC8800"
+        android:strokeWidth="16"
+        android:pathData="M256,256 m-168,0 a168,168 0 1,0 336,0 a168,168 0 1,0 -336,0" />
+
+    <!-- Dollar sign / coin symbol -->
+    <path
+        android:fillColor="#CC8800"
+        android:pathData="M256,136 L256,136 Q220,136 200,158 Q180,180 180,210 Q180,234 196,252 Q212,270 238,278 L238,278 L264,286 Q286,294 298,308 Q310,322 310,342 Q310,366 294,382 Q278,398 256,398 Q234,398 218,382 Q202,366 202,342 L170,342 Q170,376 192,400 Q214,424 246,432 L246,432 L246,456 L266,456 L266,432 Q300,426 322,402 Q344,378 344,342 Q344,314 326,294 Q308,274 278,264 L278,264 L252,256 Q232,248 222,236 Q212,224 212,210 Q212,192 224,180 Q236,168 256,168 Q276,168 288,180 Q300,192 300,210 L332,210 Q332,180 312,158 Q292,136 262,136 L262,136 L262,112 L242,112 L242,136 Z" />
+
+    <!-- White sparkle highlight -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M164,164 L180,172 L172,188 L188,180 L196,196 L196,180 L212,180 L196,172 Z" />
+</vector>

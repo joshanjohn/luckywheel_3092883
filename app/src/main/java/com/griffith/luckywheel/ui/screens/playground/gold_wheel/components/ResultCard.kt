@@ -30,7 +30,10 @@ import com.griffith.luckywheel.models.data.ResultThemeData
 import com.griffith.luckywheel.models.data.SpinWheelItem
 import com.griffith.luckywheel.models.enum.SpinActionType
 import com.griffith.luckywheel.services.SoundEffectService
-import com.griffith.luckywheel.ui.theme.*
+import com.griffith.luckywheel.ui.theme.BubbleFontFamily
+import com.griffith.luckywheel.ui.theme.goldColor
+import com.griffith.luckywheel.ui.theme.lightRedColor
+import com.griffith.luckywheel.ui.theme.neonLime
 
 @Composable
 fun ResultCard(
@@ -121,13 +124,13 @@ private fun rememberResultTheme(wheelResult: SpinWheelItem): ResultThemeData {
                 buttonText = "SPIN AGAIN"
             )
             SpinActionType.LOSE_GOLD -> ResultThemeData(
-                primaryColor = lightRedColor,
+                primaryColor = com.griffith.luckywheel.ui.theme.loseRed,
                 title = "OH NO!",
                 emoji = "💔",
                 buttonText = "TRY AGAIN"
             )
             else -> ResultThemeData(
-                primaryColor = lightGreenColor,
+                primaryColor = com.griffith.luckywheel.ui.theme.primaryNeon,
                 title = "NICE SPIN!",
                 emoji = "🎉",
                 buttonText = "SPIN AGAIN"

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 class AuthenticationService(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val firebaseService = FireBaseService()
+
     
     private fun getGoogleSignInClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -78,6 +79,7 @@ class AuthenticationService(private val context: Context) {
                             
                             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                                 result.onSuccess { message ->
+                                    // Player created/verified successfully
                                     onResult(true, message, userId)
                                 }.onFailure { exception ->
                                     onResult(false, exception.message, userId)
@@ -116,15 +118,22 @@ class AuthenticationService(private val context: Context) {
                         
                         auth.currentUser?.updateProfile(profileUpdates)?.addOnCompleteListener {
                             // Create player in database
-                            val player = Player(playerId = userId, playerName = playerName, gold = 0)
-                            firebaseService.database.child("players").child(userId).setValue(player)
-                                .addOnCompleteListener { dbTask ->
-                                    if (dbTask.isSuccessful) {
-                                        onResult(true, "Registration successful", userId)
-                                    } else {
-                                        onResult(false, dbTask.exception?.message, userId)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val player = Player(
+                                    playerId = userId,
+                                    playerName = playerName,
+                                    gold = 0
+                                )
+                                firebaseService.database.child("players").child(userId).setValue(player)
+                                    .addOnCompleteListener { dbTask ->
+                                        if (dbTask.isSuccessful) {
+                                            // Player created successfully
+                                            onResult(true, "Registration successful", userId)
+                                        } else {
+                                            onResult(false, dbTask.exception?.message, userId)
+                                        }
                                     }
-                                }
+                            }
                         }
                     } else {
                         onResult(false, "Failed to get user ID", null)

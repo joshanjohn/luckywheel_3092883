@@ -18,8 +18,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.griffith.luckywheel.ui.theme.primaryNeon
+import com.griffith.luckywheel.ui.theme.textSecondary
 
-// customized text field component
+/**
+ * Customized outlined text field component for inputs in Login/Registration.
+ * Employs Neon Casino focus borders and labels.
+ */
 @Composable
 fun CustomTextField(
     value: String,
@@ -44,23 +49,22 @@ fun CustomTextField(
             )
         },
         enabled = enabled,
-
         textStyle = LocalTextStyle.current.copy(color = Color.White),
         shape = RoundedCornerShape(16.dp),
-        visualTransformation = if (isPassword && !passwordVisible) // only for password
+        visualTransformation = if (isPassword && !passwordVisible)
             PasswordVisualTransformation()
         else
             VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.White.copy(alpha = 0.7f),
-            cursorColor = Color.White,
-            focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.White.copy(alpha = 0.8f),
-            focusedLeadingIconColor = Color.White,
-            unfocusedLeadingIconColor = Color.White.copy(alpha = 0.8f),
-            focusedTrailingIconColor = Color.White,
-            unfocusedTrailingIconColor = Color.White.copy(alpha = 0.8f)
+            focusedBorderColor = primaryNeon,
+            unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+            cursorColor = primaryNeon,
+            focusedLabelColor = primaryNeon,
+            unfocusedLabelColor = textSecondary,
+            focusedLeadingIconColor = primaryNeon,
+            unfocusedLeadingIconColor = Color.White.copy(alpha = 0.6f),
+            focusedTrailingIconColor = primaryNeon,
+            unfocusedTrailingIconColor = Color.White.copy(alpha = 0.6f)
         ),
         modifier = modifier.fillMaxWidth()
     )

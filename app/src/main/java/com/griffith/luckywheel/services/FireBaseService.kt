@@ -26,7 +26,8 @@ class FireBaseService {
     // Check if player exists, create if needed 
     suspend fun checkAndCreatePlayerIfNeeded(
         userId: String,
-        displayName: String
+        displayName: String,
+        city: String = ""
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             suspendCancellableCoroutine { continuation ->
@@ -114,6 +115,7 @@ class FireBaseService {
             Result.failure(e)
         }
     }
+
 
     // Update player info 
     suspend fun updatePlayerInfo(playerId: String, updatedPlayer: Player): Result<Unit> = withContext(Dispatchers.IO) {
