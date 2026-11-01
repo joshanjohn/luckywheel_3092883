@@ -40,7 +40,7 @@ Lucky Wheel is an Android arcade-themed casual gaming application built with Jet
 
 ## Release & Signing Setup
 - **Application ID**: `com.griffith.luckywheel`
-- **Current Version**: `versionCode = 4`, `versionName = "3.1.0"`
+- **Current Version**: `versionCode = 5`, `versionName = "3.2.0"`
 - **Target SDK**: 36, **Min SDK**: 26
 - **Release Signing**: Configured in `app/build.gradle.kts` using `luckywheel.jks` (`CN=Joshan John`, alias `luckywheel`). Keystore credentials stored locally in `local.properties` (ignored by git).
 - **Output Artifact**: `app/build/outputs/bundle/release/app-release.aab`
