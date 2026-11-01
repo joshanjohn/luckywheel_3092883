@@ -47,13 +47,29 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = localProperties.getProperty("RELEASE_KEYSTORE_PATH")
-            val keystoreFile = keystorePath?.let { file(it) }
-            if (keystoreFile != null && keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = localProperties.getProperty("RELEASE_KEYSTORE_PASSWORD")
-                keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
-                keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+            val rootKeystore = rootProject.file("luckywheel.jks")
+            val keystoreProp = localProperties.getProperty("RELEASE_KEYSTORE_PATH")
+            val configuredKeystore = when {
+                keystoreProp != null && file(keystoreProp).exists() -> file(keystoreProp)
+                keystoreProp != null && rootProject.file(keystoreProp).exists() -> rootProject.file(keystoreProp)
+                rootKeystore.exists() -> rootKeystore
+                else -> null
+            }
+
+            if (configuredKeystore != null && configuredKeystore.exists()) {
+                val storePass = localProperties.getProperty("RELEASE_KEYSTORE_PASSWORD")
+                    ?: System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                val keyPass = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+                    ?: System.getenv("RELEASE_KEY_PASSWORD")
+                    ?: storePass
+                val alias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+                    ?: System.getenv("RELEASE_KEY_ALIAS")
+                    ?: "luckywheel"
+
+                storeFile = configuredKeystore
+                storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
             } else {
                 val debugKeystore = file(System.getProperty("user.home") + "/.android/debug.keystore")
                 if (debugKeystore.exists()) {
