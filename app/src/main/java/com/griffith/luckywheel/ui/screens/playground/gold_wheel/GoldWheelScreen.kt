@@ -50,8 +50,9 @@ import com.griffith.luckywheel.ui.screens.playground.logic.generateRandomGoldWhe
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.screens.playground.logic.updatePlayerGold
 import com.griffith.luckywheel.ui.theme.*
-import kotlinx.coroutines.delay
+import androidx.compose.runtime.withFrameMillis
 import kotlinx.coroutines.launch
+import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -60,7 +61,6 @@ private const val FRICTION = 0.99f
 private const val MIN_SPEED = 0.1f
 private const val SHAKE_SENSITIVITY = 2.0f
 private const val GRAVITY = 9.8f
-private const val PHYSICS_STEP_MS = 16L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,17 +168,23 @@ fun GoldWheelScreen(
         }
     }
 
+    // withFrameMillis ties physics ticks exactly to vsync — never faster,
+    // never slower — eliminating the drift of a fixed delay() loop.
     LaunchedEffect(Unit) {
+        var lastFrameMs = withFrameMillis { it }
         while (true) {
+            val frameMs = withFrameMillis { it }
+            val dtMs = (frameMs - lastFrameMs).coerceIn(1L, 48L) // cap at ~2 frames
+            lastFrameMs = frameMs
             if (rotationSpeed > 0f) {
-                rotationDegrees = (rotationDegrees + rotationSpeed) % 360f
-                rotationSpeed *= FRICTION
+                val dtScale = dtMs / 16f   // normalise relative to 60 fps
+                rotationDegrees = (rotationDegrees + rotationSpeed * dtScale) % 360f
+                rotationSpeed *= FRICTION.pow(dtScale)
                 if (rotationSpeed < MIN_SPEED) {
                     rotationSpeed = 0f
                     onSpinComplete()
                 }
             }
-            delay(PHYSICS_STEP_MS)
         }
     }
 

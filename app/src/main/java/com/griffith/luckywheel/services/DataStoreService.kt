@@ -13,6 +13,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
+data class AppSettings(
+    val musicVolume: Float = 0.5f,
+    val musicMuted: Boolean = false,
+    val soundEffectsVolume: Float = 0.7f,
+    val soundEffectsMuted: Boolean = false,
+    val sensorSpinEnabled: Boolean = true,
+)
+
 private val Context.playerPrefDataStore by preferencesDataStore(name = "player_pref")
 
 // Handles all local data storage operations for player preferences
@@ -125,5 +133,20 @@ class DataStoreService(private val context: Context) {
     // Get sensor spin enabled state (defaults to true - shake mode on)
     fun getSensorSpinEnabled() = dataStore.data.map { prefs ->
         prefs[SENSOR_SPIN_ENABLED] ?: true
+    }
+
+    /**
+     * Single flow that emits all audio + spin settings together.
+     * Use this in screens that need multiple settings to avoid opening
+     * the DataStore backing file 5 separate times.
+     */
+    fun getAppSettings() = dataStore.data.map { prefs ->
+        AppSettings(
+            musicVolume       = prefs[MUSIC_VOLUME] ?: 0.5f,
+            musicMuted        = prefs[MUSIC_MUTED] ?: false,
+            soundEffectsVolume = prefs[SOUND_EFFECTS_VOLUME] ?: 0.7f,
+            soundEffectsMuted = prefs[SOUND_EFFECTS_MUTED] ?: false,
+            sensorSpinEnabled = prefs[SENSOR_SPIN_ENABLED] ?: true,
+        )
     }
 }

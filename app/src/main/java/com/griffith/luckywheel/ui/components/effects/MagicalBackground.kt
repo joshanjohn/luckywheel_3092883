@@ -69,6 +69,8 @@ fun MagicalBackground(content: @Composable () -> Unit) {
     ) {
         val particles = remember { List(50) { NeonParticle() } }
         val shootingStars = remember { List(6) { NeonShootingStar() } }
+        // Pre-allocate a single reusable Path — avoids GC pressure at 60fps
+        val chipPath = remember { androidx.compose.ui.graphics.Path() }
 
         Canvas(modifier = Modifier.fillMaxSize()) {
             // Draw ambient floating particles
@@ -83,7 +85,7 @@ fun MagicalBackground(content: @Composable () -> Unit) {
                 val center = Offset(currentX * size.width, currentY * size.height)
 
                 when (particle.type) {
-                    NeonParticleType.CHIP -> drawCasinoChip(center, particle.size, particle.color, alpha)
+                    NeonParticleType.CHIP -> drawCasinoChip(center, particle.size, particle.color, alpha, chipPath)
                     NeonParticleType.DUST -> drawCircle(
                         color = particle.color.copy(alpha = alpha),
                         radius = particle.size,
@@ -142,14 +144,15 @@ fun MagicalBackground(content: @Composable () -> Unit) {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Draws a small hexagonal casino-chip shape at [center]. */
+/** Draws a small hexagonal casino-chip shape at [center] using a pre-allocated [path]. */
 private fun DrawScope.drawCasinoChip(
     center: Offset,
     size: Float,
     color: Color,
-    alpha: Float
+    alpha: Float,
+    path: Path
 ) {
-    val path = Path()
+    path.rewind()  // reuse allocation — no GC
     val sides = 6
     for (i in 0 until sides) {
         val angle = (PI / 3.0 * i - PI / 6.0).toFloat()

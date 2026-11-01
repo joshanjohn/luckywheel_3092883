@@ -273,12 +273,12 @@ private fun BestOf3Card(
                     Text("Pick your side:", fontSize = 12.sp, fontFamily = ArcadeFontFamily, color = Color.White.copy(0.7f))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton(onClick = { onChoose(CoinSide.HEADS) },
-                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.5.dp),
+                            border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.5.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = arcadeGold)) {
                             Text("HEADS", fontFamily = ArcadeFontFamily, fontSize = 12.sp)
                         }
                         OutlinedButton(onClick = { onChoose(CoinSide.TAILS) },
-                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.5.dp),
+                            border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.5.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = silverColor)) {
                             Text("TAILS", fontFamily = ArcadeFontFamily, fontSize = 12.sp)
                         }

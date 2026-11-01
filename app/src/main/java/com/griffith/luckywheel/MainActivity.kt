@@ -19,8 +19,6 @@ import com.griffith.luckywheel.services.DataStoreService
 import com.griffith.luckywheel.services.FireBaseService
 
 import com.griffith.luckywheel.ui.theme.LuckyWheelTheme
-import kotlinx.coroutines.launch
-
 class MainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -43,35 +41,34 @@ class MainActivity : ComponentActivity() {
                 com.griffith.luckywheel.ui.components.effects.MagicalBackground {
                     var initialRoute by remember { mutableStateOf<String?>(null) }
                     var isCheckingAuth by remember { mutableStateOf(true) }
-                    val coroutineScope = rememberCoroutineScope()
-                    
-                    LaunchedEffect(Unit) {
-                        coroutineScope.launch {
-                            val auth = FirebaseAuth.getInstance()
-                            val currentUser = auth.currentUser
-                            
-                            if (currentUser != null) {
-                                val userId = currentUser.uid
-                                val dataStoreService = DataStoreService(this@MainActivity)
-                                val firebaseService = FireBaseService()
-                                
-                                val playerResult = firebaseService.getPlayerInfo(userId)
-                                playerResult.onSuccess { player ->
-                                    dataStoreService.clear()
-                                    dataStoreService.savePlayer(player)
 
-                                    initialRoute = "home/$userId"
-                                }.onFailure {
-                                    val cachedPlayer = dataStoreService.getPlayer()
-                                    initialRoute = if (cachedPlayer.playerId.isNotEmpty()) "home/${cachedPlayer.playerId}" else "login"
-                                }
-                            } else {
-                                val dataStoreService = DataStoreService(this@MainActivity)
+                    // Single LaunchedEffect runs directly on the coroutine scope —
+                    // no nested coroutineScope.launch needed. IO-bound work is
+                    // already dispatched inside DataStoreService/FireBaseService.
+                    LaunchedEffect(Unit) {
+                        val auth = FirebaseAuth.getInstance()
+                        val currentUser = auth.currentUser
+
+                        if (currentUser != null) {
+                            val userId = currentUser.uid
+                            val dataStoreService = DataStoreService(this@MainActivity)
+                            val firebaseService = FireBaseService()
+
+                            val playerResult = firebaseService.getPlayerInfo(userId)
+                            playerResult.onSuccess { player ->
+                                dataStoreService.clear()
+                                dataStoreService.savePlayer(player)
+                                initialRoute = "home/$userId"
+                            }.onFailure {
                                 val cachedPlayer = dataStoreService.getPlayer()
                                 initialRoute = if (cachedPlayer.playerId.isNotEmpty()) "home/${cachedPlayer.playerId}" else "login"
                             }
-                            isCheckingAuth = false
+                        } else {
+                            val dataStoreService = DataStoreService(this@MainActivity)
+                            val cachedPlayer = dataStoreService.getPlayer()
+                            initialRoute = if (cachedPlayer.playerId.isNotEmpty()) "home/${cachedPlayer.playerId}" else "login"
                         }
+                        isCheckingAuth = false
                     }
                     
                     if (!isCheckingAuth && initialRoute != null) {

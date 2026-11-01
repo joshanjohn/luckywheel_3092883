@@ -50,11 +50,14 @@ fun SettingsScreen(
     val soundEffectService = remember { SoundEffectService(context) }
     val coroutineScope = rememberCoroutineScope()
 
-    val musicVolume by dataStoreService.getMusicVolume().collectAsState(initial = 0.5f)
-    val musicMuted by dataStoreService.getMusicMuted().collectAsState(initial = false)
-    val soundEffectsVolume by dataStoreService.getSoundEffectsVolume().collectAsState(initial = 0.7f)
-    val soundEffectsMuted by dataStoreService.getSoundEffectsMuted().collectAsState(initial = false)
-    val sensorSpinEnabled by dataStoreService.getSensorSpinEnabled().collectAsState(initial = true)
+    // Single flow — one DataStore disk read instead of five
+    val settings by dataStoreService.getAppSettings()
+        .collectAsState(initial = com.griffith.luckywheel.services.AppSettings())
+    val musicVolume = settings.musicVolume
+    val musicMuted = settings.musicMuted
+    val soundEffectsVolume = settings.soundEffectsVolume
+    val soundEffectsMuted = settings.soundEffectsMuted
+    val sensorSpinEnabled = settings.sensorSpinEnabled
 
     DisposableEffect(Unit) {
         onDispose { soundEffectService.release() }

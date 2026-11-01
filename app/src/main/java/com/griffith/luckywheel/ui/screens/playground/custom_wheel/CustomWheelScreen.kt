@@ -47,7 +47,8 @@ import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.Resul
 import com.griffith.luckywheel.ui.screens.playground.gold_wheel.components.SpinButton
 import com.griffith.luckywheel.ui.screens.playground.logic.getResultFromAngle
 import com.griffith.luckywheel.ui.theme.*
-import kotlinx.coroutines.delay
+import androidx.compose.runtime.withFrameMillis
+import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -56,7 +57,6 @@ private const val FRICTION = 0.985f
 private const val MIN_SPEED = 0.1f
 private const val GRAVITY = 9.8f
 private const val SHAKE_THRESHOLD = 2.0f
-private const val TICK_RATE_MS = 16L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,18 +155,22 @@ fun CustomWheelScreen(
         }
     }
 
-    // Physics Engine Loop
+    // Physics Engine Loop — vsync-locked via withFrameMillis, no polling delay
     LaunchedEffect(Unit) {
+        var lastFrameMs = withFrameMillis { it }
         while (true) {
+            val frameMs = withFrameMillis { it }
+            val dtMs = (frameMs - lastFrameMs).coerceIn(1L, 48L)
+            lastFrameMs = frameMs
             if (rotationSpeed > 0f) {
-                rotationDegrees = (rotationDegrees + rotationSpeed) % 360f
-                rotationSpeed *= FRICTION
+                val dtScale = dtMs / 16f
+                rotationDegrees = (rotationDegrees + rotationSpeed * dtScale) % 360f
+                rotationSpeed *= FRICTION.pow(dtScale)
                 if (rotationSpeed < MIN_SPEED) {
                     rotationSpeed = 0f
                     onSpinStopped()
                 }
             }
-            delay(TICK_RATE_MS)
         }
     }
 

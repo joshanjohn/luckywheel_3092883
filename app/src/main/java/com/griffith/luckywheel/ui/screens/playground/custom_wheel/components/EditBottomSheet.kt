@@ -380,7 +380,7 @@ private fun AddSegmentButton(onClick: () -> Unit) {
             .height(52.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-        border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
+        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
     ) {
         Text("Add New Segment", fontFamily = ArcadeFontFamily, fontSize = 14.sp)
     }
