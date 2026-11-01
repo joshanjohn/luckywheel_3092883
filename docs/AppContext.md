@@ -5,7 +5,7 @@ Lucky Wheel is an Android arcade-themed casual gaming application built with Jet
 
 ## Architecture
 - **Language**: Kotlin 2.2.10
-- **Build System**: Android Gradle Plugin (AGP) 9.2.1, Gradle Wrapper 8.9
+- **Build System**: Android Gradle Plugin (AGP) 9.4.1, Gradle Wrapper 9.6.0
 - **UI Toolkit**: Jetpack Compose (Material3 + Custom Neon Arcade Design System)
 - **State & Storage**: Jetpack DataStore Preferences (`player_pref`)
 - **Backend & Auth**: Firebase Auth (Google Sign-In + Email/Password), Firebase Realtime Database
@@ -44,3 +44,4 @@ Lucky Wheel is an Android arcade-themed casual gaming application built with Jet
 - **Target SDK**: 36, **Min SDK**: 26
 - **Release Signing**: Configured in `app/build.gradle.kts` with configurable release keystore via `local.properties` or fallback to registered debug keystore matching Google Play App Signing upload certificate.
 - **Output Artifact**: `app/build.outputs/bundle/release/app-release.aab`
+
